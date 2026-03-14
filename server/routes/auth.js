@@ -102,6 +102,7 @@ router.post("/register", async (req, res) => {
         id: user._id,
         name: user.name,
         username: user.username,
+        profile_picture: user.profile_picture || '',
       },
     });
 
@@ -163,6 +164,7 @@ router.post("/login", async (req, res) => {
         id: user._id,
         name: user.name,
         username: user.username,
+        profile_picture: user.profile_picture || '',
       },
     });
 

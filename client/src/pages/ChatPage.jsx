@@ -403,7 +403,7 @@ const AppointmentCard = ({ appointment, index, onAccept, onReject, onCancel, cur
               transition={{ delay: 0.15, duration: 0.4 }}>
               {isHost ? (
                 <motion.button
-                  onClick={() => onCancel(appointment.id)}
+                  onClick={() => onCancel(appointment.id || appointment._id)}
                   className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12px] font-semibold text-white/40 hover:text-white/70 transition-all duration-300"
                   style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
                   whileHover={{ scale: 1.03, borderColor: "rgba(255,255,255,0.15)", boxShadow: "0 0 15px rgba(255,255,255,0.04)" }}
@@ -413,7 +413,7 @@ const AppointmentCard = ({ appointment, index, onAccept, onReject, onCancel, cur
               ) : (
                 <>
                   <motion.button
-                    onClick={() => onAccept(appointment.id)}
+                    onClick={() => onAccept(appointment.id || appointment._id)}
                     className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12px] font-semibold text-emerald-400/80 transition-all duration-300"
                     style={{ background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.15)" }}
                     whileHover={{ scale: 1.04, boxShadow: "0 0 25px rgba(52,211,153,0.15)", borderColor: "rgba(52,211,153,0.3)" }}
@@ -421,7 +421,7 @@ const AppointmentCard = ({ appointment, index, onAccept, onReject, onCancel, cur
                     {icons.check} Accept
                   </motion.button>
                   <motion.button
-                    onClick={() => onReject(appointment.id)}
+                    onClick={() => onReject(appointment.id || appointment._id)}
                     className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12px] font-semibold text-red-400/80 transition-all duration-300"
                     style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}
                     whileHover={{ scale: 1.04, boxShadow: "0 0 25px rgba(239,68,68,0.15)", borderColor: "rgba(239,68,68,0.3)" }}
@@ -613,7 +613,7 @@ export default function MessagesPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [currentMessages]);
 
-  // Load Conversations on Mount
+  // Load Conversations on Mount (run ONCE — no activeConvo in deps)
   useEffect(() => {
     const loadConversations = async () => {
       try {
@@ -645,7 +645,7 @@ export default function MessagesPage() {
         setConversations(Array.isArray(mapped) ? mapped : []);
         
         // Auto select first if none passed in URL
-        if (!activeConvo && Array.isArray(mapped) && mapped.length > 0) {
+        if (!conversationId && Array.isArray(mapped) && mapped.length > 0) {
           setActiveConvo(mapped[0].id);
           navigate(`/chat/${mapped[0].id}`, { replace: true });
         }
@@ -654,7 +654,8 @@ export default function MessagesPage() {
       }
     };
     loadConversations();
-  }, [activeConvo, navigate]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Load Messages & Join Socket Room
   useEffect(() => {
@@ -677,13 +678,29 @@ export default function MessagesPage() {
           const senderIdStr = msg.sender_id ? (msg.sender_id._id || msg.sender_id).toString() : null;
           const isMe = senderIdStr === String(currentUserId);
           
+          // Map appointment fields from backend model to frontend display fields
+          let appointmentData = undefined;
+          if (msg.appointment_id) {
+            const apt = msg.appointment_id;
+            const scheduledDate = apt.scheduled_for ? new Date(apt.scheduled_for) : null;
+            appointmentData = {
+              ...apt,
+              id: apt._id,
+              title: apt.note || 'Meeting Request',
+              date: scheduledDate ? scheduledDate.toLocaleDateString() : 'TBD',
+              time: scheduledDate ? scheduledDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD',
+              duration: '30 minutes',
+              host_id: apt.host_id?._id || apt.host_id,
+            };
+          }
+          
           return {
             ...msg,
             id: msg._id || String(Math.random()),
             sender: isMe ? "me" : "other",
             text: msg.message_text,
             time: new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            appointment: msg.appointment_id ? { ...msg.appointment_id, id: msg.appointment_id._id } : undefined
+            appointment: appointmentData
           };
         });
         
@@ -1006,7 +1023,11 @@ export default function MessagesPage() {
                 className="relative flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white/80 overflow-hidden"
                 style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.35), rgba(59,130,246,0.3))", border: "1px solid rgba(255,255,255,0.12)" }}
                 whileHover={{ scale: 1.1 }}>
-                {initials}
+                {user?.profile_picture ? (
+                  <img src={user.profile_picture} alt={username} className="w-full h-full object-cover" />
+                ) : (
+                  initials
+                )}
               </motion.div>
             </div>
             <motion.button onClick={logout}
@@ -1062,7 +1083,7 @@ export default function MessagesPage() {
                 transition={{ delay: 0.3, duration: 0.4 }}>
                 <div className="flex items-center gap-3">
                   <select className="md:hidden rounded-lg px-2 py-1 text-xs text-white/60 bg-white/5 border border-white/10 outline-none"
-                    value={activeConvo} onChange={(e) => setActiveConvo(Number(e.target.value))}>
+                    value={activeConvo} onChange={(e) => setActiveConvo(e.target.value)}>
                     {conversations.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                   <div className="hidden md:flex relative">
@@ -1188,6 +1209,50 @@ export default function MessagesPage() {
         onSubmit={handleCreateAppointment}
         isLoading={appointmentLoading}
       />
+
+      {/* ══════ MOBILE BOTTOM NAV BAR ══════ */}
+      <motion.nav
+        className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden items-center justify-around py-2 px-2"
+        style={{
+          ...glassStyle,
+          borderRadius: 0,
+          borderBottom: "none",
+          borderLeft: "none",
+          borderRight: "none",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          background: "linear-gradient(165deg, rgba(10,6,24,0.95) 0%, rgba(5,2,8,0.98) 100%)",
+          backdropFilter: "blur(30px) saturate(150%)",
+          WebkitBackdropFilter: "blur(30px) saturate(150%)",
+        }}
+        initial={{ y: 80 }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {[
+          { key: "dashboard", label: "Home", icon: icons.dashboard, to: "/dashboard" },
+          { key: "messages", label: "Chat", icon: icons.messages, to: "/messages" },
+          { key: "profile", label: "Profile", icon: icons.profile, to: user?.username ? `/profile/${user.username}` : "/dashboard" },
+        ].map((item) => {
+          const isActive = item.key === "messages";
+          return (
+            <Link key={item.key} to={item.to}
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all duration-300 ${isActive ? "text-violet-400" : "text-white/30 hover:text-white/60"}`}
+            >
+              <motion.span whileTap={{ scale: 0.85 }}>
+                {item.icon}
+              </motion.span>
+              <span className="text-[10px] font-medium">{item.label}</span>
+              {isActive && (
+                <motion.div
+                  className="absolute -bottom-0.5 h-[2px] w-6 rounded-full"
+                  style={{ background: "linear-gradient(90deg, rgba(139,92,246,0.8), rgba(59,130,246,0.6))", boxShadow: "0 0 8px rgba(139,92,246,0.4)" }}
+                  layoutId="mobileNavIndicator"
+                />
+              )}
+            </Link>
+          );
+        })}
+      </motion.nav>
     </div>
   );
 }

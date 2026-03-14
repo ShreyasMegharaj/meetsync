@@ -7,6 +7,29 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
+// --------------------------------------------------
+// GET /api/appointments
+// Fetch all appointments for the logged-in user
+// --------------------------------------------------
+router.get('/', authMiddleware, async (req, res) => {
+  try {
+    const appointments = await Appointment.find({
+      $or: [
+        { host_id: req.user.id },
+        { client_id: req.user.id }
+      ]
+    })
+    .populate('host_id', 'name username profile_picture')
+    .populate('client_id', 'name username profile_picture')
+    .populate('conversation_id')
+    .sort({ scheduled_for: 1 });
+
+    res.json(appointments);
+  } catch (error) {
+    console.error('Fetch appointments error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 // --------------------------------------------------
 // POST /api/appointments

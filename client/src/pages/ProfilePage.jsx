@@ -531,7 +531,11 @@ export default function ProfilePage() {
                 animate={{ borderColor: ["rgba(255,255,255,0.12)", "rgba(167,139,250,0.2)", "rgba(255,255,255,0.12)"] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               >
-                {currentInitials}
+                {currentUser?.profile_picture ? (
+                  <img src={currentUser.profile_picture} alt={currentUserName} className="w-full h-full object-cover" />
+                ) : (
+                  currentInitials
+                )}
                 <motion.div className="absolute inset-0 pointer-events-none"
                   style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)", transform: "skewX(-20deg)" }}
                   animate={{ left: ["-150%", "250%"] }}
@@ -542,7 +546,7 @@ export default function ProfilePage() {
         </motion.header>
 
         {/* ══════ MAIN CONTENT ══════ */}
-        <main className="px-6 py-10 sm:px-8 flex items-start justify-center min-h-[calc(100vh-72px)]">
+        <main className="px-6 py-10 sm:px-8 pb-28 flex items-start justify-center min-h-[calc(100vh-72px)]">
           {loading ? (
             <ProfileSkeleton />
           ) : error ? (
@@ -765,6 +769,50 @@ export default function ProfilePage() {
           )}
         </main>
       </div>
+
+      {/* ══════ MOBILE BOTTOM NAV BAR ══════ */}
+      <motion.nav
+        className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden items-center justify-around py-2 px-2"
+        style={{
+          ...glassStyle,
+          borderRadius: 0,
+          borderBottom: "none",
+          borderLeft: "none",
+          borderRight: "none",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          background: "linear-gradient(165deg, rgba(10,6,24,0.95) 0%, rgba(5,2,8,0.98) 100%)",
+          backdropFilter: "blur(30px) saturate(150%)",
+          WebkitBackdropFilter: "blur(30px) saturate(150%)",
+        }}
+        initial={{ y: 80 }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {[
+          { key: "dashboard", label: "Home", icon: icons.dashboard, to: "/dashboard" },
+          { key: "messages", label: "Chat", icon: icons.messages, to: "/messages" },
+          { key: "profile", label: "Profile", icon: icons.profile, to: currentUser?.username ? `/profile/${currentUser.username}` : "/dashboard" },
+        ].map((item) => {
+          const isActive = item.key === "profile";
+          return (
+            <Link key={item.key} to={item.to}
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all duration-300 ${isActive ? "text-violet-400" : "text-white/30 hover:text-white/60"}`}
+            >
+              <motion.span whileTap={{ scale: 0.85 }}>
+                {item.icon}
+              </motion.span>
+              <span className="text-[10px] font-medium">{item.label}</span>
+              {isActive && (
+                <motion.div
+                  className="absolute -bottom-0.5 h-[2px] w-6 rounded-full"
+                  style={{ background: "linear-gradient(90deg, rgba(139,92,246,0.8), rgba(59,130,246,0.6))", boxShadow: "0 0 8px rgba(139,92,246,0.4)" }}
+                  layoutId="mobileNavIndicator"
+                />
+              )}
+            </Link>
+          );
+        })}
+      </motion.nav>
     </div>
   );
 }

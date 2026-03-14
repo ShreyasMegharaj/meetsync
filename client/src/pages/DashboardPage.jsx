@@ -410,7 +410,7 @@ const UpcomingMeetings = ({ appointments, currentUsername }) => {
                   Meeting with {name}
                 </p>
                 <div className="flex gap-4 text-[12px] text-white/50 mt-1 pl-6">
-                  <span>{new Date(apt.date).toLocaleDateString()} at {apt.time}</span>
+                  <span>{apt.scheduled_for ? new Date(apt.scheduled_for).toLocaleDateString() : 'TBD'} at {apt.scheduled_for ? new Date(apt.scheduled_for).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'TBD'}</span>
                 </div>
                 {apt.note && <p className="text-[12px] text-white/40 italic mt-2 ml-6 bg-black/20 p-2.5 rounded-lg">"{apt.note}"</p>}
               </motion.div>
@@ -562,8 +562,12 @@ export default function DashboardPage() {
                   <p className="text-[11px] text-white/20">Online</p>
                 </div>
               </div>
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/30 to-blue-500/30 border border-white/10 text-sm font-bold text-white/80">
-                {initials}
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/30 to-blue-500/30 border border-white/10 text-sm font-bold text-white/80 overflow-hidden">
+                {user?.profile_picture ? (
+                  <img src={user.profile_picture} alt={username} className="w-full h-full object-cover" />
+                ) : (
+                  initials
+                )}
               </div>
             </div>
             <motion.button onClick={logout} className="group flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-white/30 bg-white/5 border border-white/5 hover:text-red-400/70 hover:border-red-500/20"
@@ -575,7 +579,7 @@ export default function DashboardPage() {
         </motion.header>
 
         {/* ══════ MAIN CONTENT ══════ */}
-        <main className="flex-1 px-6 py-8 sm:px-8 max-w-[1200px] w-full mx-auto pb-20">
+        <main className="flex-1 px-6 py-8 sm:px-8 max-w-[1200px] w-full mx-auto pb-28">
           {/* Welcome */}
           <motion.div className="mb-8" initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.7 }}>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
@@ -602,6 +606,50 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
+
+      {/* ══════ MOBILE BOTTOM NAV BAR ══════ */}
+      <motion.nav
+        className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden items-center justify-around py-2 px-2"
+        style={{
+          ...glassStyle,
+          borderRadius: 0,
+          borderBottom: "none",
+          borderLeft: "none",
+          borderRight: "none",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          background: "linear-gradient(165deg, rgba(10,6,24,0.95) 0%, rgba(5,2,8,0.98) 100%)",
+          backdropFilter: "blur(30px) saturate(150%)",
+          WebkitBackdropFilter: "blur(30px) saturate(150%)",
+        }}
+        initial={{ y: 80 }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {[
+          { key: "dashboard", label: "Home", icon: icons.dashboard, to: "/dashboard" },
+          { key: "messages", label: "Chat", icon: icons.messages, to: "/messages" },
+          { key: "profile", label: "Profile", icon: icons.profile, to: user?.username ? `/profile/${user.username}` : "/dashboard" },
+        ].map((item) => {
+          const isActive = item.key === "dashboard";
+          return (
+            <Link key={item.key} to={item.to}
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all duration-300 ${isActive ? "text-violet-400" : "text-white/30 hover:text-white/60"}`}
+            >
+              <motion.span whileTap={{ scale: 0.85 }}>
+                {item.icon}
+              </motion.span>
+              <span className="text-[10px] font-medium">{item.label}</span>
+              {isActive && (
+                <motion.div
+                  className="absolute -bottom-0.5 h-[2px] w-6 rounded-full"
+                  style={{ background: "linear-gradient(90deg, rgba(139,92,246,0.8), rgba(59,130,246,0.6))", boxShadow: "0 0 8px rgba(139,92,246,0.4)" }}
+                  layoutId="mobileNavIndicator"
+                />
+              )}
+            </Link>
+          );
+        })}
+      </motion.nav>
 
       {/* ══════ SEARCH MODAL ══════ */}
       <Modal isOpen={!!activeModal} onClose={() => setActiveModal(null)} title={activeModal === 'chat' ? "Start Conversation" : "Find Users"}>
