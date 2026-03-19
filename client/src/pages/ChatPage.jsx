@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import NotificationBell from "../components/NotificationBell";
 import socket from "../utils/socket";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -164,6 +165,7 @@ const icons = {
   clock: (<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>),
   check: (<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>),
   xMark: (<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>),
+  back: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>),
 };
 
 /* ─── Sidebar ─── */
@@ -171,7 +173,6 @@ const getSidebarItems = (currentUsername) => [
   { key: "dashboard", label: "Dashboard", icon: icons.dashboard, to: "/dashboard" },
   { key: "messages", label: "Messages", icon: icons.messages, to: "/messages" },
   { key: "profile", label: "Profile", icon: icons.profile, to: currentUsername ? `/profile/${currentUsername}` : "/dashboard" },
-  { key: "settings", label: "Settings", icon: icons.settings, to: "/settings" },
 ];
 
 const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
@@ -646,8 +647,10 @@ export default function MessagesPage() {
         
         // Auto select first if none passed in URL
         if (!conversationId && Array.isArray(mapped) && mapped.length > 0) {
-          setActiveConvo(mapped[0].id);
-          navigate(`/chat/${mapped[0].id}`, { replace: true });
+          if (window.innerWidth >= 768) {
+            setActiveConvo(mapped[0].id);
+            navigate(`/chat/${mapped[0].id}`, { replace: true });
+          }
         }
       } catch (err) {
         console.error("Failed to fetch conversations", err);
@@ -1006,15 +1009,7 @@ export default function MessagesPage() {
             </motion.h2>
           </div>
           <div className="flex items-center gap-3">
-            <motion.button
-              className="relative flex items-center justify-center h-10 w-10 rounded-xl text-white/30 hover:text-white/60 transition-colors"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
-              whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.95 }}>
-              {icons.bell}
-              <motion.div className="absolute top-2 right-2 h-2 w-2 rounded-full"
-                style={{ background: "rgba(239,68,68,0.8)", boxShadow: "0 0 8px rgba(239,68,68,0.4)" }}
-                animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 2, repeat: Infinity }} />
-            </motion.button>
+            <NotificationBell />
             <div className="flex items-center gap-3">
               <div className="hidden sm:block text-right">
                 <p className="text-sm font-medium text-white/60">{username}</p>
@@ -1044,7 +1039,7 @@ export default function MessagesPage() {
         <div className="flex flex-1 overflow-hidden">
           {/* ─── LEFT: Conversation List ─── */}
           <motion.div
-            className="hidden md:flex flex-col w-[320px] lg:w-[340px] shrink-0 overflow-hidden"
+            className={`flex flex-col w-full md:w-[320px] lg:w-[340px] shrink-0 overflow-hidden ${activeConvo ? 'hidden md:flex' : 'flex'}`}
             style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderBottom: "none", borderRight: "1px solid rgba(255,255,255,0.06)" }}
             initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -1071,7 +1066,7 @@ export default function MessagesPage() {
           </motion.div>
 
           {/* ─── RIGHT: Chat Window ─── */}
-          <motion.div className="flex-1 flex flex-col overflow-hidden"
+          <motion.div className={`flex-1 flex-col overflow-hidden ${!activeConvo ? 'hidden md:flex' : 'flex'}`}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}>
 
@@ -1082,11 +1077,10 @@ export default function MessagesPage() {
                 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.4 }}>
                 <div className="flex items-center gap-3">
-                  <select className="md:hidden rounded-lg px-2 py-1 text-xs text-white/60 bg-white/5 border border-white/10 outline-none"
-                    value={activeConvo} onChange={(e) => setActiveConvo(e.target.value)}>
-                    {conversations.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                  <div className="hidden md:flex relative">
+                  <button onClick={() => { setActiveConvo(null); navigate('/messages'); }} className="md:hidden p-1 mr-1 text-white/60 hover:text-white transition-colors" aria-label="Back">
+                    {icons.back}
+                  </button>
+                  <div className="flex relative shrink-0">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold text-white/80"
                       style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.35), rgba(59,130,246,0.3))", border: "1px solid rgba(255,255,255,0.1)" }}>
                       {activeConversation.avatar}
@@ -1097,8 +1091,8 @@ export default function MessagesPage() {
                         animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }} />
                     )}
                   </div>
-                  <div className="hidden md:block">
-                    <p className="text-sm font-semibold text-white/80">{activeConversation.name}</p>
+                  <div className="block">
+                    <p className="text-sm font-semibold text-white/80 truncate max-w-[120px] sm:max-w-none">{activeConversation.name}</p>
                     <div className="flex items-center gap-1.5">
                       {activeConversation.online ? (
                         <>

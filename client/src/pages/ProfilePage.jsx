@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import NotificationBell from "../components/NotificationBell";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -126,7 +127,6 @@ const getSidebarItems = (currentUsername) => [
   { key: "dashboard", label: "Dashboard", icon: icons.dashboard, to: "/dashboard" },
   { key: "messages", label: "Messages", icon: icons.messages, to: "/messages" },
   { key: "profile", label: "Profile", icon: icons.profile, to: currentUsername ? `/profile/${currentUsername}` : "/dashboard" },
-  { key: "settings", label: "Settings", icon: icons.settings, to: "/settings" },
 ];
 
 const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
@@ -319,6 +319,11 @@ export default function ProfilePage() {
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
 
+  /* Connection state */
+  const [connectionStatus, setConnectionStatus] = useState("none");
+  const [connectionLoading, setConnectionLoading] = useState(false);
+  const [requestId, setRequestId] = useState(null);
+
   /* Edit state */
   const [isEditing, setIsEditing] = useState(false);
   const [editBio, setEditBio] = useState("");
@@ -369,6 +374,16 @@ export default function ProfilePage() {
         if (ownProfile) {
           setEditBio(data.bio || "");
           setEditProfilePic(data.profile_picture || data.avatar || "");
+        } else if (currentUser) {
+          try {
+            const statusRes = await axios.get(`${API_BASE}/requests/status/${data._id || data.id}`, {
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
+            setConnectionStatus(statusRes.data.status);
+            setRequestId(statusRes.data.requestId);
+          } catch (err) {
+            console.error("Failed to check connection status", err);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch profile:", err);
@@ -403,6 +418,44 @@ export default function ProfilePage() {
       console.error("Failed to start conversation:", err);
     } finally {
       setChatLoading(false);
+    }
+  };
+
+  /* ─── Send/Accept/Reject Requests ─── */
+  const handleSendRequest = async () => {
+    setConnectionLoading(true);
+    try {
+      const token = getToken();
+      const res = await axios.post(`${API_BASE}/requests/send`, 
+        { to_user: profileData._id || profileData.id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setConnectionStatus("pending_sent");
+      setRequestId(res.data._id);
+    } catch (err) {
+      console.error("Failed to send request", err);
+    } finally {
+      setConnectionLoading(false);
+    }
+  };
+
+  const handleRequestAction = async (action) => {
+    if (!requestId) return;
+    setConnectionLoading(true);
+    try {
+      const token = getToken();
+      await axios.put(`${API_BASE}/requests/${requestId}/${action}`, {}, {
+         headers: { Authorization: `Bearer ${token}` }
+      });
+      if (action === 'accept') {
+        setConnectionStatus("connected");
+      } else {
+        setConnectionStatus("none");
+      }
+    } catch (err) {
+      console.error(`Failed to ${action} request`, err);
+    } finally {
+      setConnectionLoading(false);
     }
   };
 
@@ -502,16 +555,7 @@ export default function ProfilePage() {
 
           <div className="flex items-center gap-3">
             {/* Notification bell */}
-            <motion.button className="relative flex items-center justify-center h-10 w-10 rounded-xl text-white/30 hover:text-white/60 transition-colors duration-300"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
-              whileHover={{ scale: 1.08, borderColor: "rgba(255,255,255,0.12)" }}
-              whileTap={{ scale: 0.95 }}>
-              {icons.bell}
-              <motion.div className="absolute top-2 right-2 h-2 w-2 rounded-full"
-                style={{ background: "rgba(239,68,68,0.8)", boxShadow: "0 0 8px rgba(239,68,68,0.4)" }}
-                animate={{ scale: [1, 1.4, 1], opacity: [0.8, 1, 0.8] }}
-                transition={{ duration: 2, repeat: Infinity }} />
-            </motion.button>
+            <NotificationBell />
 
             {/* Avatar + name */}
             <div className="flex items-center gap-3">
@@ -742,26 +786,57 @@ export default function ProfilePage() {
                       )}
                     </AnimatePresence>
                   ) : (
-                    /* ── Other User: Start Chat ── */
-                    <motion.button
-                      onClick={handleStartChat}
-                      disabled={chatLoading}
-                      className="w-full flex items-center justify-center gap-2.5 rounded-xl py-3 text-sm font-semibold text-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.4), rgba(59,130,246,0.35))", border: "1px solid rgba(139,92,246,0.25)", boxShadow: "0 0 25px rgba(139,92,246,0.12)" }}
-                      whileHover={{ scale: 1.03, boxShadow: "0 0 40px rgba(139,92,246,0.25), 0 0 80px rgba(59,130,246,0.08)", borderColor: "rgba(167,139,250,0.4)" }}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      {chatLoading ? (
-                        <motion.div className="h-5 w-5 rounded-full border-2 border-white/20 border-t-white/80"
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
+                    /* ── Other User: Start Chat / Connection ── */
+                    <div className="w-full flex flex-col gap-3">
+                      {connectionStatus === 'connected' ? (
+                        <motion.button
+                          onClick={handleStartChat}
+                          disabled={chatLoading}
+                          className="w-full flex items-center justify-center gap-2.5 rounded-xl py-3 text-sm font-semibold text-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.4), rgba(59,130,246,0.35))", border: "1px solid rgba(139,92,246,0.25)", boxShadow: "0 0 25px rgba(139,92,246,0.12)" }}
+                          whileHover={{ scale: 1.03, boxShadow: "0 0 40px rgba(139,92,246,0.25), 0 0 80px rgba(59,130,246,0.08)", borderColor: "rgba(167,139,250,0.4)" }}
+                          whileTap={{ scale: 0.97 }}
+                        >
+                          {chatLoading ? (
+                            <motion.div className="h-5 w-5 rounded-full border-2 border-white/20 border-t-white/80" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
+                          ) : (
+                            <>{icons.chat} Open Chat</>
+                          )}
+                        </motion.button>
+                      ) : connectionStatus === 'pending_sent' ? (
+                        <button disabled className="w-full flex items-center justify-center gap-2.5 rounded-xl py-3 text-sm font-semibold text-white/40 bg-white/5 border border-white/10 cursor-not-allowed">
+                          Request Sent
+                        </button>
+                      ) : connectionStatus === 'pending_received' ? (
+                        <div className="flex gap-3">
+                          <motion.button onClick={() => handleRequestAction('accept')} disabled={connectionLoading}
+                            className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
+                            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                            {icons.check} Accept
+                          </motion.button>
+                          <motion.button onClick={() => handleRequestAction('reject')} disabled={connectionLoading}
+                            className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all"
+                            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                            {icons.xMark} Reject
+                          </motion.button>
+                        </div>
                       ) : (
-                        <>
-                          {icons.chat}
-                          Start Chat
-                        </>
+                        <motion.button
+                          onClick={handleSendRequest}
+                          disabled={connectionLoading}
+                          className="w-full flex items-center justify-center gap-2.5 rounded-xl py-3 text-sm font-semibold text-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.4), rgba(139,92,246,0.35))", border: "1px solid rgba(59,130,246,0.25)", boxShadow: "0 0 25px rgba(59,130,246,0.12)" }}
+                          whileHover={{ scale: 1.03, boxShadow: "0 0 40px rgba(59,130,246,0.25)", borderColor: "rgba(96,165,250,0.4)" }}
+                          whileTap={{ scale: 0.97 }}
+                        >
+                          {connectionLoading ? (
+                             <motion.div className="h-5 w-5 rounded-full border-2 border-white/20 border-t-white/80" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
+                          ) : (
+                            <>Send Request</>
+                          )}
+                        </motion.button>
                       )}
-                    </motion.button>
+                    </div>
                   )}
                 </motion.div>
               </div>

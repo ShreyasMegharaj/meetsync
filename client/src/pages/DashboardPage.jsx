@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import NotificationBell from "../components/NotificationBell";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -124,7 +125,6 @@ const getSidebarItems = (currentUsername) => [
   { key: "messages", label: "Messages", icon: icons.messages, to: "/messages" },
 
   { key: "profile", label: "Profile", icon: icons.profile, to: currentUsername ? `/profile/${currentUsername}` : "/dashboard" },
-  { key: "settings", label: "Settings", icon: icons.settings, to: "/settings" },
 ];
 
 const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
@@ -284,6 +284,67 @@ const QuickActionCard = ({ icon, title, description, gradient, delay }) => (
     </div>
   </motion.div>
 );
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVE CLOCK WIDGET
+   ═══════════════════════════════════════════════════════════════ */
+const LiveClockWidget = ({ delay }) => {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const hours = time.getHours();
+  let greeting = "Good Evening";
+  if (hours >= 5 && hours < 12) greeting = "Good Morning";
+  else if (hours >= 12 && hours < 17) greeting = "Good Afternoon";
+
+  const dateStr = time.toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const timeStr = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  return (
+    <motion.div
+      className="group relative cursor-default overflow-hidden rounded-2xl p-6 flex flex-col justify-center items-center h-full min-h-[160px]"
+      style={glassStyle}
+      initial={{ opacity: 0, y: 35, scale: 0.94 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <motion.div className="absolute -inset-[1px] rounded-2xl overflow-hidden opacity-[0.5] transition-opacity duration-500">
+        <motion.div className="absolute inset-0"
+          style={{ background: "conic-gradient(from 0deg, transparent 30%, rgba(167,139,250,0.15), rgba(96,165,250,0.12), transparent 70%, rgba(244,114,182,0.08), transparent 100%)" }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear" }} />
+      </motion.div>
+
+      <motion.div className="absolute inset-0 rounded-2xl opacity-[0.6]"
+        style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.2), rgba(109,40,217,0.15))", filter: "blur(45px)" }} />
+
+      <div className="relative z-10 text-center flex flex-col items-center justify-center p-2 mb-1">
+        <h3 className="text-[13px] font-medium text-white/50 tracking-[0.2em] uppercase mb-3">{greeting}</h3>
+        <div className="text-4xl sm:text-5xl font-bold tracking-tight pb-2"
+          style={{
+            background: "linear-gradient(135deg, #ffffff 0%, #c4b5fd 70%, #818cf8 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            textShadow: "0 0 25px rgba(139,92,246,0.4)"
+          }}>
+          {timeStr}
+        </div>
+        <p className="text-[15px] text-white/40 font-medium pt-1">{dateStr}</p>
+      </div>
+    </motion.div>
+  );
+};
 
 /* ═══════════════════════════════════════════════════════════════
    MODAL COMPONENT
@@ -549,11 +610,7 @@ export default function DashboardPage() {
           <h2 className="hidden lg:block text-lg font-semibold text-white/70">Dashboard</h2>
 
           <div className="flex items-center gap-3">
-            <motion.button className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/5 text-white/30 hover:text-white/60"
-              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              {icons.bell}
-              <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-            </motion.button>
+            <NotificationBell />
             <div className="flex items-center gap-3">
               <div className="hidden sm:block text-right">
                 <p className="text-sm font-medium text-white/60">{username}</p>
@@ -591,8 +648,8 @@ export default function DashboardPage() {
 
           {/* Quick actions row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
-            <div onClick={() => { setActiveModal('chat'); setSearchQuery(''); }}>
-              <QuickActionCard icon={icons.chat} title="Start Conversation" description="Begin a real-time chat with your contacts or start a new group discussion." gradient="linear-gradient(135deg, rgba(139,92,246,0.2), rgba(109,40,217,0.15))" delay={0.3} />
+            <div>
+              <LiveClockWidget delay={0.3} />
             </div>
             <div onClick={() => { setActiveModal('search'); setSearchQuery(''); }}>
               <QuickActionCard icon={icons.search} title="Find Users" description="Search and connect with people across the platform to expand your network." gradient="linear-gradient(135deg, rgba(59,130,246,0.2), rgba(6,182,212,0.15))" delay={0.4} />
