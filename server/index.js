@@ -47,7 +47,7 @@ io.on('connection', (socket) => {
   socket.on("sendMessage", async (data) => {
     try {
       const Message = require('./models/messages');
-      const Conversation = require('./models/Conversation');
+      const Conversation = require('./models/conversation');
 
       const message = await Message.create({
         conversation_id: data.conversationId,

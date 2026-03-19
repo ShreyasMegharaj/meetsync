@@ -1,7 +1,7 @@
 // routes/conversations.js
 
 const express = require('express');
-const Conversation = require('../models/Conversation');
+const Conversation = require('../models/conversation');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/authMiddleware');
 

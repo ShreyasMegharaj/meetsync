@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const Appointment = require('../models/appointment');
-const Conversation = require('../models/Conversation');
+const Conversation = require('../models/conversation');
 const Message = require('../models/messages');
 const authMiddleware = require('../middleware/authMiddleware');
 
