@@ -882,7 +882,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="relative h-[100dvh] flex flex-col overflow-hidden" style={{ background: "#030108" }}>
+    <div className="fixed top-0 left-0 right-0 bottom-0 flex flex-col overflow-hidden" style={{ background: "#030108" }}>
       <Background />
       
       <Sidebar active="messages" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={user?.username || ""} />
@@ -1023,7 +1023,7 @@ export default function MessagesPage() {
             )}
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 pb-24" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.08) transparent" }}>
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-4" style={{ paddingBottom: "80px", scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.08) transparent" }}>
               <AnimatePresence mode="wait">
                 <motion.div key={activeConvo} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                   {currentMessages.length === 0 ? (
@@ -1060,8 +1060,8 @@ export default function MessagesPage() {
             </div>
 
             {/* Input Area */}
-            <motion.div className="shrink-0 sticky bottom-0 z-20 px-4 py-3 sm:px-6"
-              style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
+            <motion.div className="shrink-0 sticky bottom-0 w-full z-10"
+              style={{ padding: "12px", borderTop: "1px solid rgba(255,255,255,0.06)", background: "#030108" }}
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.2 }}>
               <div className="flex items-center gap-2 rounded-xl px-3 py-2"
@@ -1108,7 +1108,7 @@ export default function MessagesPage() {
 
       {/* ══════ MOBILE BOTTOM NAV BAR ══════ */}
       <motion.nav
-        className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden items-center justify-around py-2 px-2"
+        className={`fixed bottom-0 left-0 right-0 z-50 md:hidden items-center justify-around py-2 px-2 ${activeConvo ? 'hidden' : 'flex'}`}
         style={{
           ...glassStyle,
           borderRadius: 0,
