@@ -882,12 +882,12 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="relative h-[100dvh] overflow-hidden" style={{ background: "#030108" }}>
+    <div className="relative h-[100dvh] flex flex-col overflow-hidden" style={{ background: "#030108" }}>
       <Background />
       
       <Sidebar active="messages" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={user?.username || ""} />
 
-      <div className="relative z-10 flex flex-col h-[100dvh]">
+      <div className="relative z-10 flex flex-col flex-1 overflow-hidden">
         {/* ══════ TOP NAVBAR ══════ */}
         <motion.header
           className="shrink-0 flex items-center justify-between px-6 py-3 sm:px-8"
@@ -1023,7 +1023,7 @@ export default function MessagesPage() {
             )}
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-6 py-4" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.08) transparent" }}>
+            <div className="flex-1 overflow-y-auto px-6 py-4 pb-24" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.08) transparent" }}>
               <AnimatePresence mode="wait">
                 <motion.div key={activeConvo} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                   {currentMessages.length === 0 ? (
@@ -1060,7 +1060,7 @@ export default function MessagesPage() {
             </div>
 
             {/* Input Area */}
-            <motion.div className="shrink-0 px-4 py-3 sm:px-6"
+            <motion.div className="shrink-0 sticky bottom-0 z-20 px-4 py-3 sm:px-6"
               style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.2 }}>
