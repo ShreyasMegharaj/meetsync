@@ -10,63 +10,14 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 const rand = (a, b) => Math.random() * (b - a) + a;
 
 /* ═══════════════════════════════════════════════════════════════
-   AMBIENT BACKGROUND — rich immersive depth
+   BACKGROUND
    ═══════════════════════════════════════════════════════════════ */
-const BLOBS = [
-  { gradient: "radial-gradient(circle,rgba(109,40,217,0.35),rgba(59,130,246,0.12),transparent 70%)", size: 600, blur: 110, dur: 30, opacity: 0.4, path: { x: [-250, 600, 150, -150, 450, -250], y: [-150, 350, -80, 550, 100, -150], s: [1, 1.2, 0.88, 1.12, 0.92, 1] } },
-  { gradient: "radial-gradient(circle,rgba(219,39,119,0.25),rgba(168,85,247,0.14),transparent 70%)", size: 480, blur: 125, dur: 36, opacity: 0.32, path: { x: [750, -80, 380, 80, 650, 750], y: [450, 20, 380, -120, 280, 450], s: [0.92, 1.25, 0.95, 1.18, 0.86, 0.92] } },
-  { gradient: "radial-gradient(circle,rgba(6,182,212,0.22),rgba(59,130,246,0.14),transparent 70%)", size: 520, blur: 105, dur: 34, opacity: 0.33, path: { x: [250, -180, 550, 80, -120, 250], y: [650, 120, -120, 480, 220, 650], s: [1.08, 0.82, 1.25, 0.88, 1.12, 1.08] } },
-  { gradient: "radial-gradient(circle,rgba(139,92,246,0.3),rgba(236,72,153,0.1),transparent 70%)", size: 400, blur: 130, dur: 42, opacity: 0.25, path: { x: [-150, 450, 750, 180, 550, -150], y: [280, -180, 450, 80, 650, 280], s: [1, 1.35, 0.78, 1.18, 0.95, 1] } },
-];
-
-const MOTES = Array.from({ length: 40 }, (_, i) => ({
-  id: i, size: rand(1.2, 3.5),
-  color: [`rgba(167,139,250,`, `rgba(96,165,250,`, `rgba(244,114,182,`, `rgba(34,211,238,`, `rgba(129,140,248,`][i % 5] + `${rand(0.25, 0.6)})`,
-  dur: rand(18, 38), delay: rand(0, 10),
-  path: { x: Array.from({ length: 7 }, () => rand(-50, 1800)), y: Array.from({ length: 7 }, () => rand(-50, 1000)) },
-}));
-
-const STREAKS = Array.from({ length: 4 }, (_, i) => ({
-  id: i, delay: rand(2, 16), dur: rand(2.5, 4), top: rand(8, 85), angle: rand(-18, -4),
-}));
-
-const RINGS = [
-  { sz: 200, x: 80, y: 12, dur: 30, c: "rgba(139,92,246,0.05)" },
-  { sz: 280, x: 10, y: 70, dur: 36, c: "rgba(59,130,246,0.04)" },
-  { sz: 160, x: 60, y: 60, dur: 26, c: "rgba(236,72,153,0.04)" },
-];
-
 const Background = () => (
-  <div className="fixed inset-0 overflow-hidden" style={{ zIndex: 0 }}>
+  <div className="fixed inset-0 overflow-hidden bg-[#030108]" style={{ zIndex: 0 }}>
     <div className="absolute inset-0" style={{ background: "linear-gradient(145deg, #050208 0%, #0a0618 30%, #0d0a1a 50%, #06050f 70%, #020104 100%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 25% 15%, rgba(109,40,217,0.07) 0%, transparent 55%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 75% 85%, rgba(59,130,246,0.05) 0%, transparent 55%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(236,72,153,0.03) 0%, transparent 50%)" }} />
-    <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "linear-gradient(rgba(139,92,246,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,0.5) 1px,transparent 1px)", backgroundSize: "80px 80px" }} />
-    {BLOBS.map((b, i) => (
-      <motion.div key={i} className="absolute rounded-full pointer-events-none will-change-transform"
-        style={{ width: b.size, height: b.size, background: b.gradient, filter: `blur(${b.blur}px)`, opacity: b.opacity }}
-        animate={{ x: b.path.x, y: b.path.y, scale: b.path.s }}
-        transition={{ duration: b.dur, repeat: Infinity, repeatType: "loop", ease: "linear" }} />
-    ))}
-    {RINGS.map((r, i) => (
-      <motion.div key={`r${i}`} className="absolute rounded-full pointer-events-none"
-        style={{ width: r.sz, height: r.sz, border: `1px solid ${r.c}`, left: `${r.x}%`, top: `${r.y}%` }}
-        animate={{ rotate: 360, scale: [1, 1.1, 0.93, 1.08, 1] }}
-        transition={{ rotate: { duration: r.dur, repeat: Infinity, ease: "linear" }, scale: { duration: r.dur * 0.7, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" } }} />
-    ))}
-    {MOTES.map((m) => (
-      <motion.div key={m.id} className="absolute rounded-full pointer-events-none"
-        style={{ width: m.size, height: m.size, background: m.color, boxShadow: `0 0 ${m.size * 3}px ${m.color}` }}
-        animate={{ x: m.path.x, y: m.path.y, opacity: [0.4, 1, 0.4] }}
-        transition={{ duration: m.dur, delay: m.delay, repeat: Infinity, repeatType: "loop", ease: "linear" }} />
-    ))}
-    {STREAKS.map((s) => (
-      <motion.div key={`s${s.id}`} className="absolute pointer-events-none"
-        style={{ top: `${s.top}%`, left: "-12%", width: 140, height: 1.5, background: "linear-gradient(90deg,transparent,rgba(167,139,250,0.5),rgba(96,165,250,0.3),transparent)", borderRadius: 999, transform: `rotate(${s.angle}deg)`, boxShadow: "0 0 10px rgba(139,92,246,0.2)" }}
-        animate={{ x: ["-12vw", "115vw"], opacity: [0, 1, 1, 0] }}
-        transition={{ duration: s.dur, delay: s.delay, repeat: Infinity, repeatDelay: rand(10, 22), ease: "easeInOut" }} />
-    ))}
   </div>
 );
 
@@ -144,7 +95,7 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
           className="fixed top-0 left-0 h-full z-40 flex flex-col w-[260px] py-6 px-4"
           style={{ ...glassStyle, borderRight: "1px solid rgba(255,255,255,0.06)", borderRadius: 0 }}
           initial={{ x: -280, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -280, opacity: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
       {/* Logo */}
       <Link to="/dashboard" className="flex items-center gap-3 px-3 mb-10">
@@ -152,13 +103,13 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
           style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(255,255,255,0.1)" }}
           whileHover={{ scale: 1.1, borderColor: "rgba(167,139,250,0.4)" }}
           animate={{ borderColor: ["rgba(255,255,255,0.1)", "rgba(167,139,250,0.2)", "rgba(96,165,250,0.2)", "rgba(255,255,255,0.1)"] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 0.2,  ease: "easeInOut" }}
         >
           {/* Logo shimmer */}
           <motion.div className="absolute inset-0 pointer-events-none"
             style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)", transform: "skewX(-20deg)" }}
             animate={{ left: ["-150%", "250%"] }}
-            transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" }} />
+            transition={{ duration: 0.2,  repeatDelay: 4, ease: "easeInOut" }} />
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
             <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
@@ -167,7 +118,7 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
         <motion.span className="text-xl font-bold"
           style={{ background: "linear-gradient(135deg, #ffffff 0%, #c4b5fd 70%, #818cf8 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
           animate={{ opacity: [0.85, 1, 0.85] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+          transition={{ duration: 0.2,  ease: "easeInOut" }}>
           MeetSync
         </motion.span>
       </Link>
@@ -180,10 +131,10 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
             <motion.div key={item.key}
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 + i * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: 0.1 + i * 0.08, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
               <Link to={item.to} onClick={onClose}
-                className={`group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${isActive ? "text-white/90" : "text-white/30 hover:text-white/65"}`}>
+                className={`group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive ? "text-white/90" : "text-white/30 hover:text-white/65"}`}>
                 {isActive && (
                   <motion.div className="absolute inset-0 rounded-xl"
                     layoutId="sidebarActive"
@@ -201,11 +152,11 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
                     style={{ background: "linear-gradient(180deg, rgba(139,92,246,0.9), rgba(59,130,246,0.7))", boxShadow: "0 0 12px rgba(139,92,246,0.5)" }}
                     layoutId="sidebarIndicator"
                     animate={{ opacity: [0.7, 1, 0.7], height: [18, 22, 18] }}
-                    transition={{ opacity: { duration: 2, repeat: Infinity }, height: { duration: 2, repeat: Infinity } }} />
+                    transition={{ opacity: { duration: 0.2,  }, height: { duration: 0.2,  } }} />
                 )}
                 {/* Hover glow for inactive */}
                 {!isActive && (
-                  <motion.div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  <motion.div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                     style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }} />
                 )}
               </Link>
@@ -237,20 +188,20 @@ const QuickActionCard = ({ icon, title, description, gradient, delay }) => (
     style={glassStyle}
     initial={{ opacity: 0, y: 35, scale: 0.94 }}
     animate={{ opacity: 1, y: 0, scale: 1 }}
-    transition={{ delay, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+    transition={{ delay, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
     whileHover={{ scale: 1.04, y: -6 }}
     whileTap={{ scale: 0.97 }}
   >
     {/* Rotating conic border on hover */}
-    <motion.div className="absolute -inset-[1px] rounded-2xl overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+    <motion.div className="absolute -inset-[1px] rounded-2xl overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-200">
       <motion.div className="absolute inset-0"
         style={{ background: "conic-gradient(from 0deg, transparent 30%, rgba(167,139,250,0.15), rgba(96,165,250,0.12), transparent 70%, rgba(244,114,182,0.08), transparent 100%)" }}
         animate={{ rotate: 360 }}
-        transition={{ duration: 8, repeat: Infinity, ease: "linear" }} />
+        transition={{ duration: 0.2,  ease: "linear" }} />
     </motion.div>
 
     {/* Hover glow */}
-    <motion.div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-600"
+    <motion.div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
       style={{ background: gradient, filter: "blur(45px)" }} />
 
     {/* Shimmer sweep */}
@@ -258,23 +209,23 @@ const QuickActionCard = ({ icon, title, description, gradient, delay }) => (
       <motion.div
         style={{ position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.05),transparent)", transform: "skewX(-15deg)" }}
         animate={{ left: ["-100%", "280%"] }}
-        transition={{ duration: 4.5, repeat: Infinity, repeatDelay: 2.5, ease: "easeInOut" }} />
+        transition={{ duration: 0.2,  repeatDelay: 2.5, ease: "easeInOut" }} />
     </motion.div>
 
     {/* Icon container with pulse */}
     <motion.div className="relative z-10 mb-4 flex h-13 w-13 items-center justify-center rounded-xl"
       style={{ background: gradient, border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 20px rgba(0,0,0,0.3)", width: 52, height: 52 }}
       animate={{ boxShadow: ["0 4px 20px rgba(0,0,0,0.3)", `0 4px 30px ${gradient.includes("139,92,246") ? "rgba(139,92,246,0.15)" : gradient.includes("59,130,246") ? "rgba(59,130,246,0.15)" : "rgba(236,72,153,0.15)"}`, "0 4px 20px rgba(0,0,0,0.3)"] }}
-      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      transition={{ duration: 0.2,  ease: "easeInOut" }}
       whileHover={{ scale: 1.15, rotate: 5 }}>
-      <span className="text-white/80 group-hover:text-white transition-colors duration-300">{icon}</span>
+      <span className="text-white/80 group-hover:text-white transition-colors duration-200">{icon}</span>
     </motion.div>
 
-    <h3 className="relative z-10 text-[15px] font-semibold text-white/85 group-hover:text-white transition-colors duration-300">{title}</h3>
-    <p className="relative z-10 mt-1.5 text-[13px] text-white/25 group-hover:text-white/45 transition-colors duration-300 leading-relaxed">{description}</p>
+    <h3 className="relative z-10 text-[15px] font-semibold text-white/85 group-hover:text-white transition-colors duration-200">{title}</h3>
+    <p className="relative z-10 mt-1.5 text-[13px] text-white/25 group-hover:text-white/45 transition-colors duration-200 leading-relaxed">{description}</p>
 
     {/* Arrow */}
-    <div className="relative z-10 mt-5 flex items-center text-white/15 group-hover:text-white/50 transition-all duration-400">
+    <div className="relative z-10 mt-5 flex items-center text-white/15 group-hover:text-white/50 transition-all duration-200">
       <span className="text-[12px] font-medium mr-2 tracking-wide">Get started</span>
       <motion.svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
         animate={{ x: [0, 0] }}
@@ -316,13 +267,13 @@ const LiveClockWidget = ({ delay }) => {
       style={glassStyle}
       initial={{ opacity: 0, y: 35, scale: 0.94 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ delay, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
     >
-      <motion.div className="absolute -inset-[1px] rounded-2xl overflow-hidden opacity-[0.5] transition-opacity duration-500">
+      <motion.div className="absolute -inset-[1px] rounded-2xl overflow-hidden opacity-[0.5] transition-opacity duration-200">
         <motion.div className="absolute inset-0"
           style={{ background: "conic-gradient(from 0deg, transparent 30%, rgba(167,139,250,0.15), rgba(96,165,250,0.12), transparent 70%, rgba(244,114,182,0.08), transparent 100%)" }}
           animate={{ rotate: 360 }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }} />
+          transition={{ duration: 0.2,  ease: "linear" }} />
       </motion.div>
 
       <motion.div className="absolute inset-0 rounded-2xl opacity-[0.6]"
@@ -391,7 +342,7 @@ const RecentActivity = ({ conversations, currentUsername }) => {
   return (
     <motion.div className="relative rounded-2xl p-6 overflow-hidden h-full flex flex-col"
       style={glassStyle}
-      initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75, duration: 0.7 }}
+      initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75, duration: 0.2 }}
     >
       <div className="relative z-10 flex items-center justify-between mb-5">
         <h3 className="text-[15px] font-semibold text-white/80">Recent Activity</h3>
@@ -418,7 +369,7 @@ const RecentActivity = ({ conversations, currentUsername }) => {
                 className="group relative flex items-center gap-4 rounded-xl px-4 py-3.5 cursor-pointer overflow-hidden bg-white/5 hover:bg-white/10 transition-colors"
                 whileHover={{ x: 4 }}
               >
-                <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-105"
+                <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-200 group-hover:scale-105"
                   style={{ background: color.replace("0.5", "0.08"), border: `1px solid ${color.replace("0.5", "0.1")}` }}>
                   {otherUser?.profile_picture ? (
                     <img src={otherUser.profile_picture} alt={name} className="w-full h-full rounded-xl object-cover" />
@@ -446,7 +397,7 @@ const UpcomingMeetings = ({ appointments, currentUsername }) => {
   return (
     <motion.div className="relative rounded-2xl p-6 overflow-hidden h-full flex flex-col"
       style={glassStyle}
-      initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85, duration: 0.7 }}
+      initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85, duration: 0.2 }}
     >
       <div className="relative z-10 flex items-center justify-between mb-5">
         <h3 className="text-[15px] font-semibold text-white/80">Upcoming Meetings</h3>
@@ -592,7 +543,7 @@ export default function DashboardPage() {
   return (
     <div className="relative min-h-screen overflow-hidden" style={{ background: "#030108" }}>
       <Background />
-      <MagneticCursor />
+      
       <Sidebar active="dashboard" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={user?.username || ""} />
 
       <div className="relative z-10 flex flex-col min-h-screen">
@@ -600,7 +551,7 @@ export default function DashboardPage() {
         <motion.header
           className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 sm:px-8"
           style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-          initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
+          initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
         >
           <motion.button className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white/70"
             onClick={() => setSidebarOpen(!sidebarOpen)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -638,7 +589,7 @@ export default function DashboardPage() {
         {/* ══════ MAIN CONTENT ══════ */}
         <main className="flex-1 px-6 py-8 sm:px-8 max-w-[1200px] w-full mx-auto pb-28">
           {/* Welcome */}
-          <motion.div className="mb-8" initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.7 }}>
+          <motion.div className="mb-8" initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.2 }}>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
               <span className="text-white/35">Welcome back, </span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-violet-200 to-indigo-400">{username}</span>
@@ -680,7 +631,7 @@ export default function DashboardPage() {
         }}
         initial={{ y: 80 }}
         animate={{ y: 0 }}
-        transition={{ delay: 0.5, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ delay: 0.5, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       >
         {[
           { key: "dashboard", label: "Home", icon: icons.dashboard, to: "/dashboard" },
@@ -690,7 +641,7 @@ export default function DashboardPage() {
           const isActive = item.key === "dashboard";
           return (
             <Link key={item.key} to={item.to}
-              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all duration-300 ${isActive ? "text-violet-400" : "text-white/30 hover:text-white/60"}`}
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all duration-200 ${isActive ? "text-violet-400" : "text-white/30 hover:text-white/60"}`}
             >
               <motion.span whileTap={{ scale: 0.85 }}>
                 {item.icon}

@@ -10,63 +10,14 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 const rand = (a, b) => Math.random() * (b - a) + a;
 
 /* ═══════════════════════════════════════════════════════════════
-   AMBIENT BACKGROUND
+   BACKGROUND
    ═══════════════════════════════════════════════════════════════ */
-const BLOBS = [
-  { gradient: "radial-gradient(circle,rgba(109,40,217,0.35),rgba(59,130,246,0.12),transparent 70%)", size: 600, blur: 110, dur: 30, opacity: 0.4, path: { x: [-250, 600, 150, -150, 450, -250], y: [-150, 350, -80, 550, 100, -150], s: [1, 1.2, 0.88, 1.12, 0.92, 1] } },
-  { gradient: "radial-gradient(circle,rgba(219,39,119,0.25),rgba(168,85,247,0.14),transparent 70%)", size: 480, blur: 125, dur: 36, opacity: 0.32, path: { x: [750, -80, 380, 80, 650, 750], y: [450, 20, 380, -120, 280, 450], s: [0.92, 1.25, 0.95, 1.18, 0.86, 0.92] } },
-  { gradient: "radial-gradient(circle,rgba(6,182,212,0.22),rgba(59,130,246,0.14),transparent 70%)", size: 520, blur: 105, dur: 34, opacity: 0.33, path: { x: [250, -180, 550, 80, -120, 250], y: [650, 120, -120, 480, 220, 650], s: [1.08, 0.82, 1.25, 0.88, 1.12, 1.08] } },
-  { gradient: "radial-gradient(circle,rgba(139,92,246,0.3),rgba(236,72,153,0.1),transparent 70%)", size: 400, blur: 130, dur: 42, opacity: 0.25, path: { x: [-150, 450, 750, 180, 550, -150], y: [280, -180, 450, 80, 650, 280], s: [1, 1.35, 0.78, 1.18, 0.95, 1] } },
-];
-
-const MOTES = Array.from({ length: 40 }, (_, i) => ({
-  id: i, size: rand(1.2, 3.5),
-  color: [`rgba(167,139,250,`, `rgba(96,165,250,`, `rgba(244,114,182,`, `rgba(34,211,238,`, `rgba(129,140,248,`][i % 5] + `${rand(0.25, 0.6)})`,
-  dur: rand(18, 38), delay: rand(0, 10),
-  path: { x: Array.from({ length: 7 }, () => rand(-50, 1800)), y: Array.from({ length: 7 }, () => rand(-50, 1000)) },
-}));
-
-const STREAKS = Array.from({ length: 4 }, (_, i) => ({
-  id: i, delay: rand(2, 16), dur: rand(2.5, 4), top: rand(8, 85), angle: rand(-18, -4),
-}));
-
-const RINGS = [
-  { sz: 200, x: 80, y: 12, dur: 30, c: "rgba(139,92,246,0.05)" },
-  { sz: 280, x: 10, y: 70, dur: 36, c: "rgba(59,130,246,0.04)" },
-  { sz: 160, x: 60, y: 60, dur: 26, c: "rgba(236,72,153,0.04)" },
-];
-
 const Background = () => (
-  <div className="fixed inset-0 overflow-hidden" style={{ zIndex: 0 }}>
+  <div className="fixed inset-0 overflow-hidden bg-[#030108]" style={{ zIndex: 0 }}>
     <div className="absolute inset-0" style={{ background: "linear-gradient(145deg, #050208 0%, #0a0618 30%, #0d0a1a 50%, #06050f 70%, #020104 100%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 25% 15%, rgba(109,40,217,0.07) 0%, transparent 55%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 75% 85%, rgba(59,130,246,0.05) 0%, transparent 55%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(236,72,153,0.03) 0%, transparent 50%)" }} />
-    <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "linear-gradient(rgba(139,92,246,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,0.5) 1px,transparent 1px)", backgroundSize: "80px 80px" }} />
-    {BLOBS.map((b, i) => (
-      <motion.div key={i} className="absolute rounded-full pointer-events-none will-change-transform"
-        style={{ width: b.size, height: b.size, background: b.gradient, filter: `blur(${b.blur}px)`, opacity: b.opacity }}
-        animate={{ x: b.path.x, y: b.path.y, scale: b.path.s }}
-        transition={{ duration: b.dur, repeat: Infinity, repeatType: "loop", ease: "linear" }} />
-    ))}
-    {RINGS.map((r, i) => (
-      <motion.div key={`r${i}`} className="absolute rounded-full pointer-events-none"
-        style={{ width: r.sz, height: r.sz, border: `1px solid ${r.c}`, left: `${r.x}%`, top: `${r.y}%` }}
-        animate={{ rotate: 360, scale: [1, 1.1, 0.93, 1.08, 1] }}
-        transition={{ rotate: { duration: r.dur, repeat: Infinity, ease: "linear" }, scale: { duration: r.dur * 0.7, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" } }} />
-    ))}
-    {MOTES.map((m) => (
-      <motion.div key={m.id} className="absolute rounded-full pointer-events-none"
-        style={{ width: m.size, height: m.size, background: m.color, boxShadow: `0 0 ${m.size * 3}px ${m.color}` }}
-        animate={{ x: m.path.x, y: m.path.y, opacity: [0.4, 1, 0.4] }}
-        transition={{ duration: m.dur, delay: m.delay, repeat: Infinity, repeatType: "loop", ease: "linear" }} />
-    ))}
-    {STREAKS.map((s) => (
-      <motion.div key={`s${s.id}`} className="absolute pointer-events-none"
-        style={{ top: `${s.top}%`, left: "-12%", width: 140, height: 1.5, background: "linear-gradient(90deg,transparent,rgba(167,139,250,0.5),rgba(96,165,250,0.3),transparent)", borderRadius: 999, transform: `rotate(${s.angle}deg)`, boxShadow: "0 0 10px rgba(139,92,246,0.2)" }}
-        animate={{ x: ["-12vw", "115vw"], opacity: [0, 1, 1, 0] }}
-        transition={{ duration: s.dur, delay: s.delay, repeat: Infinity, repeatDelay: rand(10, 22), ease: "easeInOut" }} />
-    ))}
   </div>
 );
 
@@ -145,19 +96,19 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
           className="fixed top-0 left-0 h-full z-40 flex flex-col w-[260px] py-6 px-4"
           style={{ ...glassStyle, borderRight: "1px solid rgba(255,255,255,0.06)", borderRadius: 0 }}
           initial={{ x: -280, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -280, opacity: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           <Link to="/dashboard" className="flex items-center gap-3 px-3 mb-10">
             <motion.div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden"
               style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(255,255,255,0.1)" }}
               whileHover={{ scale: 1.1 }}
               animate={{ borderColor: ["rgba(255,255,255,0.1)", "rgba(167,139,250,0.2)", "rgba(96,165,250,0.2)", "rgba(255,255,255,0.1)"] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 0.2,  ease: "easeInOut" }}
             >
               <motion.div className="absolute inset-0 pointer-events-none"
                 style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)", transform: "skewX(-20deg)" }}
                 animate={{ left: ["-150%", "250%"] }}
-                transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" }} />
+                transition={{ duration: 0.2,  repeatDelay: 4, ease: "easeInOut" }} />
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
@@ -166,7 +117,7 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
             <motion.span className="text-xl font-bold"
               style={{ background: "linear-gradient(135deg, #ffffff 0%, #c4b5fd 70%, #818cf8 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
               animate={{ opacity: [0.85, 1, 0.85] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+              transition={{ duration: 0.2,  ease: "easeInOut" }}>
               MeetSync
             </motion.span>
           </Link>
@@ -178,10 +129,10 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
                 <motion.div key={item.key}
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + i * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ delay: 0.1 + i * 0.08, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <Link to={item.to} onClick={onClose}
-                    className={`group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${isActive ? "text-white/90" : "text-white/30 hover:text-white/65"}`}>
+                    className={`group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive ? "text-white/90" : "text-white/30 hover:text-white/65"}`}>
                     {isActive && (
                       <motion.div className="absolute inset-0 rounded-xl"
                         layoutId="sidebarActive"
@@ -199,10 +150,10 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
                         style={{ background: "linear-gradient(180deg, rgba(139,92,246,0.9), rgba(59,130,246,0.7))", boxShadow: "0 0 12px rgba(139,92,246,0.5)" }}
                         layoutId="sidebarIndicator"
                         animate={{ opacity: [0.7, 1, 0.7], height: [18, 22, 18] }}
-                        transition={{ opacity: { duration: 2, repeat: Infinity }, height: { duration: 2, repeat: Infinity } }} />
+                        transition={{ opacity: { duration: 0.2,  }, height: { duration: 0.2,  } }} />
                     )}
                     {!isActive && (
-                      <motion.div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      <motion.div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                         style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }} />
                     )}
                   </Link>
@@ -231,34 +182,34 @@ const ProfileSkeleton = () => (
     style={glassStyle}
     initial={{ opacity: 0, y: 30 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
   >
     <div className="flex flex-col items-center">
       {/* Avatar skeleton */}
       <motion.div className="w-28 h-28 rounded-full mb-6"
         style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08))", border: "1px solid rgba(255,255,255,0.06)" }}
         animate={{ opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }} />
+        transition={{ duration: 0.2,  ease: "easeInOut" }} />
       {/* Name skeleton */}
       <motion.div className="w-40 h-5 rounded-lg mb-3"
         style={{ background: "rgba(255,255,255,0.06)" }}
         animate={{ opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.15 }} />
+        transition={{ duration: 0.2,  ease: "easeInOut", delay: 0.15 }} />
       {/* Username skeleton */}
       <motion.div className="w-28 h-4 rounded-lg mb-4"
         style={{ background: "rgba(255,255,255,0.04)" }}
         animate={{ opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }} />
+        transition={{ duration: 0.2,  ease: "easeInOut", delay: 0.3 }} />
       {/* Bio skeleton */}
       <motion.div className="w-full h-16 rounded-xl mb-6"
         style={{ background: "rgba(255,255,255,0.04)" }}
         animate={{ opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.45 }} />
+        transition={{ duration: 0.2,  ease: "easeInOut", delay: 0.45 }} />
       {/* Button skeleton */}
       <motion.div className="w-44 h-11 rounded-xl"
         style={{ background: "rgba(139,92,246,0.08)" }}
         animate={{ opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.6 }} />
+        transition={{ duration: 0.2,  ease: "easeInOut", delay: 0.6 }} />
     </div>
   </motion.div>
 );
@@ -272,7 +223,7 @@ const ErrorCard = ({ message, onGoBack }) => (
     style={glassStyle}
     initial={{ opacity: 0, y: 30, scale: 0.95 }}
     animate={{ opacity: 1, y: 0, scale: 1 }}
-    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
   >
     {/* Top glow */}
     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-1 rounded-b-full"
@@ -282,7 +233,7 @@ const ErrorCard = ({ message, onGoBack }) => (
       <motion.div className="flex h-16 w-16 items-center justify-center rounded-full mb-5"
         style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}
         animate={{ scale: [1, 1.05, 1], borderColor: ["rgba(239,68,68,0.15)", "rgba(239,68,68,0.3)", "rgba(239,68,68,0.15)"] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        transition={{ duration: 0.2,  ease: "easeInOut" }}
       >
         <svg className="w-8 h-8 text-red-400/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
@@ -293,7 +244,7 @@ const ErrorCard = ({ message, onGoBack }) => (
       <p className="text-sm text-white/30 mb-6 leading-relaxed">{message || "The user you're looking for doesn't exist or may have been removed."}</p>
 
       <motion.button onClick={onGoBack}
-        className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white/60 hover:text-white/90 transition-all duration-300"
+        className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white/60 hover:text-white/90 transition-all duration-200"
         style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
         whileHover={{ scale: 1.04, borderColor: "rgba(255,255,255,0.15)", boxShadow: "0 0 20px rgba(139,92,246,0.1)" }}
         whileTap={{ scale: 0.96 }}
@@ -521,7 +472,7 @@ export default function ProfilePage() {
   return (
     <div className="relative min-h-screen overflow-hidden" style={{ background: "#030108" }}>
       <Background />
-      <MagneticCursor />
+      
       <Sidebar active="profile" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={currentUser?.username || ""} />
 
       <div className="relative z-10">
@@ -531,11 +482,11 @@ export default function ProfilePage() {
           style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="flex items-center gap-3">
             <motion.button
-              className="flex items-center justify-center h-10 w-10 rounded-xl text-white/40 hover:text-white/70 transition-colors duration-300"
+              className="flex items-center justify-center h-10 w-10 rounded-xl text-white/40 hover:text-white/70 transition-colors duration-200"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
               onClick={() => setSidebarOpen(!sidebarOpen)}
               whileHover={{ scale: 1.08, borderColor: "rgba(255,255,255,0.12)" }}
@@ -547,7 +498,7 @@ export default function ProfilePage() {
 
             <div className="hidden lg:block">
               <motion.h2 className="text-lg font-semibold text-white/70"
-                initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
+                initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.2 }}>
                 Profile
               </motion.h2>
             </div>
@@ -565,7 +516,7 @@ export default function ProfilePage() {
                   <motion.div className="h-1.5 w-1.5 rounded-full"
                     style={{ background: "rgba(52,211,153,0.8)", boxShadow: "0 0 6px rgba(52,211,153,0.4)" }}
                     animate={{ opacity: [0.6, 1, 0.6] }}
-                    transition={{ duration: 2, repeat: Infinity }} />
+                    transition={{ duration: 0.2,  }} />
                   <p className="text-[11px] text-white/20">Online</p>
                 </div>
               </div>
@@ -573,7 +524,7 @@ export default function ProfilePage() {
                 style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.35), rgba(59,130,246,0.3))", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 4px 15px rgba(0,0,0,0.3)" }}
                 whileHover={{ scale: 1.1, borderColor: "rgba(167,139,250,0.4)" }}
                 animate={{ borderColor: ["rgba(255,255,255,0.12)", "rgba(167,139,250,0.2)", "rgba(255,255,255,0.12)"] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                transition={{ duration: 0.2,  ease: "easeInOut" }}
               >
                 {currentUser?.profile_picture ? (
                   <img src={currentUser.profile_picture} alt={currentUserName} className="w-full h-full object-cover" />
@@ -583,7 +534,7 @@ export default function ProfilePage() {
                 <motion.div className="absolute inset-0 pointer-events-none"
                   style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)", transform: "skewX(-20deg)" }}
                   animate={{ left: ["-150%", "250%"] }}
-                  transition={{ duration: 3, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }} />
+                  transition={{ duration: 0.2,  repeatDelay: 5, ease: "easeInOut" }} />
               </motion.div>
             </div>
           </div>
@@ -602,7 +553,7 @@ export default function ProfilePage() {
               style={glassStyle}
               initial={{ opacity: 0, y: 35, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
               {/* Top gradient accent */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 rounded-b-full"
@@ -612,15 +563,15 @@ export default function ProfilePage() {
               <motion.div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
                 <motion.div style={{ position: "absolute", top: 0, left: "-100%", width: "40%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.03),transparent)", transform: "skewX(-12deg)" }}
                   animate={{ left: ["-100%", "300%"] }}
-                  transition={{ duration: 7, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" }} />
+                  transition={{ duration: 0.2,  repeatDelay: 4, ease: "easeInOut" }} />
               </motion.div>
 
               {/* Rotating conic border on hover */}
-              <motion.div className="absolute -inset-[1px] rounded-2xl overflow-hidden opacity-0 hover:opacity-100 transition-opacity duration-700" style={{ zIndex: -1 }}>
+              <motion.div className="absolute -inset-[1px] rounded-2xl overflow-hidden opacity-0 hover:opacity-100 transition-opacity duration-200" style={{ zIndex: -1 }}>
                 <motion.div className="absolute inset-0"
                   style={{ background: "conic-gradient(from 0deg, transparent 30%, rgba(167,139,250,0.12), rgba(96,165,250,0.1), transparent 70%, rgba(244,114,182,0.06), transparent 100%)" }}
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }} />
+                  transition={{ duration: 0.2,  ease: "linear" }} />
               </motion.div>
 
               <div className="relative z-10 flex flex-col items-center text-center">
@@ -628,7 +579,7 @@ export default function ProfilePage() {
                 <motion.div className="relative mb-6"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.15, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ delay: 0.15, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <motion.div
                     className="relative flex h-28 w-28 items-center justify-center rounded-full overflow-hidden text-3xl font-bold text-white/80"
@@ -644,26 +595,26 @@ export default function ProfilePage() {
                     animate={{
                       borderColor: ["rgba(255,255,255,0.1)", "rgba(167,139,250,0.25)", "rgba(96,165,250,0.2)", "rgba(255,255,255,0.1)"],
                     }}
-                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                    transition={{ duration: 0.2,  ease: "easeInOut" }}
                   >
                     {!(profilePicture || (isEditing && editProfilePic)) && initials}
                     {/* Avatar shimmer */}
                     <motion.div className="absolute inset-0 pointer-events-none"
                       style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)", transform: "skewX(-20deg)" }}
                       animate={{ left: ["-150%", "250%"] }}
-                      transition={{ duration: 3, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }} />
+                      transition={{ duration: 0.2,  repeatDelay: 5, ease: "easeInOut" }} />
                   </motion.div>
 
                   {/* Online indicator */}
                   <motion.div className="absolute bottom-1 right-1 h-4 w-4 rounded-full"
                     style={{ background: "rgba(52,211,153,0.9)", border: "3px solid rgba(10,6,24,0.8)", boxShadow: "0 0 10px rgba(52,211,153,0.4)" }}
                     animate={{ scale: [1, 1.2, 1], opacity: [0.8, 1, 0.8] }}
-                    transition={{ duration: 2.5, repeat: Infinity }} />
+                    transition={{ duration: 0.2,  }} />
 
                   {/* Camera overlay for editing */}
                   {isEditing && (
                     <motion.button
-                      className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 text-white/70 hover:text-white/90 transition-colors duration-300 cursor-pointer"
+                      className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 text-white/70 hover:text-white/90 transition-colors duration-200 cursor-pointer"
                       onClick={() => fileInputRef.current?.click()}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -680,7 +631,7 @@ export default function ProfilePage() {
                   className="text-2xl font-bold mb-1"
                   style={{ background: "linear-gradient(135deg, #ffffff 0%, #e8e4f0 35%, #c4b5fd 65%, #818cf8 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", backgroundSize: "200% 200%" }}
                   animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{ duration: 0.2,  ease: "easeInOut" }}
                   initial={{ opacity: 0, y: 10 }}
                 >
                   {displayName}
@@ -690,7 +641,7 @@ export default function ProfilePage() {
                 <motion.p className="text-sm text-white/30 mb-5 font-medium"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.25, duration: 0.5 }}
+                  transition={{ delay: 0.25, duration: 0.2 }}
                 >
                   @{displayUsername}
                 </motion.p>
@@ -699,7 +650,7 @@ export default function ProfilePage() {
                 <motion.div className="w-full mb-7"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.35, duration: 0.5 }}
+                  transition={{ delay: 0.35, duration: 0.2 }}
                 >
                   {isEditing ? (
                     <textarea
@@ -707,7 +658,7 @@ export default function ProfilePage() {
                       onChange={(e) => setEditBio(e.target.value)}
                       placeholder="Write something about yourself..."
                       rows={3}
-                      className="w-full rounded-xl px-4 py-3 text-sm text-white/80 placeholder-white/15 outline-none resize-none transition-all duration-300 focus:border-violet-500/30"
+                      className="w-full rounded-xl px-4 py-3 text-sm text-white/80 placeholder-white/15 outline-none resize-none transition-all duration-200 focus:border-violet-500/30"
                       style={{
                         background: "rgba(255,255,255,0.04)",
                         border: "1px solid rgba(255,255,255,0.08)",
@@ -727,7 +678,7 @@ export default function ProfilePage() {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.45, duration: 0.5 }}
+                  transition={{ delay: 0.45, duration: 0.2 }}
                   className="w-full"
                 >
                   {isOwnProfile ? (
@@ -736,11 +687,11 @@ export default function ProfilePage() {
                       {isEditing ? (
                         <motion.div key="edit-actions" className="flex items-center gap-3"
                           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-                          transition={{ duration: 0.3 }}
+                          transition={{ duration: 0.2 }}
                         >
                           <motion.button
                             onClick={() => { setIsEditing(false); setEditBio(profileData?.bio || ""); setEditProfilePic(profileData?.profilePicture || profileData?.avatar || ""); }}
-                            className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white/40 hover:text-white/70 transition-all duration-300"
+                            className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white/40 hover:text-white/70 transition-all duration-200"
                             style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
                             whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.15)" }}
                             whileTap={{ scale: 0.97 }}
@@ -752,7 +703,7 @@ export default function ProfilePage() {
                           <motion.button
                             onClick={handleSaveProfile}
                             disabled={editLoading}
-                            className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             style={{ background: "linear-gradient(135deg, rgba(52,211,153,0.4), rgba(6,182,212,0.3))", border: "1px solid rgba(52,211,153,0.2)", boxShadow: "0 0 20px rgba(52,211,153,0.1)" }}
                             whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(52,211,153,0.2)" }}
                             whileTap={{ scale: 0.97 }}
@@ -760,7 +711,7 @@ export default function ProfilePage() {
                             {editLoading ? (
                               <motion.div className="h-5 w-5 rounded-full border-2 border-white/20 border-t-white/80"
                                 animate={{ rotate: 360 }}
-                                transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
+                                transition={{ duration: 0.2,  ease: "linear" }} />
                             ) : editSuccess ? (
                               <>{icons.check} Saved!</>
                             ) : (
@@ -772,7 +723,7 @@ export default function ProfilePage() {
                         <motion.button
                           key="edit-btn"
                           onClick={() => setIsEditing(true)}
-                          className="w-full flex items-center justify-center gap-2.5 rounded-xl py-3 text-sm font-semibold text-white/80 hover:text-white transition-all duration-300"
+                          className="w-full flex items-center justify-center gap-2.5 rounded-xl py-3 text-sm font-semibold text-white/80 hover:text-white transition-all duration-200"
                           style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.3), rgba(59,130,246,0.25))", border: "1px solid rgba(139,92,246,0.2)", boxShadow: "0 0 25px rgba(139,92,246,0.1)" }}
                           whileHover={{ scale: 1.03, boxShadow: "0 0 35px rgba(139,92,246,0.2)", borderColor: "rgba(167,139,250,0.35)" }}
                           whileTap={{ scale: 0.97 }}
@@ -792,13 +743,13 @@ export default function ProfilePage() {
                         <motion.button
                           onClick={handleStartChat}
                           disabled={chatLoading}
-                          className="w-full flex items-center justify-center gap-2.5 rounded-xl py-3 text-sm font-semibold text-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full flex items-center justify-center gap-2.5 rounded-xl py-3 text-sm font-semibold text-white/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                           style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.4), rgba(59,130,246,0.35))", border: "1px solid rgba(139,92,246,0.25)", boxShadow: "0 0 25px rgba(139,92,246,0.12)" }}
                           whileHover={{ scale: 1.03, boxShadow: "0 0 40px rgba(139,92,246,0.25), 0 0 80px rgba(59,130,246,0.08)", borderColor: "rgba(167,139,250,0.4)" }}
                           whileTap={{ scale: 0.97 }}
                         >
                           {chatLoading ? (
-                            <motion.div className="h-5 w-5 rounded-full border-2 border-white/20 border-t-white/80" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
+                            <motion.div className="h-5 w-5 rounded-full border-2 border-white/20 border-t-white/80" animate={{ rotate: 360 }} transition={{ duration: 0.2,  ease: "linear" }} />
                           ) : (
                             <>{icons.chat} Open Chat</>
                           )}
@@ -824,13 +775,13 @@ export default function ProfilePage() {
                         <motion.button
                           onClick={handleSendRequest}
                           disabled={connectionLoading}
-                          className="w-full flex items-center justify-center gap-2.5 rounded-xl py-3 text-sm font-semibold text-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full flex items-center justify-center gap-2.5 rounded-xl py-3 text-sm font-semibold text-white/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                           style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.4), rgba(139,92,246,0.35))", border: "1px solid rgba(59,130,246,0.25)", boxShadow: "0 0 25px rgba(59,130,246,0.12)" }}
                           whileHover={{ scale: 1.03, boxShadow: "0 0 40px rgba(59,130,246,0.25)", borderColor: "rgba(96,165,250,0.4)" }}
                           whileTap={{ scale: 0.97 }}
                         >
                           {connectionLoading ? (
-                             <motion.div className="h-5 w-5 rounded-full border-2 border-white/20 border-t-white/80" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} />
+                             <motion.div className="h-5 w-5 rounded-full border-2 border-white/20 border-t-white/80" animate={{ rotate: 360 }} transition={{ duration: 0.2,  ease: "linear" }} />
                           ) : (
                             <>Send Request</>
                           )}
@@ -861,7 +812,7 @@ export default function ProfilePage() {
         }}
         initial={{ y: 80 }}
         animate={{ y: 0 }}
-        transition={{ delay: 0.5, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ delay: 0.5, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       >
         {[
           { key: "dashboard", label: "Home", icon: icons.dashboard, to: "/dashboard" },
@@ -871,7 +822,7 @@ export default function ProfilePage() {
           const isActive = item.key === "profile";
           return (
             <Link key={item.key} to={item.to}
-              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all duration-300 ${isActive ? "text-violet-400" : "text-white/30 hover:text-white/60"}`}
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all duration-200 ${isActive ? "text-violet-400" : "text-white/30 hover:text-white/60"}`}
             >
               <motion.span whileTap={{ scale: 0.85 }}>
                 {item.icon}

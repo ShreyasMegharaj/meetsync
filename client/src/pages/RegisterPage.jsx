@@ -16,7 +16,7 @@ const AmbientBlob = ({ gradient, size, blur, dur, path, opacity }) => (
     className="absolute rounded-full pointer-events-none will-change-transform"
     style={{ width: size, height: size, background: gradient, filter: `blur(${blur}px)`, opacity }}
     animate={{ x: path.x, y: path.y, scale: path.s }}
-    transition={{ duration: dur, repeat: Infinity, repeatType: "loop", ease: "linear" }}
+    transition={{ duration: dur,  repeatType: "loop", ease: "linear" }}
   />
 );
 
@@ -41,7 +41,7 @@ const Mote = ({ size, color, dur, delay, path }) => (
     className="absolute rounded-full pointer-events-none"
     style={{ width: size, height: size, background: color, boxShadow: `0 0 ${size * 3}px ${color}` }}
     animate={{ x: path.x, y: path.y }}
-    transition={{ duration: dur, delay, repeat: Infinity, repeatType: "loop", ease: "linear" }}
+    transition={{ duration: dur, delay,  repeatType: "loop", ease: "linear" }}
   />
 );
 
@@ -55,7 +55,7 @@ const Streak = ({ delay, dur, top, angle }) => (
     className="absolute pointer-events-none"
     style={{ top: `${top}%`, left: "-12%", width: 160, height: 1.5, background: "linear-gradient(90deg,transparent,rgba(167,139,250,0.6),rgba(96,165,250,0.4),transparent)", borderRadius: 999, transform: `rotate(${angle}deg)`, boxShadow: "0 0 12px rgba(139,92,246,0.3)" }}
     animate={{ x: ["-12vw", "115vw"], opacity: [0, 1, 1, 0] }}
-    transition={{ duration: dur, delay, repeat: Infinity, repeatDelay: rand(8, 20), ease: "easeInOut" }}
+    transition={{ duration: dur, delay,  repeatDelay: rand(8, 20), ease: "easeInOut" }}
   />
 );
 
@@ -73,10 +73,10 @@ const Ring = ({ sz, x, y, dur, c }) => (
     style={{ width: sz, height: sz, border: `1px solid ${c}`, left: `${x}%`, top: `${y}%` }}
     animate={{ rotate: 360, scale: [1, 1.12, 0.92, 1.08, 1], x: [0, 40, -35, 25, 0], y: [0, -35, 25, -15, 0] }}
     transition={{
-      rotate: { duration: dur, repeat: Infinity, ease: "linear" },
-      scale: { duration: dur * 0.7, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" },
-      x: { duration: dur * 0.85, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" },
-      y: { duration: dur * 0.65, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" },
+      rotate: { duration: dur,  ease: "linear" },
+      scale: { duration: dur * 0.7,  repeatType: "mirror", ease: "easeInOut" },
+      x: { duration: dur * 0.85,  repeatType: "mirror", ease: "easeInOut" },
+      y: { duration: dur * 0.65,  repeatType: "mirror", ease: "easeInOut" },
     }}
   />
 );
@@ -133,18 +133,18 @@ const MagneticCursor = () => {
     <>
       {sparks.map((s) => (
         <motion.div key={s.id} className="fixed rounded-full pointer-events-none" style={{ left: s.x - s.s / 2, top: s.y - s.s / 2, width: s.s, height: s.s, background: `hsla(${s.h},80%,72%,0.9)`, boxShadow: `0 0 ${s.s * 4}px hsla(${s.h},80%,60%,0.5)`, zIndex: 10001 }}
-          initial={{ scale: 1, opacity: 1 }} animate={{ scale: 0, opacity: 0, y: rand(-35, 35), x: rand(-35, 35) }} transition={{ duration: 0.9, ease: "easeOut" }} />
+          initial={{ scale: 1, opacity: 1 }} animate={{ scale: 0, opacity: 0, y: rand(-35, 35), x: rand(-35, 35) }} transition={{ duration: 0.2, ease: "easeOut" }} />
       ))}
       {/* Outer aurora */}
       <motion.div className="fixed rounded-full pointer-events-none" style={{ x: slowX, y: slowY, width: 420, height: 420, marginLeft: -210, marginTop: -210, background: "radial-gradient(circle,rgba(139,92,246,0.08),rgba(59,130,246,0.05),rgba(236,72,153,0.03),transparent 70%)", filter: "blur(65px)", zIndex: 9997 }} />
       {/* Pulsing ring */}
       <motion.div className="fixed pointer-events-none" style={{ x: midX, y: midY, width: 48, height: 48, marginLeft: -24, marginTop: -24, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,0.2)", boxShadow: "0 0 18px rgba(139,92,246,0.12), inset 0 0 18px rgba(139,92,246,0.06)", zIndex: 10000 }}
         animate={{ scale: [1, 1.35, 1], opacity: [0.5, 1, 0.5], borderColor: ["rgba(255,255,255,0.2)", "rgba(167,139,250,0.45)", "rgba(96,165,250,0.35)", "rgba(255,255,255,0.2)"] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }} />
+        transition={{ duration: 0.2,  ease: "easeInOut" }} />
       {/* Bright core */}
       <motion.div className="fixed rounded-full pointer-events-none" style={{ x: fastX, y: fastY, width: 7, height: 7, marginLeft: -3.5, marginTop: -3.5, background: "rgba(255,255,255,0.95)", boxShadow: "0 0 12px rgba(255,255,255,0.6), 0 0 25px rgba(139,92,246,0.5)", zIndex: 10002 }}
         animate={{ boxShadow: ["0 0 12px rgba(255,255,255,0.6),0 0 25px rgba(139,92,246,0.5)", "0 0 18px rgba(255,255,255,0.8),0 0 35px rgba(59,130,246,0.6)", "0 0 12px rgba(255,255,255,0.6),0 0 25px rgba(236,72,153,0.5)", "0 0 12px rgba(255,255,255,0.6),0 0 25px rgba(139,92,246,0.5)"] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
+        transition={{ duration: 0.2,  ease: "easeInOut" }} />
     </>
   );
 };
@@ -163,18 +163,18 @@ const AnimatedLogo = () => (
     <motion.div className="absolute inset-0 rounded-[22px]"
       style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.2), rgba(59,130,246,0.15))", filter: "blur(20px)" }}
       animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0.1, 0.4] }}
-      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
+      transition={{ duration: 0.2,  ease: "easeInOut" }} />
     <motion.div className="absolute inset-0 rounded-[22px]"
       style={{ background: "linear-gradient(135deg, rgba(236,72,153,0.15), rgba(139,92,246,0.1))", filter: "blur(15px)" }}
       animate={{ scale: [1.2, 0.9, 1.2], opacity: [0.2, 0.5, 0.2] }}
-      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }} />
+      transition={{ duration: 0.2,  ease: "easeInOut", delay: 0.5 }} />
 
     {/* Rotating border gradient */}
     <motion.div className="absolute -inset-px rounded-[22px] overflow-hidden">
       <motion.div className="absolute inset-0"
         style={{ background: "conic-gradient(from 0deg, transparent 30%, rgba(167,139,250,0.5), rgba(96,165,250,0.4), transparent 70%, rgba(244,114,182,0.3), transparent 100%)" }}
         animate={{ rotate: 360 }}
-        transition={{ duration: 5, repeat: Infinity, ease: "linear" }} />
+        transition={{ duration: 0.2,  ease: "linear" }} />
     </motion.div>
 
     {/* Glass body */}
@@ -191,7 +191,7 @@ const AnimatedLogo = () => (
         scale: [1, 1.04, 1],
         borderColor: ["rgba(255,255,255,0.12)", "rgba(167,139,250,0.25)", "rgba(255,255,255,0.12)"],
       }}
-      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      transition={{ duration: 0.2,  ease: "easeInOut" }}
       whileHover={{ scale: 1.1, borderColor: "rgba(167,139,250,0.4)" }}
     >
       {/* Liquid refraction inside logo */}
@@ -199,7 +199,7 @@ const AnimatedLogo = () => (
         <motion.div
           style={{ position: "absolute", top: 0, left: "-120%", width: "80%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)", transform: "skewX(-20deg)" }}
           animate={{ left: ["-120%", "220%"] }}
-          transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }} />
+          transition={{ duration: 0.2,  repeatDelay: 2, ease: "easeInOut" }} />
       </motion.div>
 
       {/* Register icon — user-plus */}
@@ -207,7 +207,7 @@ const AnimatedLogo = () => (
         width="30" height="30" viewBox="0 0 24 24" fill="none"
         stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
         animate={{ strokeOpacity: [0.9, 1, 0.9], scale: [1, 1.05, 1] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        transition={{ duration: 0.2,  ease: "easeInOut" }}
       >
         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
         <circle cx="8.5" cy="7" r="4" />
@@ -225,18 +225,18 @@ const GlassInput = ({ id, label, type, value, onChange, placeholder, icon, d, ex
   <motion.div
     initial={{ opacity: 0, x: -25 }}
     animate={{ opacity: 1, x: 0 }}
-    transition={{ delay: d, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+    transition={{ delay: d, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
   >
     <label htmlFor={id} className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.18em] text-white/30">
       {label}
     </label>
     <div className="group relative">
-      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-white/20 transition-colors duration-500 group-focus-within:text-white/50">
+      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-white/20 transition-colors duration-200 group-focus-within:text-white/50">
         {icon}
       </div>
       <input id={id} type={type} value={value} onChange={onChange} placeholder={placeholder}
         autoComplete={id === "email" ? "email" : id === "name" ? "name" : id === "username" ? "username" : "new-password"}
-        className="w-full rounded-2xl border py-3.5 pl-12 pr-12 text-sm text-white/90 outline-none placeholder:text-white/15 transition-all duration-500"
+        className="w-full rounded-2xl border py-3.5 pl-12 pr-12 text-sm text-white/90 outline-none placeholder:text-white/15 transition-all duration-200"
         style={{ cursor: "none", background: "rgba(255,255,255,0.04)", backdropFilter: "blur(30px)", WebkitBackdropFilter: "blur(30px)", borderColor: "rgba(255,255,255,0.07)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 12px rgba(0,0,0,0.25)" }}
         onFocus={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.18)"; e.target.style.background = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.08), 0 0 30px rgba(139,92,246,0.08), 0 0 60px rgba(99,102,241,0.04)"; }}
         onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.07)"; e.target.style.background = "rgba(255,255,255,0.04)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 12px rgba(0,0,0,0.25)"; }}
@@ -354,7 +354,7 @@ export default function RegisterPage() {
   /* Password-visibility toggle button */
   const pwToggle = (show, toggle) => (
     <button type="button" onClick={toggle}
-      className="absolute inset-y-0 right-0 flex items-center pr-4 text-white/15 hover:text-white/40 transition-colors duration-300"
+      className="absolute inset-y-0 right-0 flex items-center pr-4 text-white/15 hover:text-white/40 transition-colors duration-200"
       tabIndex={-1} style={{ cursor: "none" }}>
       {show ? <EyeOffIcon /> : <EyeIcon />}
     </button>
@@ -363,27 +363,16 @@ export default function RegisterPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10" style={{ background: "#030108", cursor: "none" }}>
       <Background />
-      <MagneticCursor />
+      
 
       {/* ══════ LIQUID GLASS CARD ══════ */}
       <motion.div className="relative w-full max-w-[440px]" style={{ zIndex: 10 }}
         initial={{ opacity: 0, y: 70, scale: 0.88 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
+        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}>
 
         {/* Breathing outer glow */}
-        <motion.div className="absolute -inset-4 rounded-[40px]"
-          style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,130,246,0.08), rgba(236,72,153,0.05))", filter: "blur(50px)" }}
-          animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.04, 1] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} />
-
-        {/* Continuously rotating conic border */}
-        <motion.div className="absolute -inset-[1px] rounded-[30px] overflow-hidden">
-          <motion.div className="absolute inset-0"
-            style={{ background: "conic-gradient(from 0deg, transparent 25%, rgba(255,255,255,0.12), rgba(167,139,250,0.2), rgba(96,165,250,0.15), transparent 75%, rgba(244,114,182,0.1), transparent 100%)" }}
-            animate={{ rotate: 360 }}
-            transition={{ duration: 10, repeat: Infinity, ease: "linear" }} />
-        </motion.div>
+        
 
         {/* CARD BODY — frosted white liquid glass */}
         <motion.div
@@ -402,56 +391,48 @@ export default function RegisterPage() {
             `,
           }}
           animate={{ y: [0, -7, 0] }}
-          transition={{ duration: 7, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
+          transition={{ duration: 0.2,  repeatType: "mirror", ease: "easeInOut" }}
         >
           {/* Continuous liquid light sweep 1 */}
-          <motion.div className="absolute inset-0 rounded-[28px] overflow-hidden pointer-events-none" style={{ zIndex: 1 }}>
-            <motion.div style={{ position: "absolute", top: 0, left: "-100%", width: "45%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent)", transform: "skewX(-15deg)" }}
-              animate={{ left: ["-100%", "280%"] }}
-              transition={{ duration: 6, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }} />
-          </motion.div>
+          
 
           {/* Continuous liquid light sweep 2 — opposite direction */}
-          <motion.div className="absolute inset-0 rounded-[28px] overflow-hidden pointer-events-none" style={{ zIndex: 1 }}>
-            <motion.div style={{ position: "absolute", bottom: 0, right: "-100%", width: "35%", height: "100%", background: "linear-gradient(270deg,transparent,rgba(255,255,255,0.025),transparent)", transform: "skewX(12deg)" }}
-              animate={{ right: ["-100%", "280%"] }}
-              transition={{ duration: 8, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }} />
-          </motion.div>
+          
 
           {/* Top refraction edge — breathing */}
           <motion.div className="absolute top-0 left-[8%] right-[8%] h-px pointer-events-none" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)", zIndex: 2 }}
             animate={{ opacity: [0.3, 0.9, 0.3], scaleX: [0.8, 1, 0.8] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
+            transition={{ duration: 0.2,  ease: "easeInOut" }} />
 
           {/* Bottom refraction edge */}
           <motion.div className="absolute bottom-0 left-[15%] right-[15%] h-px pointer-events-none" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)", zIndex: 2 }}
             animate={{ opacity: [0.2, 0.5, 0.2] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }} />
+            transition={{ duration: 0.2,  ease: "easeInOut", delay: 1 }} />
 
           {/* Content */}
           <div className="relative" style={{ zIndex: 3 }}>
             <AnimatedLogo />
 
             <motion.h1 className="mt-3 text-center text-[30px] font-bold tracking-tight"
-              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.7 }}>
+              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.2 }}>
               <motion.span
                 style={{ background: "linear-gradient(135deg, #ffffff 0%, #e8e4f0 40%, #c4b5fd 70%, #818cf8 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
                 animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                transition={{ duration: 0.2,  ease: "easeInOut" }}
               >
                 MeetSync
               </motion.span>
             </motion.h1>
 
             <motion.p className="mt-1 text-center text-[13px] text-white/25 font-light"
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.42, duration: 0.6 }}>
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.42, duration: 0.2 }}>
               Create your account
             </motion.p>
 
             {/* Error */}
             <AnimatePresence mode="wait">
               {error && (
-                <motion.div key="err" initial={{ opacity: 0, y: -10, height: 0, marginTop: 0 }} animate={{ opacity: 1, y: 0, height: "auto", marginTop: 20 }} exit={{ opacity: 0, y: -10, height: 0, marginTop: 0 }} transition={{ duration: 0.45, ease: "easeOut" }} className="overflow-hidden">
+                <motion.div key="err" initial={{ opacity: 0, y: -10, height: 0, marginTop: 0 }} animate={{ opacity: 1, y: 0, height: "auto", marginTop: 20 }} exit={{ opacity: 0, y: -10, height: 0, marginTop: 0 }} transition={{ duration: 0.2, ease: "easeOut" }} className="overflow-hidden">
                   <div className="flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm text-red-400/90"
                     style={{ background: "rgba(239,68,68,0.06)", backdropFilter: "blur(12px)", border: "1px solid rgba(239,68,68,0.08)", boxShadow: "0 0 20px rgba(239,68,68,0.04)" }}>
                     <svg className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 00-2 0v4a1 1 0 002 0V6zm-1 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>
@@ -486,11 +467,11 @@ export default function RegisterPage() {
                 extra={pwToggle(showCpw, () => setShowCpw(!showCpw))} />
 
               {/* WHITE REGISTER BUTTON */}
-              <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.7 }}>
+              <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.2 }}>
                 <motion.button type="submit" disabled={loading}
                   whileHover={{ scale: loading ? 1 : 1.025 }}
                   whileTap={{ scale: loading ? 1 : 0.975 }}
-                  className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl px-6 py-4 text-[14px] font-semibold text-black/80 disabled:opacity-50 disabled:cursor-not-allowed transition-shadow duration-500"
+                  className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl px-6 py-4 text-[14px] font-semibold text-black/80 disabled:opacity-50 disabled:cursor-not-allowed transition-shadow duration-200"
                   style={{
                     background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(241,245,249,0.92) 50%, rgba(226,232,240,0.9) 100%)",
                     boxShadow: "0 0 35px rgba(255,255,255,0.08), 0 8px 35px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.9)",
@@ -500,14 +481,14 @@ export default function RegisterPage() {
                   <motion.span className="absolute inset-0 pointer-events-none"
                     style={{ background: "linear-gradient(90deg,transparent,rgba(139,92,246,0.08),transparent)" }}
                     animate={{ x: ["-100%", "100%"] }}
-                    transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 2.5, ease: "easeInOut" }} />
-                  <span className="absolute -inset-1 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    transition={{ duration: 0.2,  repeatDelay: 2.5, ease: "easeInOut" }} />
+                  <span className="absolute -inset-1 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                     style={{ background: "radial-gradient(circle,rgba(255,255,255,0.12),transparent 70%)", filter: "blur(20px)" }} />
                   {loading ? (
                     <><Spinner /><span className="relative">Creating account…</span></>
                   ) : (
                     <><span className="relative">Create Account</span>
-                      <svg className="relative h-4 w-4 transition-transform duration-500 group-hover:translate-x-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg></>
+                      <svg className="relative h-4 w-4 transition-transform duration-200 group-hover:translate-x-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg></>
                   )}
                 </motion.button>
               </motion.div>
@@ -517,14 +498,14 @@ export default function RegisterPage() {
             <div className="mt-8 flex items-center">
               <motion.span className="h-px flex-1" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent)" }}
                 animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
+                transition={{ duration: 0.2,  ease: "easeInOut" }} />
             </div>
 
             {/* Login link */}
             <motion.p className="mt-6 text-center text-sm text-white/20"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85, duration: 0.6 }}>
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85, duration: 0.2 }}>
               Already have an account?{" "}
-              <Link to="/login" className="font-semibold text-white/40 transition-all duration-300 hover:text-white/70"
+              <Link to="/login" className="font-semibold text-white/40 transition-all duration-200 hover:text-white/70"
                 style={{ cursor: "none" }}
                 onMouseEnter={(e) => (e.target.style.textShadow = "0 0 25px rgba(255,255,255,0.25)")}
                 onMouseLeave={(e) => (e.target.style.textShadow = "none")}>

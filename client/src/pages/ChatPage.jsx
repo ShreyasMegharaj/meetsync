@@ -11,112 +11,14 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 const rand = (a, b) => Math.random() * (b - a) + a;
 
 /* ═══════════════════════════════════════════════════════════════
-   AMBIENT BACKGROUND
+   BACKGROUND
    ═══════════════════════════════════════════════════════════════ */
-const BLOBS = [
-  { gradient: "radial-gradient(circle,rgba(109,40,217,0.35),rgba(59,130,246,0.12),transparent 70%)", size: 600, blur: 110, dur: 30, opacity: 0.4, path: { x: [-250, 600, 150, -150, 450, -250], y: [-150, 350, -80, 550, 100, -150], s: [1, 1.2, 0.88, 1.12, 0.92, 1] } },
-  { gradient: "radial-gradient(circle,rgba(219,39,119,0.25),rgba(168,85,247,0.14),transparent 70%)", size: 480, blur: 125, dur: 36, opacity: 0.32, path: { x: [750, -80, 380, 80, 650, 750], y: [450, 20, 380, -120, 280, 450], s: [0.92, 1.25, 0.95, 1.18, 0.86, 0.92] } },
-  { gradient: "radial-gradient(circle,rgba(6,182,212,0.22),rgba(59,130,246,0.14),transparent 70%)", size: 520, blur: 105, dur: 34, opacity: 0.33, path: { x: [250, -180, 550, 80, -120, 250], y: [650, 120, -120, 480, 220, 650], s: [1.08, 0.82, 1.25, 0.88, 1.12, 1.08] } },
-  { gradient: "radial-gradient(circle,rgba(139,92,246,0.3),rgba(236,72,153,0.1),transparent 70%)", size: 400, blur: 130, dur: 42, opacity: 0.25, path: { x: [-150, 450, 750, 180, 550, -150], y: [280, -180, 450, 80, 650, 280], s: [1, 1.35, 0.78, 1.18, 0.95, 1] } },
-];
-
-const MOTES = Array.from({ length: 45 }, (_, i) => ({
-  id: i, size: rand(1.2, 3.8),
-  color: [`rgba(167,139,250,`, `rgba(96,165,250,`, `rgba(244,114,182,`, `rgba(34,211,238,`, `rgba(129,140,248,`][i % 5] + `${rand(0.25, 0.65)})`,
-  dur: rand(16, 40), delay: rand(0, 12),
-  path: { x: Array.from({ length: 7 }, () => rand(-50, 1800)), y: Array.from({ length: 7 }, () => rand(-50, 1000)) },
-}));
-
-const MSG_BIRDS = Array.from({ length: 8 }, (_, i) => ({
-  id: i,
-  size: rand(14, 26),
-  color: [`rgba(167,139,250,`, `rgba(96,165,250,`, `rgba(244,114,182,`, `rgba(34,211,238,`, `rgba(129,140,248,`, `rgba(192,132,252,`, `rgba(251,146,60,`, `rgba(74,222,128,`][i % 8] + `${rand(0.12, 0.3)})`,
-  top: rand(5, 90),
-  dur: rand(18, 35),
-  delay: rand(0, 15),
-  yDrift: rand(-60, 60),
-  direction: i % 2 === 0 ? 1 : -1,
-}));
-
-const STREAKS = Array.from({ length: 5 }, (_, i) => ({
-  id: i, delay: rand(2, 18), dur: rand(2.5, 4.5), top: rand(8, 88), angle: rand(-18, -4),
-}));
-
-const RINGS = [
-  { sz: 220, x: 82, y: 10, dur: 30, c: "rgba(139,92,246,0.04)" },
-  { sz: 300, x: 8, y: 72, dur: 38, c: "rgba(59,130,246,0.035)" },
-  { sz: 170, x: 55, y: 58, dur: 26, c: "rgba(236,72,153,0.035)" },
-];
-
-const FLOAT_BUBBLES = Array.from({ length: 6 }, (_, i) => ({
-  id: i,
-  size: rand(20, 36),
-  color: [`rgba(167,139,250,`, `rgba(96,165,250,`, `rgba(244,114,182,`, `rgba(34,211,238,`, `rgba(129,140,248,`, `rgba(192,132,252,`][i % 6] + `${rand(0.06, 0.15)})`,
-  strokeColor: [`rgba(167,139,250,`, `rgba(96,165,250,`, `rgba(244,114,182,`, `rgba(34,211,238,`, `rgba(129,140,248,`, `rgba(192,132,252,`][i % 6] + `${rand(0.15, 0.35)})`,
-  dur: rand(20, 40),
-  delay: rand(0, 12),
-  path: { x: Array.from({ length: 5 }, () => rand(50, 1400)), y: Array.from({ length: 5 }, () => rand(50, 800)) },
-}));
-
 const Background = () => (
-  <div className="fixed inset-0 overflow-hidden" style={{ zIndex: 0 }}>
+  <div className="fixed inset-0 overflow-hidden bg-[#030108]" style={{ zIndex: 0 }}>
     <div className="absolute inset-0" style={{ background: "linear-gradient(145deg, #050208 0%, #0a0618 30%, #0d0a1a 50%, #06050f 70%, #020104 100%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 25% 15%, rgba(109,40,217,0.07) 0%, transparent 55%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 75% 85%, rgba(59,130,246,0.05) 0%, transparent 55%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(236,72,153,0.03) 0%, transparent 50%)" }} />
-    <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "linear-gradient(rgba(139,92,246,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,0.5) 1px,transparent 1px)", backgroundSize: "80px 80px" }} />
-    {BLOBS.map((b, i) => (
-      <motion.div key={`b${i}`} className="absolute rounded-full pointer-events-none will-change-transform"
-        style={{ width: b.size, height: b.size, background: b.gradient, filter: `blur(${b.blur}px)`, opacity: b.opacity }}
-        animate={{ x: b.path.x, y: b.path.y, scale: b.path.s }}
-        transition={{ duration: b.dur, repeat: Infinity, repeatType: "loop", ease: "linear" }} />
-    ))}
-    {RINGS.map((r, i) => (
-      <motion.div key={`ring${i}`} className="absolute rounded-full pointer-events-none"
-        style={{ width: r.sz, height: r.sz, border: `1px solid ${r.c}`, left: `${r.x}%`, top: `${r.y}%` }}
-        animate={{ rotate: 360, scale: [1, 1.1, 0.93, 1.08, 1] }}
-        transition={{ rotate: { duration: r.dur, repeat: Infinity, ease: "linear" }, scale: { duration: r.dur * 0.7, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" } }} />
-    ))}
-    {MOTES.map((m) => (
-      <motion.div key={`m${m.id}`} className="absolute rounded-full pointer-events-none"
-        style={{ width: m.size, height: m.size, background: m.color, boxShadow: `0 0 ${m.size * 3}px ${m.color}` }}
-        animate={{ x: m.path.x, y: m.path.y, opacity: [0.4, 1, 0.4] }}
-        transition={{ duration: m.dur, delay: m.delay, repeat: Infinity, repeatType: "loop", ease: "linear" }} />
-    ))}
-    {STREAKS.map((s) => (
-      <motion.div key={`s${s.id}`} className="absolute pointer-events-none"
-        style={{ top: `${s.top}%`, left: "-12%", width: 140, height: 1.5, background: "linear-gradient(90deg,transparent,rgba(167,139,250,0.5),rgba(96,165,250,0.3),transparent)", borderRadius: 999, transform: `rotate(${s.angle}deg)`, boxShadow: "0 0 10px rgba(139,92,246,0.2)" }}
-        animate={{ x: ["-12vw", "115vw"], opacity: [0, 1, 1, 0] }}
-        transition={{ duration: s.dur, delay: s.delay, repeat: Infinity, repeatDelay: rand(10, 22), ease: "easeInOut" }} />
-    ))}
-    {MSG_BIRDS.map((bird) => (
-      <motion.div key={`bird${bird.id}`} className="absolute pointer-events-none"
-        style={{ top: `${bird.top}%` }}
-        animate={{
-          x: bird.direction === 1 ? ["-8vw", "110vw"] : ["110vw", "-8vw"],
-          y: [0, bird.yDrift, -bird.yDrift * 0.6, bird.yDrift * 0.4, 0],
-          rotate: bird.direction === 1 ? [0, -3, 5, -2, 0] : [0, 3, -5, 2, 0],
-        }}
-        transition={{ duration: bird.dur, delay: bird.delay, repeat: Infinity, repeatDelay: rand(5, 18), ease: "easeInOut" }}>
-        <svg width={bird.size} height={bird.size} viewBox="0 0 24 24" fill="none" style={{ filter: `drop-shadow(0 0 6px ${bird.color})`, transform: bird.direction === -1 ? "scaleX(-1)" : "none" }}>
-          <path d="M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-            stroke={bird.color} strokeWidth="1" fill={bird.color.replace(/[\d.]+\)$/, "0.05)")} />
-          <circle cx="8" cy="12" r="0.8" fill={bird.color} />
-          <circle cx="12" cy="12" r="0.8" fill={bird.color} />
-          <circle cx="16" cy="12" r="0.8" fill={bird.color} />
-        </svg>
-      </motion.div>
-    ))}
-    {FLOAT_BUBBLES.map((fb) => (
-      <motion.div key={`fb${fb.id}`} className="absolute pointer-events-none"
-        animate={{ x: fb.path.x, y: fb.path.y, rotate: [0, 15, -10, 8, 0], scale: [1, 1.1, 0.92, 1.05, 1] }}
-        transition={{ duration: fb.dur, delay: fb.delay, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}>
-        <svg width={fb.size} height={fb.size} viewBox="0 0 24 24" fill="none" style={{ opacity: 0.6, filter: `drop-shadow(0 0 8px ${fb.strokeColor})` }}>
-          <path d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2v-1m0 0V6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H9z"
-            stroke={fb.strokeColor} strokeWidth="0.8" fill={fb.color} />
-        </svg>
-      </motion.div>
-    ))}
   </div>
 );
 
@@ -190,7 +92,7 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
         <motion.aside className="fixed top-0 left-0 h-full z-40 flex flex-col w-[260px] py-6 px-4"
           style={{ ...glassStyle, borderRight: "1px solid rgba(255,255,255,0.06)", borderRadius: 0 }}
           initial={{ x: -280, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -280, opacity: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}>
           <Link to="/dashboard" className="flex items-center gap-3 px-3 mb-10">
             <motion.div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden"
               style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(255,255,255,0.1)" }}
@@ -210,9 +112,9 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
               const isActive = active === item.key;
               return (
                 <motion.div key={item.key} initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + i * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}>
+                  transition={{ delay: 0.1 + i * 0.08, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}>
                   <Link to={item.to} onClick={onClose}
-                    className={`group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${isActive ? "text-white/90" : "text-white/30 hover:text-white/65"}`}>
+                    className={`group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive ? "text-white/90" : "text-white/30 hover:text-white/65"}`}>
                     {isActive && (
                       <motion.div className="absolute inset-0 rounded-xl" layoutId="sidebarActive"
                         style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 0 25px rgba(139,92,246,0.08)" }}
@@ -248,12 +150,12 @@ const ConversationItem = ({ convo, isActive, onClick, index }) => {
   ];
   return (
     <motion.div
-      className={`group relative flex items-center gap-3 rounded-xl px-3 py-3 cursor-pointer transition-all duration-300 ${isActive ? "bg-white/[0.06]" : "hover:bg-white/[0.03]"}`}
+      className={`group relative flex items-center gap-3 rounded-xl px-3 py-3 cursor-pointer transition-all duration-200 ${isActive ? "bg-white/[0.06]" : "hover:bg-white/[0.03]"}`}
       style={isActive ? { border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 0 20px rgba(139,92,246,0.06)" } : { border: "1px solid transparent" }}
       onClick={onClick}
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.15 + index * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ delay: 0.15 + index * 0.06, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       whileHover={{ x: 4 }}
     >
       {isActive && (
@@ -269,12 +171,12 @@ const ConversationItem = ({ convo, isActive, onClick, index }) => {
         {convo.online && (
           <motion.div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full"
             style={{ background: "rgba(52,211,153,0.9)", border: "2px solid rgba(10,6,24,0.9)", boxShadow: "0 0 8px rgba(52,211,153,0.4)" }}
-            animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+            animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.2,  }} />
         )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
-          <p className={`text-sm font-semibold truncate ${isActive ? "text-white/90" : "text-white/60 group-hover:text-white/80"} transition-colors duration-300`}>{convo.name}</p>
+          <p className={`text-sm font-semibold truncate ${isActive ? "text-white/90" : "text-white/60 group-hover:text-white/80"} transition-colors duration-200`}>{convo.name}</p>
           <span className="text-[10px] text-white/20 shrink-0 ml-2">{convo.time}</span>
         </div>
         <p className="text-[12px] text-white/25 truncate mt-0.5">{convo.lastMessage}</p>
@@ -282,7 +184,7 @@ const ConversationItem = ({ convo, isActive, onClick, index }) => {
       {convo.unread > 0 && (
         <motion.div className="shrink-0 flex items-center justify-center h-5 min-w-[20px] rounded-full px-1.5 text-[10px] font-bold text-white/90"
           style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.7), rgba(59,130,246,0.6))", boxShadow: "0 0 12px rgba(139,92,246,0.3)" }}
-          animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+          animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 0.2,  }}>
           {convo.unread}
         </motion.div>
       )}
@@ -298,7 +200,7 @@ const ChatBubble = ({ message, index }) => {
       className={`flex ${isMe ? "justify-end" : "justify-start"} mb-3`}
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: index * 0.05, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ delay: index * 0.05, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className={`relative max-w-[70%] px-4 py-2.5 rounded-2xl ${isMe ? "rounded-br-md" : "rounded-bl-md"}`}
         style={isMe ? {
@@ -336,25 +238,25 @@ const AppointmentCard = ({ appointment, index, onAccept, onReject, onCancel, cur
       className="flex justify-center mb-4"
       initial={{ opacity: 0, y: 30, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: index * 0.05, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ delay: index * 0.05, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
     >
       <motion.div
         className="w-full max-w-[400px] rounded-2xl p-5 relative overflow-hidden group cursor-default"
         style={{ ...glassStyle, background: "linear-gradient(165deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.05) 100%)" }}
         whileHover={{ boxShadow: `0 20px 60px rgba(0,0,0,0.45), 0 0 30px ${st.glow}, inset 0 1px 0 rgba(255,255,255,0.1)` }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.2 }}
       >
         <motion.div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
           <motion.div style={{ position: "absolute", top: 0, left: "-100%", width: "40%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent)", transform: "skewX(-12deg)" }}
             animate={{ left: ["-100%", "300%"] }}
-            transition={{ duration: 6, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }} />
+            transition={{ duration: 0.2,  repeatDelay: 5, ease: "easeInOut" }} />
         </motion.div>
         <AnimatePresence>
           {isFinalized && (
             <motion.div className="absolute inset-0 rounded-2xl pointer-events-none"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               style={{ background: `radial-gradient(ellipse at 50% 0%, ${st.glow} 0%, transparent 70%)` }}
-              transition={{ duration: 0.6 }} />
+              transition={{ duration: 0.2 }} />
           )}
         </AnimatePresence>
         <div className="relative z-10">
@@ -375,7 +277,7 @@ const AppointmentCard = ({ appointment, index, onAccept, onReject, onCancel, cur
               key={appointment.status}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: [1, 1.08, 1], opacity: 1 }}
-              transition={{ scale: { duration: 0.6, ease: "easeOut" }, opacity: { duration: 0.3 } }}
+              transition={{ scale: { duration: 0.2, ease: "easeOut" }, opacity: { duration: 0.2 } }}
             >
               {isHost && appointment.status === "pending" ? "Waiting for response" : st.label}
             </motion.span>
@@ -401,11 +303,11 @@ const AppointmentCard = ({ appointment, index, onAccept, onReject, onCancel, cur
           {appointment.status === "pending" && (
             <motion.div className="flex items-center gap-2"
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.4 }}>
+              transition={{ delay: 0.15, duration: 0.2 }}>
               {isHost ? (
                 <motion.button
                   onClick={() => onCancel(appointment.id || appointment._id)}
-                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12px] font-semibold text-white/40 hover:text-white/70 transition-all duration-300"
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12px] font-semibold text-white/40 hover:text-white/70 transition-all duration-200"
                   style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
                   whileHover={{ scale: 1.03, borderColor: "rgba(255,255,255,0.15)", boxShadow: "0 0 15px rgba(255,255,255,0.04)" }}
                   whileTap={{ scale: 0.96 }}>
@@ -415,7 +317,7 @@ const AppointmentCard = ({ appointment, index, onAccept, onReject, onCancel, cur
                 <>
                   <motion.button
                     onClick={() => onAccept(appointment.id || appointment._id)}
-                    className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12px] font-semibold text-emerald-400/80 transition-all duration-300"
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12px] font-semibold text-emerald-400/80 transition-all duration-200"
                     style={{ background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.15)" }}
                     whileHover={{ scale: 1.04, boxShadow: "0 0 25px rgba(52,211,153,0.15)", borderColor: "rgba(52,211,153,0.3)" }}
                     whileTap={{ scale: 0.95 }}>
@@ -423,7 +325,7 @@ const AppointmentCard = ({ appointment, index, onAccept, onReject, onCancel, cur
                   </motion.button>
                   <motion.button
                     onClick={() => onReject(appointment.id || appointment._id)}
-                    className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12px] font-semibold text-red-400/80 transition-all duration-300"
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12px] font-semibold text-red-400/80 transition-all duration-200"
                     style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}
                     whileHover={{ scale: 1.04, boxShadow: "0 0 25px rgba(239,68,68,0.15)", borderColor: "rgba(239,68,68,0.3)" }}
                     whileTap={{ scale: 0.95 }}>
@@ -478,13 +380,13 @@ const AppointmentModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
               initial={{ scale: 0.9, y: 30, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 30, opacity: 0 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
             >
               <motion.div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
                 <motion.div style={{ position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent)", transform: "skewX(-12deg)" }}
                   animate={{ left: ["-100%", "300%"] }}
-                  transition={{ duration: 5, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" }} />
+                  transition={{ duration: 0.2,  repeatDelay: 4, ease: "easeInOut" }} />
               </motion.div>
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-6">
@@ -492,7 +394,7 @@ const AppointmentModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
                     <motion.div className="flex h-10 w-10 items-center justify-center rounded-xl"
                       style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(255,255,255,0.1)" }}
                       animate={{ borderColor: ["rgba(255,255,255,0.1)", "rgba(167,139,250,0.25)", "rgba(255,255,255,0.1)"] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+                      transition={{ duration: 0.2,  ease: "easeInOut" }}>
                       <svg className="w-5 h-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
@@ -514,27 +416,27 @@ const AppointmentModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
                     <label className="block text-[11px] font-medium text-white/35 mb-1.5 uppercase tracking-wider">Meeting Title</label>
                     <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. Project Review"
-                      className="w-full rounded-xl px-4 py-2.5 text-sm placeholder-white/15 outline-none transition-all duration-300 focus:border-violet-500/30"
+                      className="w-full rounded-xl px-4 py-2.5 text-sm placeholder-white/15 outline-none transition-all duration-200 focus:border-violet-500/30"
                       style={inputStyle} />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[11px] font-medium text-white/35 mb-1.5 uppercase tracking-wider">Date</label>
                       <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-                        className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all duration-300 focus:border-violet-500/30 [color-scheme:dark]"
+                        className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:border-violet-500/30 [color-scheme:dark]"
                         style={inputStyle} />
                     </div>
                     <div>
                       <label className="block text-[11px] font-medium text-white/35 mb-1.5 uppercase tracking-wider">Time</label>
                       <input type="time" value={time} onChange={(e) => setTime(e.target.value)}
-                        className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all duration-300 focus:border-violet-500/30 [color-scheme:dark]"
+                        className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:border-violet-500/30 [color-scheme:dark]"
                         style={inputStyle} />
                     </div>
                   </div>
                   <div>
                     <label className="block text-[11px] font-medium text-white/35 mb-1.5 uppercase tracking-wider">Duration</label>
                     <select value={duration} onChange={(e) => setDuration(e.target.value)}
-                      className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all duration-300 focus:border-violet-500/30 [color-scheme:dark]"
+                      className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:border-violet-500/30 [color-scheme:dark]"
                       style={inputStyle}>
                       {DURATION_OPTIONS.map((d) => <option key={d} value={d}>{d}</option>)}
                     </select>
@@ -544,24 +446,24 @@ const AppointmentModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
                     <textarea value={note} onChange={(e) => setNote(e.target.value)}
                       placeholder="Optional meeting notes..."
                       rows={3}
-                      className="w-full rounded-xl px-4 py-2.5 text-sm placeholder-white/15 outline-none resize-none transition-all duration-300 focus:border-violet-500/30"
+                      className="w-full rounded-xl px-4 py-2.5 text-sm placeholder-white/15 outline-none resize-none transition-all duration-200 focus:border-violet-500/30"
                       style={inputStyle} />
                   </div>
                 </div>
                 <div className="flex items-center gap-3 mt-6">
                   <motion.button onClick={onClose}
-                    className="flex-1 rounded-xl py-2.5 text-[13px] font-semibold text-white/40 hover:text-white/60 transition-all duration-300"
+                    className="flex-1 rounded-xl py-2.5 text-[13px] font-semibold text-white/40 hover:text-white/60 transition-all duration-200"
                     style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     Cancel
                   </motion.button>
                   <motion.button onClick={handleSubmit} disabled={isLoading || !title.trim() || !date || !time}
-                    className="flex-1 rounded-xl py-2.5 text-[13px] font-semibold text-white/90 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex-1 rounded-xl py-2.5 text-[13px] font-semibold text-white/90 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.5), rgba(59,130,246,0.4))", border: "1px solid rgba(139,92,246,0.3)", boxShadow: "0 0 25px rgba(139,92,246,0.15)" }}
                     whileHover={{ scale: 1.02, boxShadow: "0 0 35px rgba(139,92,246,0.25)" }}
                     whileTap={{ scale: 0.98 }}>
                     {isLoading
-                      ? <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>⏳</motion.span>
+                      ? <motion.span animate={{ rotate: 360 }} transition={{ duration: 0.2,  ease: "linear" }}>⏳</motion.span>
                       : "📅 Send Appointment Request"
                     }
                   </motion.button>
@@ -980,22 +882,22 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="relative h-screen overflow-hidden" style={{ background: "#030108" }}>
+    <div className="relative h-[100dvh] overflow-hidden" style={{ background: "#030108" }}>
       <Background />
-      <MagneticCursor />
+      
       <Sidebar active="messages" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={user?.username || ""} />
 
-      <div className="relative z-10 flex flex-col h-screen">
+      <div className="relative z-10 flex flex-col h-[100dvh]">
         {/* ══════ TOP NAVBAR ══════ */}
         <motion.header
           className="shrink-0 flex items-center justify-between px-6 py-3 sm:px-8"
           style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
           initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="flex items-center gap-4">
             <motion.button
-              className="flex items-center justify-center h-10 w-10 rounded-xl text-white/40 hover:text-white/70 transition-colors duration-300"
+              className="flex items-center justify-center h-10 w-10 rounded-xl text-white/40 hover:text-white/70 transition-colors duration-200"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
               onClick={() => setSidebarOpen(!sidebarOpen)}
               whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.95 }}>
@@ -1026,7 +928,7 @@ export default function MessagesPage() {
               </motion.div>
             </div>
             <motion.button onClick={logout}
-              className="group flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-white/30 hover:text-red-400/70 transition-all duration-300"
+              className="group flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-white/30 hover:text-red-400/70 transition-all duration-200"
               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
               whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
               {icons.logout}
@@ -1042,7 +944,7 @@ export default function MessagesPage() {
             className={`flex flex-col w-full md:w-[320px] lg:w-[340px] shrink-0 overflow-hidden ${activeConvo ? 'hidden md:flex' : 'flex'}`}
             style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderBottom: "none", borderRight: "1px solid rgba(255,255,255,0.06)" }}
             initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ delay: 0.1, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="p-4 pb-2">
               <div className="relative">
@@ -1052,7 +954,7 @@ export default function MessagesPage() {
                   placeholder="Search conversations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-white/70 placeholder-white/20 outline-none transition-all duration-300 focus:border-violet-500/30"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-white/70 placeholder-white/20 outline-none transition-all duration-200 focus:border-violet-500/30"
                   style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
                 />
               </div>
@@ -1068,14 +970,14 @@ export default function MessagesPage() {
           {/* ─── RIGHT: Chat Window ─── */}
           <motion.div className={`flex-1 flex-col overflow-hidden ${!activeConvo ? 'hidden md:flex' : 'flex'}`}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}>
+            transition={{ delay: 0.2, duration: 0.2 }}>
 
             {/* Chat Top Bar */}
             {activeConversation && (
               <motion.div className="shrink-0 flex items-center justify-between px-6 py-3"
                 style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
                 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.4 }}>
+                transition={{ delay: 0.3, duration: 0.2 }}>
                 <div className="flex items-center gap-3">
                   <button onClick={() => { setActiveConvo(null); navigate('/messages'); }} className="md:hidden p-1 mr-1 text-white/60 hover:text-white transition-colors" aria-label="Back">
                     {icons.back}
@@ -1088,7 +990,7 @@ export default function MessagesPage() {
                     {activeConversation.online && (
                       <motion.div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full"
                         style={{ background: "rgba(52,211,153,0.9)", border: "2px solid rgba(10,6,24,0.9)", boxShadow: "0 0 8px rgba(52,211,153,0.4)" }}
-                        animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+                        animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.2,  }} />
                     )}
                   </div>
                   <div className="block">
@@ -1097,7 +999,7 @@ export default function MessagesPage() {
                       {activeConversation.online ? (
                         <>
                           <motion.div className="h-1.5 w-1.5 rounded-full" style={{ background: "rgba(52,211,153,0.8)" }}
-                            animate={{ opacity: [0.6, 1, 0.6] }} transition={{ duration: 2, repeat: Infinity }} />
+                            animate={{ opacity: [0.6, 1, 0.6] }} transition={{ duration: 0.2,  }} />
                           <span className="text-[11px] text-emerald-400/50">Online</span>
                         </>
                       ) : (
@@ -1109,7 +1011,7 @@ export default function MessagesPage() {
                 <div className="flex items-center gap-2">
                   <motion.button
                     onClick={() => setShowAppointmentModal(true)}
-                    className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-[11px] font-semibold text-white/30 hover:text-white/70 transition-all duration-300"
+                    className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-[11px] font-semibold text-white/30 hover:text-white/70 transition-all duration-200"
                     style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.12)" }}
                     whileHover={{ scale: 1.05, boxShadow: "0 0 18px rgba(139,92,246,0.12)", borderColor: "rgba(139,92,246,0.25)" }}
                     whileTap={{ scale: 0.95 }}>
@@ -1123,7 +1025,7 @@ export default function MessagesPage() {
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto px-6 py-4" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.08) transparent" }}>
               <AnimatePresence mode="wait">
-                <motion.div key={activeConvo} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+                <motion.div key={activeConvo} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                   {currentMessages.length === 0 ? (
                     <motion.div className="flex flex-col items-center justify-center h-full text-center py-20"
                       initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
@@ -1161,7 +1063,7 @@ export default function MessagesPage() {
             <motion.div className="shrink-0 px-4 py-3 sm:px-6"
               style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}>
+              transition={{ delay: 0.4, duration: 0.2 }}>
               <div className="flex items-center gap-2 rounded-xl px-3 py-2"
                 style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
                 <motion.button className="shrink-0 text-white/20 hover:text-white/50 transition-colors" whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
@@ -1180,7 +1082,7 @@ export default function MessagesPage() {
                 />
                 <motion.button
                   onClick={handleSend}
-                  className="shrink-0 flex items-center justify-center h-9 w-9 rounded-xl transition-all duration-300"
+                  className="shrink-0 flex items-center justify-center h-9 w-9 rounded-xl transition-all duration-200"
                   style={{
                     background: messageInput.trim() ? "linear-gradient(135deg, rgba(139,92,246,0.5), rgba(59,130,246,0.4))" : "rgba(255,255,255,0.04)",
                     border: messageInput.trim() ? "1px solid rgba(139,92,246,0.3)" : "1px solid rgba(255,255,255,0.06)",
@@ -1220,7 +1122,7 @@ export default function MessagesPage() {
         }}
         initial={{ y: 80 }}
         animate={{ y: 0 }}
-        transition={{ delay: 0.5, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ delay: 0.5, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       >
         {[
           { key: "dashboard", label: "Home", icon: icons.dashboard, to: "/dashboard" },
@@ -1230,7 +1132,7 @@ export default function MessagesPage() {
           const isActive = item.key === "messages";
           return (
             <Link key={item.key} to={item.to}
-              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all duration-300 ${isActive ? "text-violet-400" : "text-white/30 hover:text-white/60"}`}
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all duration-200 ${isActive ? "text-violet-400" : "text-white/30 hover:text-white/60"}`}
             >
               <motion.span whileTap={{ scale: 0.85 }}>
                 {item.icon}
