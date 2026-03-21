@@ -623,30 +623,40 @@ export default function MessagesPage() {
   // Handle incoming live socket messages
   useEffect(() => {
     const handleReceive = (msg) => {
-      console.log("Received message:", msg);
-      
-      const senderIdStr = msg.sender_id ? (msg.sender_id._id || msg.sender_id).toString() : null;
+      console.log("[socket] receiveMessage:", msg);
+
+      // Normalize sender ID to string (sender_id may be a populated object after server populate())
+      const senderIdStr = msg.sender_id
+        ? ((msg.sender_id._id ?? msg.sender_id).toString())
+        : null;
       const isMe = senderIdStr === String(currentUserId);
+
+      // Normalize message _id to string so comparisons are always string === string
+      const msgId = msg._id ? msg._id.toString() : String(Math.random());
 
       const mappedMsg = {
         ...msg,
-        id: msg._id || String(Math.random()),
+        id: msgId,
         sender: isMe ? "me" : "other",
         text: msg.message_text,
-        time: msg.createdAt 
-          ? new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) 
+        time: msg.createdAt
+          ? new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
           : new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
 
       setLocalMessages(prev => {
-        const convoId = msg.conversation_id || msg.conversationId;
+        // Normalize convoId to string so it matches the key used when loading messages
+        const rawConvoId = msg.conversation_id ?? msg.conversationId;
+        const convoId = rawConvoId ? rawConvoId.toString() : null;
+        if (!convoId) return prev;
+
         const currentMsgs = prev[convoId] || [];
-        
-        // WhatsApp Sender sees own message instantly, so deduplicate based on time or strict ID
-        // If sender is me, match exactly optimistic ID generated locally or just textual duplicates closely timed
-        if (mappedMsg.sender === "me") {
-          const optimisticIndex = currentMsgs.findIndex(m => 
-            m.sender === "me" && m.text === mappedMsg.text && m.id.toString().length < 20 // Date.now()
+
+        // If the sender receives their own message back from the server,
+        // replace the optimistic placeholder (id is a Date.now() 13-digit string)
+        if (isMe) {
+          const optimisticIndex = currentMsgs.findIndex(
+            m => m.sender === "me" && m.text === mappedMsg.text && m.id.length <= 13
           );
           if (optimisticIndex !== -1) {
             const newArray = [...currentMsgs];
@@ -655,8 +665,8 @@ export default function MessagesPage() {
           }
         }
 
-        // Prevent duplicates
-        if (currentMsgs.some(m => m.id === mappedMsg.id)) return prev;
+        // Prevent duplicates (normalize both sides to string)
+        if (currentMsgs.some(m => m.id.toString() === msgId)) return prev;
 
         return {
           ...prev,
