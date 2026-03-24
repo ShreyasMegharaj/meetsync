@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -16,15 +17,15 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+
+          <Route path="/profile/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
           {/* Messages main page */}
-          <Route path="/messages" element={<ChatPage />} />
+          <Route path="/messages" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
 
           {/* Individual chat conversation */}
-          <Route path="/chat/:conversationId" element={<ChatPage />} />
-
-          <Route path="/profile/:username" element={<ProfilePage />} />
+          <Route path="/chat/:conversationId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
 
         </Routes>
       </BrowserRouter>

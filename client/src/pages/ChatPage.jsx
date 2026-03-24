@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 import NotificationBell from "../components/NotificationBell";
 import socket from "../utils/socket";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const DEFAULT_AVATAR = null; // will fall back to initials
 
 /* ─── helpers ─── */
 const rand = (a, b) => Math.random() * (b - a) + a;
@@ -494,6 +494,7 @@ export default function MessagesPage() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [conversations, setConversations] = useState([]);
+  const [conversationsLoading, setConversationsLoading] = useState(true);
   const [activeConvo, setActiveConvo] = useState(conversationId || null);
   const [localMessages, setLocalMessages] = useState({});
   const [messageInput, setMessageInput] = useState("");
@@ -516,15 +517,19 @@ export default function MessagesPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [currentMessages]);
 
+  // Authenticate socket on mount
+  useEffect(() => {
+    if (currentUserId && currentUserId !== "me") {
+      socket.emit('authenticate', currentUserId);
+    }
+  }, [currentUserId]);
+
   // Load Conversations on Mount (run ONCE — no activeConvo in deps)
   useEffect(() => {
     const loadConversations = async () => {
+      setConversationsLoading(true);
       try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        const res = await axios.get(`${API_BASE}/conversations`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get('/conversations');
         
         const mapped = res.data.map(convo => {
           const name = convo.otherUser?.name || convo.otherUser?.username || "Unknown";
@@ -534,7 +539,7 @@ export default function MessagesPage() {
             id: convo._id,
             name: name,
             avatar: convo.otherUser?.profile_picture ? (
-              <img src={convo.otherUser.profile_picture} alt={name} className="w-full h-full object-cover rounded-full" />
+              <img src={convo.otherUser.profile_picture} alt={name} className="w-full h-full object-cover rounded-full" onError={(e) => { e.target.style.display = 'none'; }} />
             ) : init,
             time: new Date(convo.last_message_at).toLocaleDateString() === new Date().toLocaleDateString() 
                 ? new Date(convo.last_message_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
@@ -554,8 +559,10 @@ export default function MessagesPage() {
             navigate(`/chat/${mapped[0].id}`, { replace: true });
           }
         }
-      } catch (err) {
-        console.error("Failed to fetch conversations", err);
+      } catch (_err) {
+        // handled by api interceptor
+      } finally {
+        setConversationsLoading(false);
       }
     };
     loadConversations();
@@ -574,10 +581,7 @@ export default function MessagesPage() {
 
     const loadMessages = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`${API_BASE}/messages/${activeConvo}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get(`/messages/${activeConvo}`);
         
         const mappedMsgs = res.data.map(msg => {
           const senderIdStr = msg.sender_id ? (msg.sender_id._id || msg.sender_id).toString() : null;
@@ -613,18 +617,16 @@ export default function MessagesPage() {
           ...prev,
           [activeConvo]: Array.isArray(mappedMsgs) ? mappedMsgs : []
         }));
-      } catch (err) {
-        console.error("Failed to load messages", err);
+      } catch (_err) {
+        // handled by api interceptor
       }
     };
     loadMessages();
-  }, [activeConvo, currentUserId, navigate, conversationId]);
+  }, [activeConvo, conversationId, currentUserId, navigate]);
 
   // Handle incoming live socket messages
   useEffect(() => {
     const handleReceive = (msg) => {
-      console.log("[socket] receiveMessage:", msg);
-
       // Normalize sender ID to string (sender_id may be a populated object after server populate())
       const senderIdStr = msg.sender_id
         ? ((msg.sender_id._id ?? msg.sender_id).toString())
@@ -634,11 +636,29 @@ export default function MessagesPage() {
       // Normalize message _id to string so comparisons are always string === string
       const msgId = msg._id ? msg._id.toString() : String(Math.random());
 
+      // Handle appointment message type from socket
+      let appointmentData = undefined;
+      if (msg.message_type === 'appointment' && msg.appointment_id) {
+        const apt = msg.appointment_id;
+        const scheduledDate = apt.scheduled_for ? new Date(apt.scheduled_for) : null;
+        appointmentData = {
+          ...apt,
+          id: apt._id,
+          title: apt.note || 'Meeting Request',
+          date: scheduledDate ? scheduledDate.toLocaleDateString() : 'TBD',
+          time: scheduledDate ? scheduledDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD',
+          duration: '30 minutes',
+          host_id: apt.host_id?._id || apt.host_id,
+        };
+      }
+
       const mappedMsg = {
         ...msg,
         id: msgId,
         sender: isMe ? "me" : "other",
         text: msg.message_text,
+        message_type: msg.message_type || 'text',
+        appointment: appointmentData,
         time: msg.createdAt
           ? new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
           : new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
@@ -685,7 +705,6 @@ export default function MessagesPage() {
   /* ─── Socket listener for incoming appointments ─── */
   useEffect(() => {
     const handleNewAppointment = (apt) => {
-      console.log("Received new appointment event:", apt);
       const convoId = apt.conversation_id || apt.conversationId;
       const hostIdStr = apt.host_id ? (apt.host_id._id || apt.host_id).toString() : null;
       const isMe = hostIdStr === String(currentUserId);
@@ -706,7 +725,6 @@ export default function MessagesPage() {
     };
     
     const handleAppointmentUpdated = (updatedAppointment) => {
-      console.log("Appointment update:", updatedAppointment);
       setLocalMessages(prev => {
         const updated = { ...prev };
         Object.keys(updated).forEach(convId => {
@@ -784,9 +802,7 @@ export default function MessagesPage() {
       note: formData.note,
     };
     try {
-      const res = await axios.post(`${API_BASE}/appointments`, payload, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      const res = await api.post('/appointments', payload);
       const created = res.data || { ...payload, id: Date.now().toString(), status: "pending", host_id: currentUserId };
       const aptMsg = {
         id: created._id || Date.now().toString(),
@@ -802,8 +818,7 @@ export default function MessagesPage() {
       }));
       
       setShowAppointmentModal(false);
-    } catch (err) {
-      console.error("Failed to create appointment:", err);
+    } catch (_err) {
       setShowAppointmentModal(false);
     } finally {
       setAppointmentLoading(false);
@@ -817,20 +832,14 @@ export default function MessagesPage() {
     updateAppointmentStatus(appointmentId, expectedStatus);
 
     try {
-      await axios.put(`${API_BASE}/appointments/${appointmentId}/${action}`, {}, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-    } catch (err) {
-      console.error(`Failed to ${action} appointment:`, err);
-      // Rollback on failure (simplified)
+      await api.put(`/appointments/${appointmentId}/${action}`);
+    } catch (_err) {
+      // Rollback on failure
       updateAppointmentStatus(appointmentId, "pending");
       
       // Safety fetch
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`${API_BASE}/messages/${activeConvo}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get(`/messages/${activeConvo}`);
         const mappedMsgs = res.data.map(msg => {
           const senderIdStr = msg.sender_id ? (msg.sender_id._id || msg.sender_id).toString() : null;
           const isMe = senderIdStr === String(currentUserId);
@@ -847,8 +856,8 @@ export default function MessagesPage() {
           ...prev,
           [activeConvo]: Array.isArray(mappedMsgs) ? mappedMsgs : []
         }));
-      } catch (safeguardErr) {
-        console.error("Safeguard refetch failed", safeguardErr);
+      } catch (_safeguardErr) {
+        // handled by api interceptor
       }
     }
   };
@@ -859,11 +868,8 @@ export default function MessagesPage() {
     updateAppointmentStatus(appointmentId, "cancelled");
 
     try {
-      await axios.delete(`${API_BASE}/appointments/${appointmentId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-    } catch (err) {
-      console.error("Failed to cancel appointment:", err);
+      await api.delete(`/appointments/${appointmentId}`);
+    } catch (_err) {
       updateAppointmentStatus(appointmentId, "pending");
     }
   };
@@ -892,7 +898,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 bottom-0 flex flex-col overflow-hidden" style={{ background: "#030108" }}>
+    <div className="fixed top-0 left-0 right-0 bottom-0 flex flex-col overflow-hidden" style={{ background: "#030108", height: "100dvh" }}>
       <Background />
       
       <Sidebar active="messages" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={user?.username || ""} />
@@ -931,7 +937,7 @@ export default function MessagesPage() {
                 style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.35), rgba(59,130,246,0.3))", border: "1px solid rgba(255,255,255,0.12)" }}
                 whileHover={{ scale: 1.1 }}>
                 {user?.profile_picture ? (
-                  <img src={user.profile_picture} alt={username} className="w-full h-full object-cover" />
+                  <img src={user.profile_picture} alt={username} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                 ) : (
                   initials
                 )}
@@ -970,10 +976,27 @@ export default function MessagesPage() {
               </div>
             </div>
             <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-1" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.08) transparent" }}>
-              {Array.isArray(filteredConversations) ? filteredConversations.map((convo, i) => (
-                <ConversationItem key={convo.id} convo={convo} isActive={activeConvo === convo.id}
-                  onClick={() => setActiveConvo(convo.id)} index={i} />
-              )) : null}
+              {conversationsLoading ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <motion.div className="h-8 w-8 rounded-full border-2 border-white/10 border-t-violet-500/60"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }} />
+                  <p className="text-xs text-white/20 mt-3">Loading conversations…</p>
+                </div>
+              ) : Array.isArray(filteredConversations) && filteredConversations.length > 0 ? (
+                filteredConversations.map((convo, i) => (
+                  <ConversationItem key={convo.id} convo={convo} isActive={activeConvo === convo.id}
+                    onClick={() => setActiveConvo(convo.id)} index={i} />
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-3"
+                    style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.12)" }}>
+                    {icons.messages}
+                  </div>
+                  <p className="text-xs text-white/20">No conversations yet</p>
+                </div>
+              )}
             </div>
           </motion.div>
 

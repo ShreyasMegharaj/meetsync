@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 import NotificationBell from "../components/NotificationBell";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 /* ─── helpers ─── */
 const rand = (a, b) => Math.random() * (b - a) + a;
@@ -304,10 +302,7 @@ export default function ProfilePage() {
       setEditSuccess(false);
 
       try {
-        const token = getToken();
-        const res = await axios.get(`${API_BASE}/users/${username}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const res = await api.get(`/users/${username}`);
 
         const data = res.data?.user || res.data;
         setProfileData(data);
@@ -327,17 +322,14 @@ export default function ProfilePage() {
           setEditProfilePic(data.profile_picture || data.avatar || "");
         } else if (currentUser) {
           try {
-            const statusRes = await axios.get(`${API_BASE}/requests/status/${data._id || data.id}`, {
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
-            });
+            const statusRes = await api.get(`/requests/status/${data._id || data.id}`);
             setConnectionStatus(statusRes.data.status);
             setRequestId(statusRes.data.requestId);
-          } catch (err) {
-            console.error("Failed to check connection status", err);
+          } catch (_err) {
+            // handled by api interceptor
           }
         }
       } catch (err) {
-        console.error("Failed to fetch profile:", err);
         if (err.response?.status === 404) {
           setError("User not found");
         } else {
@@ -351,40 +343,31 @@ export default function ProfilePage() {
     if (username) fetchProfile();
   }, [username]);
 
-  /* ─── Start Chat ─── */
   const handleStartChat = async () => {
     setChatLoading(true);
     try {
-      const token = getToken();
-      const res = await axios.post(
-        `${API_BASE}/conversations`,
-        { username },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await api.post('/conversations', { username });
       const conversationId = res.data?.conversationId || res.data?._id || res.data?.id;
       if (conversationId) {
         navigate(`/chat/${conversationId}`);
       }
-    } catch (err) {
-      console.error("Failed to start conversation:", err);
+    } catch (_err) {
+      // handled by api interceptor
     } finally {
       setChatLoading(false);
     }
   };
 
-  /* ─── Send/Accept/Reject Requests ─── */
   const handleSendRequest = async () => {
     setConnectionLoading(true);
     try {
-      const token = getToken();
-      const res = await axios.post(`${API_BASE}/requests/send`, 
-        { to_user: profileData._id || profileData.id },
-        { headers: { Authorization: `Bearer ${token}` } }
+      const res = await api.post('/requests/send', 
+        { to_user: profileData._id || profileData.id }
       );
       setConnectionStatus("pending_sent");
       setRequestId(res.data._id);
-    } catch (err) {
-      console.error("Failed to send request", err);
+    } catch (_err) {
+      // handled by api interceptor
     } finally {
       setConnectionLoading(false);
     }
@@ -394,35 +377,28 @@ export default function ProfilePage() {
     if (!requestId) return;
     setConnectionLoading(true);
     try {
-      const token = getToken();
-      await axios.put(`${API_BASE}/requests/${requestId}/${action}`, {}, {
-         headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.put(`/requests/${requestId}/${action}`);
       if (action === 'accept') {
         setConnectionStatus("connected");
       } else {
         setConnectionStatus("none");
       }
-    } catch (err) {
-      console.error(`Failed to ${action} request`, err);
+    } catch (_err) {
+      // handled by api interceptor
     } finally {
       setConnectionLoading(false);
     }
   };
 
-  /* ─── Save Profile ─── */
   const handleSaveProfile = async () => {
     setEditLoading(true);
     setEditSuccess(false);
     try {
-      const token = getToken();
       const payload = {
         bio: editBio,
         profile_picture: editProfilePic,
       };
-      const res = await axios.put(`${API_BASE}/users/profile`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.put('/users/profile', payload);
 
       const updatedUser = res.data?.user || res.data;
       setProfileData((prev) => ({ ...prev, ...updatedUser, bio: editBio, profilePicture: editProfilePic }));
@@ -438,8 +414,8 @@ export default function ProfilePage() {
         setIsEditing(false);
         setEditSuccess(false);
       }, 1200);
-    } catch (err) {
-      console.error("Failed to update profile:", err);
+    } catch (_err) {
+      // handled by api interceptor
     } finally {
       setEditLoading(false);
     }
@@ -527,7 +503,7 @@ export default function ProfilePage() {
                 transition={{ duration: 0.2,  ease: "easeInOut" }}
               >
                 {currentUser?.profile_picture ? (
-                  <img src={currentUser.profile_picture} alt={currentUserName} className="w-full h-full object-cover" />
+                  <img src={currentUser.profile_picture} alt={currentUserName} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                 ) : (
                   currentInitials
                 )}

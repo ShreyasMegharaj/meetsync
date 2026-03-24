@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
+import api from "../utils/api";
 import { Link, useNavigate } from "react-router-dom";
 import socket from "../utils/socket";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const icons = {
   bell: (<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>),
@@ -43,8 +41,8 @@ export default function NotificationBell() {
       if (!token) return;
 
       const [reqRes, convRes] = await Promise.all([
-        axios.get(`${API_BASE}/requests/incoming`, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`${API_BASE}/conversations`, { headers: { Authorization: `Bearer ${token}` } })
+        api.get('/requests/incoming'),
+        api.get('/conversations')
       ]);
 
       const fetchedRequests = reqRes.data || [];
@@ -54,8 +52,8 @@ export default function NotificationBell() {
       
       const unreadConvos = fetchedConvos.some(c => c.unread > 0);
       setHasUnread(fetchedRequests.length > 0 || unreadConvos);
-    } catch (err) {
-      console.error("Failed to fetch notifications data", err);
+    } catch (_err) {
+      // handled by api interceptor
     }
   };
 
@@ -85,14 +83,11 @@ export default function NotificationBell() {
   const handleRequestAction = async (requestId, action) => {
     setLoadingAction(requestId);
     try {
-      const token = localStorage.getItem("token");
-      await axios.put(`${API_BASE}/requests/${requestId}/${action}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.put(`/requests/${requestId}/${action}`);
       fetchData();
       if (action === 'accept') setActiveTab('messages');
-    } catch (err) {
-      console.error(`Failed to ${action} request`, err);
+    } catch (_err) {
+      // handled by api interceptor
     } finally {
       setLoadingAction(null);
     }
@@ -162,7 +157,7 @@ export default function NotificationBell() {
                     <div key={req._id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors">
                       <div className="h-10 w-10 shrink-0 rounded-full border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center text-xs font-bold text-white/70">
                         {req.from_user?.profile_picture ? (
-                          <img src={req.from_user.profile_picture} alt="avatar" className="w-full h-full object-cover" />
+                          <img src={req.from_user.profile_picture} alt="avatar" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                         ) : (
                           req.from_user?.name?.charAt(0).toUpperCase()
                         )}
@@ -195,7 +190,7 @@ export default function NotificationBell() {
                       <div key={conv._id || conv.id} onClick={() => handleOpenChat(conv._id || conv.id)} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer">
                         <div className="h-10 w-10 shrink-0 rounded-full border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center text-xs font-bold text-white/70">
                           {conv.otherUser?.profile_picture ? (
-                            <img src={conv.otherUser.profile_picture} alt="avatar" className="w-full h-full object-cover" />
+                            <img src={conv.otherUser.profile_picture} alt="avatar" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                           ) : (
                             init
                           )}

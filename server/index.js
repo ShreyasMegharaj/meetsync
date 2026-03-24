@@ -24,23 +24,23 @@ const io = new Server(server, {
     origin: process.env.CLIENT_URL,
     methods: ["GET", "POST"],
     credentials: true
-  }
+  },
+  transports: ['websocket', 'polling'],
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 app.set('io', io);
 
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
 
   socket.on('joinConversation', (conversationId) => {
     socket.join(conversationId);
-    console.log("Joined room:", conversationId);
   });
 
   socket.on('authenticate', (userId) => {
     if (userId) {
       socket.join(userId);
-      console.log(`User ${userId} joined their personal room`);
     }
   });
 
@@ -62,7 +62,6 @@ io.on('connection', (socket) => {
 
       await message.populate('sender_id', 'name username profile_picture');
 
-      console.log("Message broadcast to room", data.conversationId, ":", data.text);
       io.to(data.conversationId).emit("receiveMessage", message);
 
     } catch (err) {
@@ -71,7 +70,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
   });
 });
 
