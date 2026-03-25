@@ -5,44 +5,50 @@ import socket from "../utils/socket";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
 
-    if (storedUser) {
+    if (storedToken && storedUser) {
+      setToken(storedToken);
       setUser(JSON.parse(storedUser));
       socket.connect();
     }
+    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
-    const res = await api.post("/login", { email, password });
+    const res = await api.post("/auth/login", { email, password });
 
-    const { token, user } = res.data;
+    const { token: newToken, user: newUser } = res.data;
 
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("token", newToken);
+    localStorage.setItem("user", JSON.stringify(newUser));
 
-    setUser(user);
+    setToken(newToken);
+    setUser(newUser);
 
     socket.connect();
 
-    return user;
+    return newUser;
   };
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
+    setToken(null);
     setUser(null);
 
     socket.disconnect();
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

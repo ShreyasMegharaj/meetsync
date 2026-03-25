@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import API from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 /* ─── helpers ─── */
 const rand = (a, b) => Math.random() * (b - a) + a;
 
@@ -265,37 +265,31 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const submit = async (e) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
 
-  if (!email || !password) {
-    setError("Please fill in all fields.");
-    return;
-  }
+    if (!email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const r = await API.post("/auth/login", {
-      email,
-      password
-    });
-    localStorage.setItem("token", r.data.token);
-    localStorage.setItem("user", JSON.stringify(r.data.user));
-
-    window.location.href = "/dashboard";
-  } catch (err) {
-
-    setError(
-      err.response?.data?.message || "Login failed. Please try again."
-    );
-
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      await login(email, password);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Login failed. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10" style={{ background: "#030108", cursor: "none" }}>
