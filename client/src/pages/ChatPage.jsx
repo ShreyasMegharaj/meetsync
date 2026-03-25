@@ -517,12 +517,27 @@ export default function MessagesPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [currentMessages]);
 
-  // Authenticate socket on mount
+  // Authenticate socket on mount + re-join rooms on reconnect
   useEffect(() => {
     if (currentUserId && currentUserId !== "me") {
       socket.emit('authenticate', currentUserId);
     }
-  }, [currentUserId]);
+
+    const handleReconnect = () => {
+      if (currentUserId && currentUserId !== "me") {
+        socket.emit('authenticate', currentUserId);
+      }
+      if (activeConvo) {
+        socket.emit('joinConversation', activeConvo);
+      }
+    };
+
+    socket.on('connect', handleReconnect);
+
+    return () => {
+      socket.off('connect', handleReconnect);
+    };
+  }, [currentUserId, activeConvo]);
 
   // Load Conversations on Mount (run ONCE — no activeConvo in deps)
   useEffect(() => {
