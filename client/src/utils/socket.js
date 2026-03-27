@@ -10,10 +10,11 @@ const socketUrl = API_BASE.endsWith("/api")
 const socket = io(socketUrl, {
   withCredentials: true,
   transports: ["websocket", "polling"],
-  autoConnect: false,
+  autoConnect: true,
   reconnection: true,
-  reconnectionAttempts: 10,
-  reconnectionDelay: 1000,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 500,
+  reconnectionDelayMax: 3000,
 });
 
 export default socket;

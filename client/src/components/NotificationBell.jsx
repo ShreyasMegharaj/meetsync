@@ -119,7 +119,7 @@ export default function NotificationBell() {
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            className="absolute right-0 top-12 mt-2 w-80 sm:w-96 rounded-2xl overflow-hidden shadow-2xl z-50 flex flex-col"
+            className="fixed sm:absolute right-2 sm:right-0 top-[60px] sm:top-12 sm:mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-sm rounded-2xl overflow-hidden shadow-2xl z-[99] flex flex-col"
             style={{ 
               background: "linear-gradient(165deg, rgba(20,15,35,0.95) 0%, rgba(10,5,25,0.98) 100%)",
               backdropFilter: "blur(20px)",

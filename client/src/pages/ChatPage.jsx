@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import EmojiPicker from "emoji-picker-react";
 import api from "../utils/api";
 import NotificationBell from "../components/NotificationBell";
 import socket from "../utils/socket";
@@ -22,17 +23,22 @@ const Background = () => (
   </div>
 );
 
-/* ─── Magnetic Cursor ─── */
+/* ─── Magnetic Cursor (glow only — default OS cursor is always visible) ─── */
 const MagneticCursor = () => {
   const mx = useMotionValue(-400);
   const my = useMotionValue(-400);
   const slowX = useSpring(mx, { stiffness: 20, damping: 25, mass: 1.8 });
   const slowY = useSpring(my, { stiffness: 20, damping: 25, mass: 1.8 });
+  const [isPointer, setIsPointer] = useState(false);
   useEffect(() => {
+    // Only render on fine-pointer (mouse/trackpad) devices
+    const mq = window.matchMedia("(pointer: fine)");
+    setIsPointer(mq.matches);
     const move = (e) => { mx.set(e.clientX); my.set(e.clientY); };
     window.addEventListener("mousemove", move);
     return () => window.removeEventListener("mousemove", move);
   }, [mx, my]);
+  if (!isPointer) return null;
   return (
     <motion.div className="fixed rounded-full pointer-events-none"
       style={{ x: slowX, y: slowY, width: 350, height: 350, marginLeft: -175, marginTop: -175, background: "radial-gradient(circle,rgba(139,92,246,0.06),rgba(59,130,246,0.04),rgba(236,72,153,0.02),transparent 70%)", filter: "blur(50px)", zIndex: 9997 }} />
@@ -499,6 +505,11 @@ export default function MessagesPage() {
   const [localMessages, setLocalMessages] = useState({});
   const [messageInput, setMessageInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef(null);
+  const pollingRef = useRef(null);
+  const isFetchingRef = useRef(false);
+  const lastMsgCountRef = useRef({});
   
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [appointmentLoading, setAppointmentLoading] = useState(false);
@@ -517,8 +528,11 @@ export default function MessagesPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [currentMessages]);
 
-  // Authenticate socket on mount + re-join rooms on reconnect
+  // Authenticate socket on mount + re-join rooms on reconnect + visibility reconnect
   useEffect(() => {
+    // Ensure connection
+    if (!socket.connected) socket.connect();
+
     if (currentUserId && currentUserId !== "me") {
       socket.emit('authenticate', currentUserId);
     }
@@ -532,12 +546,33 @@ export default function MessagesPage() {
       }
     };
 
+    // Reconnect when tab becomes visible again (phone switching apps etc.)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        if (!socket.connected) socket.connect();
+        handleReconnect();
+      }
+    };
+
     socket.on('connect', handleReconnect);
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       socket.off('connect', handleReconnect);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [currentUserId, activeConvo]);
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   // Load Conversations on Mount (run ONCE — no activeConvo in deps)
   useEffect(() => {
@@ -639,6 +674,55 @@ export default function MessagesPage() {
     loadMessages();
   }, [activeConvo, conversationId, currentUserId, navigate]);
 
+  // ── 1-second polling fallback for missed socket messages ──
+  useEffect(() => {
+    if (!activeConvo) return;
+
+    const poll = async () => {
+      if (isFetchingRef.current) return;
+      isFetchingRef.current = true;
+      try {
+        const res = await api.get(`/messages/${activeConvo}`);
+        const rawMsgs = res.data || [];
+        const prevCount = lastMsgCountRef.current[activeConvo] || 0;
+
+        if (rawMsgs.length !== prevCount) {
+          lastMsgCountRef.current[activeConvo] = rawMsgs.length;
+          const mappedMsgs = rawMsgs.map(msg => {
+            const senderIdStr = msg.sender_id ? (msg.sender_id._id || msg.sender_id).toString() : null;
+            const isMe = senderIdStr === String(currentUserId);
+            let appointmentData = undefined;
+            if (msg.appointment_id) {
+              const apt = msg.appointment_id;
+              const scheduledDate = apt.scheduled_for ? new Date(apt.scheduled_for) : null;
+              appointmentData = {
+                ...apt, id: apt._id,
+                title: apt.note || 'Meeting Request',
+                date: scheduledDate ? scheduledDate.toLocaleDateString() : 'TBD',
+                time: scheduledDate ? scheduledDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD',
+                duration: '30 minutes',
+                host_id: apt.host_id?._id || apt.host_id,
+              };
+            }
+            return {
+              ...msg,
+              id: msg._id || String(Math.random()),
+              sender: isMe ? "me" : "other",
+              text: msg.message_text,
+              time: new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              appointment: appointmentData
+            };
+          });
+          setLocalMessages(prev => ({ ...prev, [activeConvo]: mappedMsgs }));
+        }
+      } catch (_) {}
+      finally { isFetchingRef.current = false; }
+    };
+
+    pollingRef.current = setInterval(poll, 1000);
+    return () => clearInterval(pollingRef.current);
+  }, [activeConvo, currentUserId]);
+
   // Handle incoming live socket messages
   useEffect(() => {
     const handleReceive = (msg) => {
@@ -711,11 +795,32 @@ export default function MessagesPage() {
     };
     
     socket.on("receiveMessage", handleReceive);
-    
+
     return () => {
       socket.off("receiveMessage", handleReceive);
     };
   }, [currentUserId]);
+
+  // Update conversation list last-message preview when a new message arrives
+  useEffect(() => {
+    const handleConvoUpdate = (msg) => {
+      const rawConvoId = msg.conversation_id ?? msg.conversationId;
+      const convoId = rawConvoId ? rawConvoId.toString() : null;
+      if (!convoId) return;
+      setConversations(prev => prev.map(c => {
+        if (c.id === convoId) {
+          return {
+            ...c,
+            lastMessage: msg.message_text || "New message",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          };
+        }
+        return c;
+      }));
+    };
+    socket.on("receiveMessage", handleConvoUpdate);
+    return () => socket.off("receiveMessage", handleConvoUpdate);
+  }, []);
 
   /* ─── Socket listener for incoming appointments ─── */
   useEffect(() => {
@@ -774,7 +879,8 @@ export default function MessagesPage() {
   const handleSend = async () => {
     if (!messageInput.trim() || !activeConvo) return;
     const text = messageInput.trim();
-    setMessageInput(""); // Clear visually immediately
+    setMessageInput("");
+    setShowEmojiPicker(false);
 
     // WhatsApp-style optimistic UI Append (User explicitly see own message instantly)
     const optimisticMsg = {
@@ -790,7 +896,13 @@ export default function MessagesPage() {
       [activeConvo]: [...(prev[activeConvo] || []), optimisticMsg]
     }));
 
-    // WhatsApp-style: emit to server and let it handle broadcast mapping
+    // Update convo list preview immediately
+    setConversations(prev => prev.map(c =>
+      c.id === activeConvo ? { ...c, lastMessage: text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) } : c
+    ));
+
+    // Ensure socket is connected before sending
+    if (!socket.connected) socket.connect();
     socket.emit("sendMessage", {
       conversationId: activeConvo,
       senderId: currentUserId,
@@ -803,6 +915,10 @@ export default function MessagesPage() {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleEmojiClick = (emojiData) => {
+    setMessageInput(prev => prev + emojiData.emoji);
   };
 
   /* ─── Create Appointment ─── */
@@ -1038,7 +1154,7 @@ export default function MessagesPage() {
                     {activeConversation.online && (
                       <motion.div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full"
                         style={{ background: "rgba(52,211,153,0.9)", border: "2px solid rgba(10,6,24,0.9)", boxShadow: "0 0 8px rgba(52,211,153,0.4)" }}
-                        animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.2,  }} />
+                        animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }} />
                     )}
                   </div>
                   <div className="block">
@@ -1047,7 +1163,7 @@ export default function MessagesPage() {
                       {activeConversation.online ? (
                         <>
                           <motion.div className="h-1.5 w-1.5 rounded-full" style={{ background: "rgba(52,211,153,0.8)" }}
-                            animate={{ opacity: [0.6, 1, 0.6] }} transition={{ duration: 0.2,  }} />
+                            animate={{ opacity: [0.6, 1, 0.6] }} transition={{ duration: 2, repeat: Infinity }} />
                           <span className="text-[11px] text-emerald-400/50">Online</span>
                         </>
                       ) : (
@@ -1108,13 +1224,42 @@ export default function MessagesPage() {
             </div>
 
             {/* Input Area */}
-            <motion.div className="shrink-0 sticky bottom-0 w-full z-10"
+            <motion.div className="relative shrink-0 sticky bottom-0 w-full z-10"
               style={{ padding: "12px", borderTop: "1px solid rgba(255,255,255,0.06)", background: "#030108" }}
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.2 }}>
+              {/* Emoji Picker */}
+              <AnimatePresence>
+                {showEmojiPicker && (
+                  <motion.div
+                    ref={emojiPickerRef}
+                    className="absolute bottom-[70px] left-2 right-2 sm:left-auto sm:right-4 z-50"
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <EmojiPicker
+                      onEmojiClick={handleEmojiClick}
+                      theme="dark"
+                      searchDisabled={false}
+                      skinTonesDisabled
+                      width="100%"
+                      height={350}
+                      previewConfig={{ showPreview: false }}
+                      style={{ background: "rgba(12,8,28,0.97)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "16px" }}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <div className="flex items-center gap-2 rounded-xl px-3 py-2"
                 style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <motion.button className="shrink-0 text-white/20 hover:text-white/50 transition-colors" whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+                <motion.button
+                  onClick={() => setShowEmojiPicker(v => !v)}
+                  className={`shrink-0 transition-colors ${showEmojiPicker ? 'text-violet-400' : 'text-white/20 hover:text-white/50'}`}
+                  whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
+                  title="Emoji"
+                >
                   {icons.emoji}
                 </motion.button>
                 <motion.button className="shrink-0 text-white/20 hover:text-white/50 transition-colors" whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
@@ -1126,6 +1271,7 @@ export default function MessagesPage() {
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  autoComplete="off"
                   className="flex-1 bg-transparent text-sm text-white/80 placeholder-white/20 outline-none px-2 py-1"
                 />
                 <motion.button
