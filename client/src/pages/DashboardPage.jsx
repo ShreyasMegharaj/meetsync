@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 import NotificationBell from "../components/NotificationBell";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 /* ─── helpers ─── */
 const rand = (a, b) => Math.random() * (b - a) + a;
@@ -467,8 +465,8 @@ export default function DashboardPage() {
 
       try {
         const [convRes, apptRes] = await Promise.all([
-          axios.get(`${API_BASE}/conversations`, { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get(`${API_BASE}/appointments`, { headers: { Authorization: `Bearer ${token}` } }).catch(() => ({ data: [] }))
+          api.get('/conversations'),
+          api.get('/appointments').catch(() => ({ data: [] }))
         ]);
 
         setConversations(Array.isArray(convRes.data) ? convRes.data : []);
@@ -495,10 +493,7 @@ export default function DashboardPage() {
       if (searchQuery.trim().length >= 1) {
         setIsSearching(true);
         try {
-          const token = localStorage.getItem("token");
-          const res = await axios.get(`${API_BASE}/users/search?q=${searchQuery}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const res = await api.get(`/users/search?q=${searchQuery}`);
           // Filter out self
           if (Array.isArray(res.data)) {
             setSearchResults(res.data.filter(u => u.username !== user?.username));
@@ -526,10 +521,7 @@ export default function DashboardPage() {
 
   const handleStartChat = async (targetUsername) => {
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post(`${API_BASE}/conversations`, { username: targetUsername }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.post('/conversations', { username: targetUsername });
       const convId = res.data._id || res.data.id || res.data.conversationId;
       navigate(`/chat/${convId}`);
     } catch (err) {

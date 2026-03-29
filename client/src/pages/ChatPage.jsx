@@ -502,18 +502,19 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState([]);
   const [conversationsLoading, setConversationsLoading] = useState(true);
   const [activeConvo, setActiveConvo] = useState(conversationId || null);
+  const activeConvoRef = useRef(activeConvo);
   const [localMessages, setLocalMessages] = useState({});
   const [messageInput, setMessageInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef(null);
-  const pollingRef = useRef(null);
-  const isFetchingRef = useRef(false);
-  const lastMsgCountRef = useRef({});
   
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [appointmentLoading, setAppointmentLoading] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Keep ref in sync so socket handlers always read the latest value
+  useEffect(() => { activeConvoRef.current = activeConvo; }, [activeConvo]);
 
   const activeConversation = conversations.find((c) => c.id === activeConvo);
   const currentMessages = localMessages[activeConvo] || [];
@@ -674,65 +675,58 @@ export default function MessagesPage() {
     loadMessages();
   }, [activeConvo, conversationId, currentUserId, navigate]);
 
-  // ── 1-second polling fallback for missed socket messages ──
+  // ── Re-fetch messages on socket reconnect (replaces aggressive polling) ──
   useEffect(() => {
-    if (!activeConvo) return;
-
-    const poll = async () => {
-      if (isFetchingRef.current) return;
-      isFetchingRef.current = true;
+    const handleReconnectRefetch = async () => {
+      const convoId = activeConvoRef.current;
+      if (!convoId) return;
       try {
-        const res = await api.get(`/messages/${activeConvo}`);
+        const res = await api.get(`/messages/${convoId}`);
         const rawMsgs = res.data || [];
-        const prevCount = lastMsgCountRef.current[activeConvo] || 0;
-
-        if (rawMsgs.length !== prevCount) {
-          lastMsgCountRef.current[activeConvo] = rawMsgs.length;
-          const mappedMsgs = rawMsgs.map(msg => {
-            const senderIdStr = msg.sender_id ? (msg.sender_id._id || msg.sender_id).toString() : null;
-            const isMe = senderIdStr === String(currentUserId);
-            let appointmentData = undefined;
-            if (msg.appointment_id) {
-              const apt = msg.appointment_id;
-              const scheduledDate = apt.scheduled_for ? new Date(apt.scheduled_for) : null;
-              appointmentData = {
-                ...apt, id: apt._id,
-                title: apt.note || 'Meeting Request',
-                date: scheduledDate ? scheduledDate.toLocaleDateString() : 'TBD',
-                time: scheduledDate ? scheduledDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD',
-                duration: '30 minutes',
-                host_id: apt.host_id?._id || apt.host_id,
-              };
-            }
-            return {
-              ...msg,
-              id: msg._id || String(Math.random()),
-              sender: isMe ? "me" : "other",
-              text: msg.message_text,
-              time: new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-              appointment: appointmentData
+        const mappedMsgs = rawMsgs.map(msg => {
+          const senderIdStr = msg.sender_id ? (msg.sender_id._id || msg.sender_id).toString() : null;
+          const isMe = senderIdStr === String(currentUserId);
+          let appointmentData = undefined;
+          if (msg.appointment_id) {
+            const apt = msg.appointment_id;
+            const scheduledDate = apt.scheduled_for ? new Date(apt.scheduled_for) : null;
+            appointmentData = {
+              ...apt, id: apt._id,
+              title: apt.note || 'Meeting Request',
+              date: scheduledDate ? scheduledDate.toLocaleDateString() : 'TBD',
+              time: scheduledDate ? scheduledDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD',
+              duration: '30 minutes',
+              host_id: apt.host_id?._id || apt.host_id,
             };
-          });
-          setLocalMessages(prev => ({ ...prev, [activeConvo]: mappedMsgs }));
-        }
+          }
+          return {
+            ...msg,
+            id: msg._id || String(Math.random()),
+            sender: isMe ? "me" : "other",
+            text: msg.message_text,
+            time: new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            appointment: appointmentData
+          };
+        });
+        setLocalMessages(prev => ({ ...prev, [convoId]: mappedMsgs }));
       } catch (_) {}
-      finally { isFetchingRef.current = false; }
     };
 
-    pollingRef.current = setInterval(poll, 1000);
-    return () => clearInterval(pollingRef.current);
-  }, [activeConvo, currentUserId]);
+    socket.on('connect', handleReconnectRefetch);
+    return () => socket.off('connect', handleReconnectRefetch);
+  }, [currentUserId]);
 
-  // Handle incoming live socket messages
+  // Handle incoming live socket messages (from OTHER users only — server excludes sender)
   useEffect(() => {
     const handleReceive = (msg) => {
-      // Normalize sender ID to string (sender_id may be a populated object after server populate())
+      // Normalize sender ID
       const senderIdStr = msg.sender_id
         ? ((msg.sender_id._id ?? msg.sender_id).toString())
         : null;
-      const isMe = senderIdStr === String(currentUserId);
 
-      // Normalize message _id to string so comparisons are always string === string
+      // Skip own messages — we already have them from the HTTP response
+      if (senderIdStr === String(currentUserId)) return;
+
       const msgId = msg._id ? msg._id.toString() : String(Math.random());
 
       // Handle appointment message type from socket
@@ -754,7 +748,7 @@ export default function MessagesPage() {
       const mappedMsg = {
         ...msg,
         id: msgId,
-        sender: isMe ? "me" : "other",
+        sender: "other",
         text: msg.message_text,
         message_type: msg.message_type || 'text',
         appointment: appointmentData,
@@ -764,27 +758,13 @@ export default function MessagesPage() {
       };
 
       setLocalMessages(prev => {
-        // Normalize convoId to string so it matches the key used when loading messages
         const rawConvoId = msg.conversation_id ?? msg.conversationId;
         const convoId = rawConvoId ? rawConvoId.toString() : null;
         if (!convoId) return prev;
 
         const currentMsgs = prev[convoId] || [];
 
-        // If the sender receives their own message back from the server,
-        // replace the optimistic placeholder (id is a Date.now() 13-digit string)
-        if (isMe) {
-          const optimisticIndex = currentMsgs.findIndex(
-            m => m.sender === "me" && m.text === mappedMsg.text && m.id.length <= 13
-          );
-          if (optimisticIndex !== -1) {
-            const newArray = [...currentMsgs];
-            newArray[optimisticIndex] = mappedMsg;
-            return { ...prev, [convoId]: newArray };
-          }
-        }
-
-        // Prevent duplicates (normalize both sides to string)
+        // Prevent duplicates
         if (currentMsgs.some(m => m.id.toString() === msgId)) return prev;
 
         return {
@@ -882,9 +862,10 @@ export default function MessagesPage() {
     setMessageInput("");
     setShowEmojiPicker(false);
 
-    // WhatsApp-style optimistic UI Append (User explicitly see own message instantly)
+    // Optimistic UI — show the message instantly
+    const optimisticId = Date.now().toString();
     const optimisticMsg = {
-      id: Date.now().toString(),
+      id: optimisticId,
       sender: "me",
       text: text,
       message_type: "text",
@@ -901,13 +882,42 @@ export default function MessagesPage() {
       c.id === activeConvo ? { ...c, lastMessage: text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) } : c
     ));
 
-    // Ensure socket is connected before sending
-    if (!socket.connected) socket.connect();
-    socket.emit("sendMessage", {
-      conversationId: activeConvo,
-      senderId: currentUserId,
-      text: text
-    });
+    // Send via HTTP POST (reliable — works even if socket is disconnected)
+    // The server route broadcasts to the OTHER user via socket automatically.
+    try {
+      const res = await api.post('/messages', {
+        conversation_id: activeConvo,
+        message_text: text,
+      });
+      // Replace optimistic message with the real server response
+      const serverMsg = res.data;
+      const realId = serverMsg._id ? serverMsg._id.toString() : optimisticId;
+      setLocalMessages(prev => {
+        const msgs = prev[activeConvo] || [];
+        return {
+          ...prev,
+          [activeConvo]: msgs.map(m =>
+            m.id === optimisticId
+              ? { ...m, id: realId, _id: serverMsg._id }
+              : m
+          ),
+        };
+      });
+    } catch (err) {
+      // Mark the optimistic message as failed so the user knows
+      console.error('Send message failed:', err);
+      setLocalMessages(prev => {
+        const msgs = prev[activeConvo] || [];
+        return {
+          ...prev,
+          [activeConvo]: msgs.map(m =>
+            m.id === optimisticId
+              ? { ...m, text: `${m.text}  ⚠️`, failed: true }
+              : m
+          ),
+        };
+      });
+    }
   };
 
   const handleKeyDown = (e) => {

@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
 
       await message.populate('sender_id', 'name username profile_picture');
 
-      io.to(data.conversationId).emit("receiveMessage", message);
+      socket.to(data.conversationId).emit("receiveMessage", message);
 
     } catch (err) {
       console.error("Socket sendMessage Error:", err);
