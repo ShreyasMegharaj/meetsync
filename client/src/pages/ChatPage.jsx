@@ -201,6 +201,7 @@ const ConversationItem = ({ convo, isActive, onClick, index }) => {
 /* ─── Chat Bubble ─── */
 const ChatBubble = ({ message, index }) => {
   const isMe = message.sender === "me";
+  const isImage = message.message_type === "image";
   return (
     <motion.div
       className={`flex ${isMe ? "justify-end" : "justify-start"} mb-3`}
@@ -208,7 +209,7 @@ const ChatBubble = ({ message, index }) => {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay: index * 0.05, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className={`relative max-w-[70%] px-4 py-2.5 rounded-2xl ${isMe ? "rounded-br-md" : "rounded-bl-md"}`}
+      <div className={`relative max-w-[70%] ${isImage ? 'p-1.5' : 'px-4 py-2.5'} rounded-2xl ${isMe ? "rounded-br-md" : "rounded-bl-md"}`}
         style={isMe ? {
           background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))",
           border: "1px solid rgba(139,92,246,0.15)",
@@ -218,8 +219,19 @@ const ChatBubble = ({ message, index }) => {
           border: "1px solid rgba(255,255,255,0.06)",
           boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
         }}>
-        <p className="text-[13px] text-white/80 leading-relaxed">{message.text}</p>
-        <p className={`text-[10px] mt-1 ${isMe ? "text-white/25 text-right" : "text-white/20"}`}>{message.time}</p>
+        {isImage && message.image_url ? (
+          <img
+            src={message.image_url}
+            alt="Shared image"
+            className="rounded-xl max-w-full max-h-[300px] object-contain cursor-pointer"
+            style={{ minWidth: 120 }}
+            onClick={() => window.open(message.image_url, '_blank')}
+            loading="lazy"
+          />
+        ) : (
+          <p className="text-[13px] text-white/80 leading-relaxed">{message.text}</p>
+        )}
+        <p className={`text-[10px] mt-1 ${isImage ? 'px-2 pb-1' : ''} ${isMe ? "text-white/25 text-right" : "text-white/20"}`}>{message.time}</p>
       </div>
     </motion.div>
   );
@@ -508,6 +520,9 @@ export default function MessagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef(null);
+  const imageInputRef = useRef(null);
+  const [pendingImage, setPendingImage] = useState(null); // { dataUrl, file }
+  const [imageSending, setImageSending] = useState(false);
   
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [appointmentLoading, setAppointmentLoading] = useState(false);
@@ -659,6 +674,8 @@ export default function MessagesPage() {
             id: msg._id || String(Math.random()),
             sender: isMe ? "me" : "other",
             text: msg.message_text,
+            message_type: msg.message_type || 'text',
+            image_url: msg.image_url || null,
             time: new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             appointment: appointmentData
           };
@@ -704,6 +721,8 @@ export default function MessagesPage() {
             id: msg._id || String(Math.random()),
             sender: isMe ? "me" : "other",
             text: msg.message_text,
+            message_type: msg.message_type || 'text',
+            image_url: msg.image_url || null,
             time: new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             appointment: appointmentData
           };
@@ -751,6 +770,7 @@ export default function MessagesPage() {
         sender: "other",
         text: msg.message_text,
         message_type: msg.message_type || 'text',
+        image_url: msg.image_url || null,
         appointment: appointmentData,
         time: msg.createdAt
           ? new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -929,6 +949,91 @@ export default function MessagesPage() {
 
   const handleEmojiClick = (emojiData) => {
     setMessageInput(prev => prev + emojiData.emoji);
+  };
+
+  /* ─── Image Handling ─── */
+  const handleImageSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+    if (!file.type.startsWith('image/')) return;
+    // ~2MB limit
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Image must be under 2MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPendingImage({ dataUrl: reader.result, file });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCancelImage = () => {
+    setPendingImage(null);
+  };
+
+  const handleSendImage = async () => {
+    if (!pendingImage || !activeConvo || imageSending) return;
+    setImageSending(true);
+
+    const optimisticId = Date.now().toString();
+    const optimisticMsg = {
+      id: optimisticId,
+      sender: "me",
+      text: "📷 Image",
+      message_type: "image",
+      image_url: pendingImage.dataUrl,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+
+    setLocalMessages(prev => ({
+      ...prev,
+      [activeConvo]: [...(prev[activeConvo] || []), optimisticMsg]
+    }));
+
+    setConversations(prev => prev.map(c =>
+      c.id === activeConvo ? { ...c, lastMessage: "📷 Image", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) } : c
+    ));
+
+    setPendingImage(null);
+
+    try {
+      const res = await api.post('/messages', {
+        conversation_id: activeConvo,
+        message_type: 'image',
+        image_url: pendingImage.dataUrl,
+      });
+      const serverMsg = res.data;
+      const realId = serverMsg._id ? serverMsg._id.toString() : optimisticId;
+      setLocalMessages(prev => {
+        const msgs = prev[activeConvo] || [];
+        return {
+          ...prev,
+          [activeConvo]: msgs.map(m =>
+            m.id === optimisticId
+              ? { ...m, id: realId, _id: serverMsg._id }
+              : m
+          ),
+        };
+      });
+    } catch (err) {
+      console.error('Send image failed:', err);
+      setLocalMessages(prev => {
+        const msgs = prev[activeConvo] || [];
+        return {
+          ...prev,
+          [activeConvo]: msgs.map(m =>
+            m.id === optimisticId
+              ? { ...m, text: "📷 Image ⚠️ Failed", failed: true }
+              : m
+          ),
+        };
+      });
+    } finally {
+      setImageSending(false);
+    }
   };
 
   /* ─── Create Appointment ─── */
@@ -1262,6 +1367,33 @@ export default function MessagesPage() {
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {/* Image Preview Bar */}
+              {pendingImage && (
+                <div className="flex items-center gap-3 px-3 py-2 rounded-xl mb-2" style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)' }}>
+                  <img src={pendingImage.dataUrl} alt="Preview" className="h-16 w-16 rounded-lg object-cover" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-white/60 truncate">{pendingImage.file.name}</p>
+                    <p className="text-[10px] text-white/30">{(pendingImage.file.size / 1024).toFixed(0)} KB</p>
+                  </div>
+                  <motion.button onClick={handleCancelImage} className="text-red-400/60 hover:text-red-400 transition-colors" whileTap={{ scale: 0.9 }} title="Cancel">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </motion.button>
+                  <motion.button
+                    onClick={handleSendImage}
+                    disabled={imageSending}
+                    className="shrink-0 flex items-center justify-center h-9 w-9 rounded-xl"
+                    style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.5), rgba(59,130,246,0.4))', border: '1px solid rgba(139,92,246,0.3)', color: 'rgba(255,255,255,0.9)' }}
+                    whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                    title="Send Image"
+                  >
+                    {imageSending ? (
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    ) : icons.send}
+                  </motion.button>
+                </div>
+              )}
+
               <div className="flex items-center gap-2 rounded-xl px-3 py-2"
                 style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
                 <motion.button
@@ -1272,9 +1404,21 @@ export default function MessagesPage() {
                 >
                   {icons.emoji}
                 </motion.button>
-                <motion.button className="shrink-0 text-white/20 hover:text-white/50 transition-colors" whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+                <motion.button
+                  onClick={() => imageInputRef.current?.click()}
+                  className="shrink-0 text-white/20 hover:text-white/50 transition-colors"
+                  whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
+                  title="Send Image"
+                >
                   {icons.attach}
                 </motion.button>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageSelect}
+                />
                 <input
                   type="text"
                   placeholder="Type a message..."

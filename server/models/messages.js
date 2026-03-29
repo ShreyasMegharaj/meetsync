@@ -17,7 +17,7 @@ const messageSchema = new mongoose.Schema(
 
     message_type: {
       type: String,
-      enum: ['text', 'appointment'],
+      enum: ['text', 'image', 'appointment'],
       default: 'text',
     },
 
@@ -25,6 +25,11 @@ const messageSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: 1000
+    },
+
+    image_url: {
+      type: String,
+      default: null,
     },
 
     appointment_id: {

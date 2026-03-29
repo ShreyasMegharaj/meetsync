@@ -280,6 +280,10 @@ export default function ProfilePage() {
   const [editLoading, setEditLoading] = useState(false);
   const [editSuccess, setEditSuccess] = useState(false);
 
+  /* Incoming friend requests (own profile only) */
+  const [incomingRequests, setIncomingRequests] = useState([]);
+  const [requestActionLoading, setRequestActionLoading] = useState(null);
+
   const fileInputRef = useRef(null);
 
   /* ─── Get current logged-in user from localStorage ─── */
@@ -342,6 +346,28 @@ export default function ProfilePage() {
 
     if (username) fetchProfile();
   }, [username]);
+
+  /* ─── Fetch incoming requests (own profile) ─── */
+  useEffect(() => {
+    if (!isOwnProfile) return;
+    const fetchRequests = async () => {
+      try {
+        const res = await api.get('/requests/incoming');
+        setIncomingRequests(res.data || []);
+      } catch (_) {}
+    };
+    fetchRequests();
+  }, [isOwnProfile]);
+
+  /* ─── Handle accept/reject from profile page ─── */
+  const handleProfileRequestAction = async (reqId, action) => {
+    setRequestActionLoading(reqId);
+    try {
+      await api.put(`/requests/${reqId}/${action}`);
+      setIncomingRequests(prev => prev.filter(r => r._id !== reqId));
+    } catch (_) {}
+    finally { setRequestActionLoading(null); }
+  };
 
   const handleStartChat = async () => {
     setChatLoading(true);
@@ -766,6 +792,50 @@ export default function ProfilePage() {
                     </div>
                   )}
                 </motion.div>
+
+                {/* ─── Incoming Friend Requests (own profile) ─── */}
+                {isOwnProfile && incomingRequests.length > 0 && (
+                  <motion.div className="w-full mt-6"
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.55, duration: 0.2 }}
+                  >
+                    <h3 className="text-sm font-semibold text-white/50 mb-3 flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" /></svg>
+                      Friend Requests
+                      <span className="bg-red-500/80 text-white text-[10px] px-1.5 py-0.5 rounded-full">{incomingRequests.length}</span>
+                    </h3>
+                    <div className="flex flex-col gap-2">
+                      {incomingRequests.map(req => (
+                        <div key={req._id} className="flex items-center gap-3 rounded-xl px-3 py-2.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                          <div className="h-10 w-10 shrink-0 rounded-full border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center text-xs font-bold text-white/70">
+                            {req.from_user?.profile_picture ? (
+                              <img src={req.from_user.profile_picture} alt="" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                            ) : (
+                              req.from_user?.name?.charAt(0).toUpperCase() || '?'
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-white/80 truncate">{req.from_user?.name || req.from_user?.username}</p>
+                            <p className="text-xs text-white/30 truncate">@{req.from_user?.username}</p>
+                          </div>
+                          <div className="flex gap-2 shrink-0">
+                            <motion.button onClick={() => handleProfileRequestAction(req._id, 'accept')} disabled={requestActionLoading === req._id}
+                              className="h-8 w-8 rounded-lg flex items-center justify-center bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors" title="Accept"
+                              whileTap={{ scale: 0.9 }}>
+                              {icons.check}
+                            </motion.button>
+                            <motion.button onClick={() => handleProfileRequestAction(req._id, 'reject')} disabled={requestActionLoading === req._id}
+                              className="h-8 w-8 rounded-lg flex items-center justify-center bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors" title="Reject"
+                              whileTap={{ scale: 0.9 }}>
+                              {icons.xMark}
+                            </motion.button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
               </div>
             </motion.div>
           )}

@@ -58,40 +58,40 @@ Send a message
 */
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { conversation_id, message_text } = req.body;
+    const { conversation_id, message_text, message_type, image_url } = req.body;
 
-    if (!conversation_id || !message_text) {
-      return res.status(400).json({
-        message: 'Conversation ID and message text are required'
-      });
+    if (!conversation_id) {
+      return res.status(400).json({ message: 'Conversation ID is required' });
     }
 
     if (!mongoose.Types.ObjectId.isValid(conversation_id)) {
-      return res.status(400).json({
-        message: 'Invalid conversation ID'
-      });
+      return res.status(400).json({ message: 'Invalid conversation ID' });
     }
 
-    const cleanMessage = message_text.trim();
+    const type = message_type || 'text';
 
-    if (cleanMessage.length === 0) {
-      return res.status(400).json({
-        message: 'Message cannot be empty'
-      });
-    }
-
-    if (cleanMessage.length > 1000) {
-      return res.status(400).json({
-        message: 'Message cannot exceed 1000 characters'
-      });
+    // Validate based on type
+    if (type === 'text') {
+      if (!message_text || !message_text.trim()) {
+        return res.status(400).json({ message: 'Message text is required for text messages' });
+      }
+      if (message_text.trim().length > 1000) {
+        return res.status(400).json({ message: 'Message cannot exceed 1000 characters' });
+      }
+    } else if (type === 'image') {
+      if (!image_url) {
+        return res.status(400).json({ message: 'Image data is required for image messages' });
+      }
+      // ~2MB base64 limit
+      if (image_url.length > 2800000) {
+        return res.status(400).json({ message: 'Image is too large. Max ~2MB.' });
+      }
     }
 
     const conversation = await Conversation.findById(conversation_id);
 
     if (!conversation) {
-      return res.status(404).json({
-        message: 'Conversation not found'
-      });
+      return res.status(404).json({ message: 'Conversation not found' });
     }
 
     const isParticipant = conversation.participants.some(
@@ -99,17 +99,23 @@ router.post('/', authMiddleware, async (req, res) => {
     );
 
     if (!isParticipant) {
-      return res.status(403).json({
-        message: 'Access denied'
-      });
+      return res.status(403).json({ message: 'Access denied' });
     }
 
-    const message = await Message.create({
+    const messageData = {
       conversation_id,
       sender_id: req.user.id,
-      message_text: cleanMessage,
-      message_type: 'text'
-    });
+      message_type: type,
+    };
+
+    if (type === 'text') {
+      messageData.message_text = message_text.trim();
+    } else if (type === 'image') {
+      messageData.image_url = image_url;
+      messageData.message_text = message_text?.trim() || '📷 Image';
+    }
+
+    const message = await Message.create(messageData);
 
     conversation.last_message_at = new Date();
     await conversation.save();
