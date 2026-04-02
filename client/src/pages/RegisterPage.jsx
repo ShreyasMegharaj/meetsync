@@ -138,12 +138,12 @@ const MagneticCursor = () => {
       {/* Outer aurora */}
       <motion.div className="fixed rounded-full pointer-events-none" style={{ x: slowX, y: slowY, width: 420, height: 420, marginLeft: -210, marginTop: -210, background: "radial-gradient(circle,rgba(139,92,246,0.08),rgba(59,130,246,0.05),rgba(236,72,153,0.03),transparent 70%)", filter: "blur(65px)", zIndex: 9997 }} />
       {/* Pulsing ring */}
-      <motion.div className="fixed pointer-events-none" style={{ x: midX, y: midY, width: 48, height: 48, marginLeft: -24, marginTop: -24, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,0.2)", boxShadow: "0 0 18px rgba(139,92,246,0.12), inset 0 0 18px rgba(139,92,246,0.06)", zIndex: 10000 }}
-        animate={{ scale: [1, 1.35, 1], opacity: [0.5, 1, 0.5], borderColor: ["rgba(255,255,255,0.2)", "rgba(167,139,250,0.45)", "rgba(96,165,250,0.35)", "rgba(255,255,255,0.2)"] }}
+      <motion.div className="fixed pointer-events-none" style={{ x: midX, y: midY, width: 48, height: 48, marginLeft: -24, marginTop: -24, borderRadius: "50%", border: "1.5px solid rgba(var(--theme-white),0.2)", boxShadow: "0 0 18px rgba(139,92,246,0.12), inset 0 0 18px rgba(139,92,246,0.06)", zIndex: 10000 }}
+        animate={{ scale: [1, 1.35, 1], opacity: [0.5, 1, 0.5], borderColor: ["rgba(var(--theme-white),0.2)", "rgba(167,139,250,0.45)", "rgba(96,165,250,0.35)", "rgba(var(--theme-white),0.2)"] }}
         transition={{ duration: 0.2,  ease: "easeInOut" }} />
       {/* Bright core */}
-      <motion.div className="fixed rounded-full pointer-events-none" style={{ x: fastX, y: fastY, width: 7, height: 7, marginLeft: -3.5, marginTop: -3.5, background: "rgba(255,255,255,0.95)", boxShadow: "0 0 12px rgba(255,255,255,0.6), 0 0 25px rgba(139,92,246,0.5)", zIndex: 10002 }}
-        animate={{ boxShadow: ["0 0 12px rgba(255,255,255,0.6),0 0 25px rgba(139,92,246,0.5)", "0 0 18px rgba(255,255,255,0.8),0 0 35px rgba(59,130,246,0.6)", "0 0 12px rgba(255,255,255,0.6),0 0 25px rgba(236,72,153,0.5)", "0 0 12px rgba(255,255,255,0.6),0 0 25px rgba(139,92,246,0.5)"] }}
+      <motion.div className="fixed rounded-full pointer-events-none" style={{ x: fastX, y: fastY, width: 7, height: 7, marginLeft: -3.5, marginTop: -3.5, background: "rgba(var(--theme-white),0.95)", boxShadow: "0 0 12px rgba(var(--theme-white),0.6), 0 0 25px rgba(139,92,246,0.5)", zIndex: 10002 }}
+        animate={{ boxShadow: ["0 0 12px rgba(var(--theme-white),0.6),0 0 25px rgba(139,92,246,0.5)", "0 0 18px rgba(var(--theme-white),0.8),0 0 35px rgba(59,130,246,0.6)", "0 0 12px rgba(var(--theme-white),0.6),0 0 25px rgba(236,72,153,0.5)", "0 0 12px rgba(var(--theme-white),0.6),0 0 25px rgba(139,92,246,0.5)"] }}
         transition={{ duration: 0.2,  ease: "easeInOut" }} />
     </>
   );
@@ -181,15 +181,15 @@ const AnimatedLogo = () => (
     <motion.div
       className="relative flex h-full w-full items-center justify-center rounded-[20px]"
       style={{
-        background: "rgba(255,255,255,0.08)",
+        background: "rgba(var(--theme-white),0.08)",
         backdropFilter: "blur(24px)",
         WebkitBackdropFilter: "blur(24px)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), 0 8px 32px rgba(0,0,0,0.4)",
+        border: "1px solid rgba(var(--theme-white),0.12)",
+        boxShadow: "inset 0 1px 0 rgba(var(--theme-white),0.15), 0 8px 32px rgba(var(--theme-black),0.4)",
       }}
       animate={{
         scale: [1, 1.04, 1],
-        borderColor: ["rgba(255,255,255,0.12)", "rgba(167,139,250,0.25)", "rgba(255,255,255,0.12)"],
+        borderColor: ["rgba(var(--theme-white),0.12)", "rgba(167,139,250,0.25)", "rgba(var(--theme-white),0.12)"],
       }}
       transition={{ duration: 0.2,  ease: "easeInOut" }}
       whileHover={{ scale: 1.1, borderColor: "rgba(167,139,250,0.4)" }}
@@ -197,7 +197,7 @@ const AnimatedLogo = () => (
       {/* Liquid refraction inside logo */}
       <motion.div className="absolute inset-0 rounded-[20px] overflow-hidden pointer-events-none">
         <motion.div
-          style={{ position: "absolute", top: 0, left: "-120%", width: "80%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)", transform: "skewX(-20deg)" }}
+          style={{ position: "absolute", top: 0, left: "-120%", width: "80%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.08),transparent)", transform: "skewX(-20deg)" }}
           animate={{ left: ["-120%", "220%"] }}
           transition={{ duration: 0.2,  repeatDelay: 2, ease: "easeInOut" }} />
       </motion.div>
@@ -205,7 +205,7 @@ const AnimatedLogo = () => (
       {/* Register icon — user-plus */}
       <motion.svg
         width="30" height="30" viewBox="0 0 24 24" fill="none"
-        stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+        stroke="rgba(var(--theme-white),0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
         animate={{ strokeOpacity: [0.9, 1, 0.9], scale: [1, 1.05, 1] }}
         transition={{ duration: 0.2,  ease: "easeInOut" }}
       >
@@ -237,9 +237,9 @@ const GlassInput = ({ id, label, type, value, onChange, placeholder, icon, d, ex
       <input id={id} type={type} value={value} onChange={onChange} placeholder={placeholder}
         autoComplete={id === "email" ? "email" : id === "name" ? "name" : id === "username" ? "username" : "new-password"}
         className="w-full rounded-2xl border py-3.5 pl-12 pr-12 text-sm text-white/90 outline-none placeholder:text-white/15 transition-all duration-200"
-        style={{ cursor: "none", background: "rgba(255,255,255,0.04)", backdropFilter: "blur(30px)", WebkitBackdropFilter: "blur(30px)", borderColor: "rgba(255,255,255,0.07)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 12px rgba(0,0,0,0.25)" }}
-        onFocus={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.18)"; e.target.style.background = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.08), 0 0 30px rgba(139,92,246,0.08), 0 0 60px rgba(99,102,241,0.04)"; }}
-        onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.07)"; e.target.style.background = "rgba(255,255,255,0.04)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 12px rgba(0,0,0,0.25)"; }}
+        style={{ cursor: "none", background: "rgba(var(--theme-white),0.04)", backdropFilter: "blur(30px)", WebkitBackdropFilter: "blur(30px)", borderColor: "rgba(var(--theme-white),0.07)", boxShadow: "inset 0 1px 0 rgba(var(--theme-white),0.05), 0 2px 12px rgba(var(--theme-black),0.25)" }}
+        onFocus={(e) => { e.target.style.borderColor = "rgba(var(--theme-white),0.18)"; e.target.style.background = "rgba(var(--theme-white),0.08)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(var(--theme-white),0.08), 0 0 30px rgba(139,92,246,0.08), 0 0 60px rgba(99,102,241,0.04)"; }}
+        onBlur={(e) => { e.target.style.borderColor = "rgba(var(--theme-white),0.07)"; e.target.style.background = "rgba(var(--theme-white),0.04)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(var(--theme-white),0.05), 0 2px 12px rgba(var(--theme-black),0.25)"; }}
       />
       {extra}
     </div>
@@ -361,7 +361,7 @@ export default function RegisterPage() {
   );
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10" style={{ background: "#030108", cursor: "none" }}>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10" style={{ background: "var(--theme-bg-main)", cursor: "none" }}>
       <Background />
       
 
@@ -378,16 +378,16 @@ export default function RegisterPage() {
         <motion.div
           className="relative rounded-[28px] px-8 py-10 sm:px-11 sm:py-13"
           style={{
-            background: "linear-gradient(165deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.08) 100%)",
+            background: "linear-gradient(165deg, rgba(var(--theme-white),0.10) 0%, rgba(var(--theme-white),0.05) 50%, rgba(var(--theme-white),0.08) 100%)",
             backdropFilter: "blur(60px) saturate(140%)",
             WebkitBackdropFilter: "blur(60px) saturate(140%)",
-            border: "1px solid rgba(255,255,255,0.10)",
+            border: "1px solid rgba(var(--theme-white),0.10)",
             boxShadow: `
-              0 40px 100px rgba(0,0,0,0.5),
-              inset 0 1px 0 rgba(255,255,255,0.12),
-              inset 0 -1px 0 rgba(255,255,255,0.03),
-              inset 1px 0 0 rgba(255,255,255,0.05),
-              inset -1px 0 0 rgba(255,255,255,0.05)
+              0 40px 100px rgba(var(--theme-black),0.5),
+              inset 0 1px 0 rgba(var(--theme-white),0.12),
+              inset 0 -1px 0 rgba(var(--theme-white),0.03),
+              inset 1px 0 0 rgba(var(--theme-white),0.05),
+              inset -1px 0 0 rgba(var(--theme-white),0.05)
             `,
           }}
           animate={{ y: [0, -7, 0] }}
@@ -400,12 +400,12 @@ export default function RegisterPage() {
           
 
           {/* Top refraction edge — breathing */}
-          <motion.div className="absolute top-0 left-[8%] right-[8%] h-px pointer-events-none" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)", zIndex: 2 }}
+          <motion.div className="absolute top-0 left-[8%] right-[8%] h-px pointer-events-none" style={{ background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.2),transparent)", zIndex: 2 }}
             animate={{ opacity: [0.3, 0.9, 0.3], scaleX: [0.8, 1, 0.8] }}
             transition={{ duration: 0.2,  ease: "easeInOut" }} />
 
           {/* Bottom refraction edge */}
-          <motion.div className="absolute bottom-0 left-[15%] right-[15%] h-px pointer-events-none" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)", zIndex: 2 }}
+          <motion.div className="absolute bottom-0 left-[15%] right-[15%] h-px pointer-events-none" style={{ background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.08),transparent)", zIndex: 2 }}
             animate={{ opacity: [0.2, 0.5, 0.2] }}
             transition={{ duration: 0.2,  ease: "easeInOut", delay: 1 }} />
 
@@ -473,8 +473,8 @@ export default function RegisterPage() {
                   whileTap={{ scale: loading ? 1 : 0.975 }}
                   className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl px-6 py-4 text-[14px] font-semibold text-black/80 disabled:opacity-50 disabled:cursor-not-allowed transition-shadow duration-200"
                   style={{
-                    background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(241,245,249,0.92) 50%, rgba(226,232,240,0.9) 100%)",
-                    boxShadow: "0 0 35px rgba(255,255,255,0.08), 0 8px 35px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.9)",
+                    background: "linear-gradient(135deg, rgba(var(--theme-white),0.95) 0%, rgba(241,245,249,0.92) 50%, rgba(226,232,240,0.9) 100%)",
+                    boxShadow: "0 0 35px rgba(var(--theme-white),0.08), 0 8px 35px rgba(var(--theme-black),0.35), inset 0 1px 0 rgba(var(--theme-white),0.9)",
                     cursor: "none",
                   }}>
                   {/* Button shimmer */}
@@ -483,7 +483,7 @@ export default function RegisterPage() {
                     animate={{ x: ["-100%", "100%"] }}
                     transition={{ duration: 0.2,  repeatDelay: 2.5, ease: "easeInOut" }} />
                   <span className="absolute -inset-1 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    style={{ background: "radial-gradient(circle,rgba(255,255,255,0.12),transparent 70%)", filter: "blur(20px)" }} />
+                    style={{ background: "radial-gradient(circle,rgba(var(--theme-white),0.12),transparent 70%)", filter: "blur(20px)" }} />
                   {loading ? (
                     <><Spinner /><span className="relative">Creating account…</span></>
                   ) : (
@@ -496,7 +496,7 @@ export default function RegisterPage() {
 
             {/* Divider */}
             <div className="mt-8 flex items-center">
-              <motion.span className="h-px flex-1" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent)" }}
+              <motion.span className="h-px flex-1" style={{ background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.07),transparent)" }}
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ duration: 0.2,  ease: "easeInOut" }} />
             </div>
@@ -507,7 +507,7 @@ export default function RegisterPage() {
               Already have an account?{" "}
               <Link to="/login" className="font-semibold text-white/40 transition-all duration-200 hover:text-white/70"
                 style={{ cursor: "none" }}
-                onMouseEnter={(e) => (e.target.style.textShadow = "0 0 25px rgba(255,255,255,0.25)")}
+                onMouseEnter={(e) => (e.target.style.textShadow = "0 0 25px rgba(var(--theme-white),0.25)")}
                 onMouseLeave={(e) => (e.target.style.textShadow = "none")}>
                 Sign in
               </Link>

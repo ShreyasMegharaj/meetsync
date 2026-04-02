@@ -4,6 +4,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import NotificationBell from "../components/NotificationBell";
+import ThemeToggle from "../components/ThemeToggle";
 
 /* ─── helpers ─── */
 const rand = (a, b) => Math.random() * (b - a) + a;
@@ -12,7 +13,7 @@ const rand = (a, b) => Math.random() * (b - a) + a;
    BACKGROUND
    ═══════════════════════════════════════════════════════════════ */
 const Background = () => (
-  <div className="fixed inset-0 overflow-hidden bg-[#030108]" style={{ zIndex: 0 }}>
+  <div className="fixed inset-0 overflow-hidden bg-[var(--theme-bg-main)]" style={{ zIndex: 0 }}>
     <div className="absolute inset-0" style={{ background: "linear-gradient(145deg, #050208 0%, #0a0618 30%, #0d0a1a 50%, #06050f 70%, #020104 100%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 25% 15%, rgba(109,40,217,0.07) 0%, transparent 55%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 75% 85%, rgba(59,130,246,0.05) 0%, transparent 55%)" }} />
@@ -44,11 +45,11 @@ const MagneticCursor = () => {
    GLASS STYLE
    ═══════════════════════════════════════════════════════════════ */
 const glassStyle = {
-  background: "linear-gradient(165deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.05) 100%)",
+  background: "linear-gradient(165deg, rgba(var(--theme-white),0.07) 0%, rgba(var(--theme-white),0.03) 50%, rgba(var(--theme-white),0.05) 100%)",
   backdropFilter: "blur(40px) saturate(130%)",
   WebkitBackdropFilter: "blur(40px) saturate(130%)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
+  border: "1px solid rgba(var(--theme-white),0.08)",
+  boxShadow: "0 20px 60px rgba(var(--theme-black),0.4), inset 0 1px 0 rgba(var(--theme-white),0.08)",
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -94,22 +95,22 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
       {isOpen && (
         <motion.aside
           className="fixed top-0 left-0 h-full z-40 flex flex-col w-[260px] py-6 px-4"
-          style={{ ...glassStyle, borderRight: "1px solid rgba(255,255,255,0.06)", borderRadius: 0 }}
+          style={{ ...glassStyle, borderRight: "1px solid rgba(var(--theme-white),0.06)", borderRadius: 0 }}
           initial={{ x: -280, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -280, opacity: 0 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           <Link to="/dashboard" className="flex items-center gap-3 px-3 mb-10">
             <motion.div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden"
-              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(255,255,255,0.1)" }}
+              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(var(--theme-white),0.1)" }}
               whileHover={{ scale: 1.1 }}
-              animate={{ borderColor: ["rgba(255,255,255,0.1)", "rgba(167,139,250,0.2)", "rgba(96,165,250,0.2)", "rgba(255,255,255,0.1)"] }}
+              animate={{ borderColor: ["rgba(var(--theme-white),0.1)", "rgba(167,139,250,0.2)", "rgba(96,165,250,0.2)", "rgba(var(--theme-white),0.1)"] }}
               transition={{ duration: 0.2,  ease: "easeInOut" }}
             >
               <motion.div className="absolute inset-0 pointer-events-none"
-                style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)", transform: "skewX(-20deg)" }}
+                style={{ background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.1),transparent)", transform: "skewX(-20deg)" }}
                 animate={{ left: ["-150%", "250%"] }}
                 transition={{ duration: 0.2,  repeatDelay: 4, ease: "easeInOut" }} />
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(var(--theme-white),0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
@@ -136,7 +137,7 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
                     {isActive && (
                       <motion.div className="absolute inset-0 rounded-xl"
                         layoutId="sidebarActive"
-                        style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 0 25px rgba(139,92,246,0.08), inset 0 1px 0 rgba(255,255,255,0.05)" }}
+                        style={{ background: "rgba(var(--theme-white),0.06)", border: "1px solid rgba(var(--theme-white),0.08)", boxShadow: "0 0 25px rgba(139,92,246,0.08), inset 0 1px 0 rgba(var(--theme-white),0.05)" }}
                         transition={{ type: "spring", stiffness: 200, damping: 25 }} />
                     )}
                     <motion.span className="relative z-10"
@@ -154,7 +155,7 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
                     )}
                     {!isActive && (
                       <motion.div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                        style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }} />
+                        style={{ background: "rgba(var(--theme-white),0.02)", border: "1px solid rgba(var(--theme-white),0.04)" }} />
                     )}
                   </Link>
                 </motion.div>
@@ -187,22 +188,22 @@ const ProfileSkeleton = () => (
     <div className="flex flex-col items-center">
       {/* Avatar skeleton */}
       <motion.div className="w-28 h-28 rounded-full mb-6"
-        style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08))", border: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08))", border: "1px solid rgba(var(--theme-white),0.06)" }}
         animate={{ opacity: [0.3, 0.6, 0.3] }}
         transition={{ duration: 0.2,  ease: "easeInOut" }} />
       {/* Name skeleton */}
       <motion.div className="w-40 h-5 rounded-lg mb-3"
-        style={{ background: "rgba(255,255,255,0.06)" }}
+        style={{ background: "rgba(var(--theme-white),0.06)" }}
         animate={{ opacity: [0.3, 0.6, 0.3] }}
         transition={{ duration: 0.2,  ease: "easeInOut", delay: 0.15 }} />
       {/* Username skeleton */}
       <motion.div className="w-28 h-4 rounded-lg mb-4"
-        style={{ background: "rgba(255,255,255,0.04)" }}
+        style={{ background: "rgba(var(--theme-white),0.04)" }}
         animate={{ opacity: [0.3, 0.6, 0.3] }}
         transition={{ duration: 0.2,  ease: "easeInOut", delay: 0.3 }} />
       {/* Bio skeleton */}
       <motion.div className="w-full h-16 rounded-xl mb-6"
-        style={{ background: "rgba(255,255,255,0.04)" }}
+        style={{ background: "rgba(var(--theme-white),0.04)" }}
         animate={{ opacity: [0.3, 0.6, 0.3] }}
         transition={{ duration: 0.2,  ease: "easeInOut", delay: 0.45 }} />
       {/* Button skeleton */}
@@ -245,8 +246,8 @@ const ErrorCard = ({ message, onGoBack }) => (
 
       <motion.button onClick={onGoBack}
         className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white/60 hover:text-white/90 transition-all duration-200"
-        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
-        whileHover={{ scale: 1.04, borderColor: "rgba(255,255,255,0.15)", boxShadow: "0 0 20px rgba(139,92,246,0.1)" }}
+        style={{ background: "rgba(var(--theme-white),0.05)", border: "1px solid rgba(var(--theme-white),0.08)" }}
+        whileHover={{ scale: 1.04, borderColor: "rgba(var(--theme-white),0.15)", boxShadow: "0 0 20px rgba(139,92,246,0.1)" }}
         whileTap={{ scale: 0.96 }}
       >
         {icons.back}
@@ -472,7 +473,7 @@ export default function ProfilePage() {
   const currentInitials = currentUserName.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 
   return (
-    <div className="relative min-h-screen overflow-hidden" style={{ background: "#030108" }}>
+    <div className="relative min-h-screen overflow-hidden" style={{ background: "var(--theme-bg-main)" }}>
       <Background />
       
       <Sidebar active="profile" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={currentUser?.username || ""} />
@@ -481,7 +482,7 @@ export default function ProfilePage() {
         {/* ══════ TOP NAVBAR ══════ */}
         <motion.header
           className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 sm:px-8"
-          style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", borderBottom: "1px solid rgba(var(--theme-white),0.06)" }}
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
@@ -489,9 +490,9 @@ export default function ProfilePage() {
           <div className="flex items-center gap-3">
             <motion.button
               className="flex items-center justify-center h-10 w-10 rounded-xl text-white/40 hover:text-white/70 transition-colors duration-200"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+              style={{ background: "rgba(var(--theme-white),0.04)", border: "1px solid rgba(var(--theme-white),0.06)" }}
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              whileHover={{ scale: 1.08, borderColor: "rgba(255,255,255,0.12)" }}
+              whileHover={{ scale: 1.08, borderColor: "rgba(var(--theme-white),0.12)" }}
               whileTap={{ scale: 0.95 }}>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -507,7 +508,7 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Notification bell */}
+            <ThemeToggle />
             <NotificationBell />
 
             {/* Avatar + name */}
@@ -523,9 +524,9 @@ export default function ProfilePage() {
                 </div>
               </div>
               <motion.div className="relative flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white/80 overflow-hidden"
-                style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.35), rgba(59,130,246,0.3))", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 4px 15px rgba(0,0,0,0.3)" }}
+                style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.35), rgba(59,130,246,0.3))", border: "1px solid rgba(var(--theme-white),0.12)", boxShadow: "0 4px 15px rgba(var(--theme-black),0.3)" }}
                 whileHover={{ scale: 1.1, borderColor: "rgba(167,139,250,0.4)" }}
-                animate={{ borderColor: ["rgba(255,255,255,0.12)", "rgba(167,139,250,0.2)", "rgba(255,255,255,0.12)"] }}
+                animate={{ borderColor: ["rgba(var(--theme-white),0.12)", "rgba(167,139,250,0.2)", "rgba(var(--theme-white),0.12)"] }}
                 transition={{ duration: 0.2,  ease: "easeInOut" }}
               >
                 {currentUser?.profile_picture ? (
@@ -534,7 +535,7 @@ export default function ProfilePage() {
                   currentInitials
                 )}
                 <motion.div className="absolute inset-0 pointer-events-none"
-                  style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)", transform: "skewX(-20deg)" }}
+                  style={{ background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.12),transparent)", transform: "skewX(-20deg)" }}
                   animate={{ left: ["-150%", "250%"] }}
                   transition={{ duration: 0.2,  repeatDelay: 5, ease: "easeInOut" }} />
               </motion.div>
@@ -563,7 +564,7 @@ export default function ProfilePage() {
 
               {/* Shimmer effect */}
               <motion.div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
-                <motion.div style={{ position: "absolute", top: 0, left: "-100%", width: "40%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.03),transparent)", transform: "skewX(-12deg)" }}
+                <motion.div style={{ position: "absolute", top: 0, left: "-100%", width: "40%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.03),transparent)", transform: "skewX(-12deg)" }}
                   animate={{ left: ["-100%", "300%"] }}
                   transition={{ duration: 0.2,  repeatDelay: 4, ease: "easeInOut" }} />
               </motion.div>
@@ -591,18 +592,18 @@ export default function ProfilePage() {
                         : isEditing && editProfilePic
                         ? `url(${editProfilePic}) center/cover no-repeat`
                         : "linear-gradient(135deg, rgba(139,92,246,0.4), rgba(59,130,246,0.3), rgba(236,72,153,0.2))",
-                      border: "2px solid rgba(255,255,255,0.1)",
+                      border: "2px solid rgba(var(--theme-white),0.1)",
                       boxShadow: "0 8px 32px rgba(139,92,246,0.15), 0 0 0 4px rgba(10,6,24,0.6)",
                     }}
                     animate={{
-                      borderColor: ["rgba(255,255,255,0.1)", "rgba(167,139,250,0.25)", "rgba(96,165,250,0.2)", "rgba(255,255,255,0.1)"],
+                      borderColor: ["rgba(var(--theme-white),0.1)", "rgba(167,139,250,0.25)", "rgba(96,165,250,0.2)", "rgba(var(--theme-white),0.1)"],
                     }}
                     transition={{ duration: 0.2,  ease: "easeInOut" }}
                   >
                     {!(profilePicture || (isEditing && editProfilePic)) && initials}
                     {/* Avatar shimmer */}
                     <motion.div className="absolute inset-0 pointer-events-none"
-                      style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)", transform: "skewX(-20deg)" }}
+                      style={{ background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.1),transparent)", transform: "skewX(-20deg)" }}
                       animate={{ left: ["-150%", "250%"] }}
                       transition={{ duration: 0.2,  repeatDelay: 5, ease: "easeInOut" }} />
                   </motion.div>
@@ -620,7 +621,7 @@ export default function ProfilePage() {
                       onClick={() => fileInputRef.current?.click()}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      whileHover={{ backgroundColor: "rgba(0,0,0,0.55)" }}
+                      whileHover={{ backgroundColor: "rgba(var(--theme-black),0.55)" }}
                     >
                       {icons.camera}
                     </motion.button>
@@ -662,13 +663,13 @@ export default function ProfilePage() {
                       rows={3}
                       className="w-full rounded-xl px-4 py-3 text-sm text-white/80 placeholder-white/15 outline-none resize-none transition-all duration-200 focus:border-violet-500/30"
                       style={{
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
+                        background: "rgba(var(--theme-white),0.04)",
+                        border: "1px solid rgba(var(--theme-white),0.08)",
                       }}
                     />
                   ) : (
                     <div className="rounded-xl px-4 py-3"
-                      style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                      style={{ background: "rgba(var(--theme-white),0.02)", border: "1px solid rgba(var(--theme-white),0.04)" }}>
                       <p className="text-sm text-white/40 leading-relaxed">
                         {bio || "No bio yet."}
                       </p>
@@ -694,8 +695,8 @@ export default function ProfilePage() {
                           <motion.button
                             onClick={() => { setIsEditing(false); setEditBio(profileData?.bio || ""); setEditProfilePic(profileData?.profilePicture || profileData?.avatar || ""); }}
                             className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white/40 hover:text-white/70 transition-all duration-200"
-                            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-                            whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.15)" }}
+                            style={{ background: "rgba(var(--theme-white),0.04)", border: "1px solid rgba(var(--theme-white),0.08)" }}
+                            whileHover={{ scale: 1.02, borderColor: "rgba(var(--theme-white),0.15)" }}
                             whileTap={{ scale: 0.97 }}
                           >
                             {icons.xMark}
@@ -806,7 +807,7 @@ export default function ProfilePage() {
                     </h3>
                     <div className="flex flex-col gap-2">
                       {incomingRequests.map(req => (
-                        <div key={req._id} className="flex items-center gap-3 rounded-xl px-3 py-2.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                        <div key={req._id} className="flex items-center gap-3 rounded-xl px-3 py-2.5" style={{ background: 'rgba(var(--theme-white),0.03)', border: '1px solid rgba(var(--theme-white),0.06)' }}>
                           <div className="h-10 w-10 shrink-0 rounded-full border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center text-xs font-bold text-white/70">
                             {req.from_user?.profile_picture ? (
                               <img src={req.from_user.profile_picture} alt="" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
@@ -851,8 +852,8 @@ export default function ProfilePage() {
           borderBottom: "none",
           borderLeft: "none",
           borderRight: "none",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          background: "linear-gradient(165deg, rgba(10,6,24,0.95) 0%, rgba(5,2,8,0.98) 100%)",
+          borderTop: "1px solid rgba(var(--theme-white),0.08)",
+          background: "linear-gradient(165deg, var(--theme-bg-nav) 0%, var(--theme-bg-nav-dark) 100%)",
           backdropFilter: "blur(30px) saturate(150%)",
           WebkitBackdropFilter: "blur(30px) saturate(150%)",
         }}

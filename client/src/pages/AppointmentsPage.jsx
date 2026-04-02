@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import NotificationBell from "../components/NotificationBell";
+import ThemeToggle from "../components/ThemeToggle";
 
 /* ─── helpers ─── */
 const rand = (a, b) => Math.random() * (b - a) + a;
@@ -12,7 +13,7 @@ const rand = (a, b) => Math.random() * (b - a) + a;
    ANIMATED BACKGROUND
    ═══════════════════════════════════════════════════════════════ */
 const Background = () => (
-  <div className="fixed inset-0 -z-10 overflow-hidden" style={{ background: "#030108" }}>
+  <div className="fixed inset-0 -z-10 overflow-hidden" style={{ background: "var(--theme-bg-main)" }}>
     {[...Array(3)].map((_, i) => (
       <motion.div key={i} className="absolute rounded-full pointer-events-none"
         style={{ width: rand(300, 500), height: rand(300, 500), left: `${rand(10, 80)}%`, top: `${rand(10, 80)}%`,
@@ -30,11 +31,11 @@ const Background = () => (
    GLASS STYLE
    ═══════════════════════════════════════════════════════════════ */
 const glassStyle = {
-  background: "linear-gradient(165deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.05) 100%)",
+  background: "linear-gradient(165deg, rgba(var(--theme-white),0.07) 0%, rgba(var(--theme-white),0.03) 50%, rgba(var(--theme-white),0.05) 100%)",
   backdropFilter: "blur(40px) saturate(130%)",
   WebkitBackdropFilter: "blur(40px) saturate(130%)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
+  border: "1px solid rgba(var(--theme-white),0.08)",
+  boxShadow: "0 20px 60px rgba(var(--theme-black),0.4), inset 0 1px 0 rgba(var(--theme-white),0.08)",
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -76,15 +77,15 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
       {isOpen && (
         <motion.aside
           className="fixed top-0 left-0 h-full z-40 flex flex-col w-[260px] py-6 px-4"
-          style={{ ...glassStyle, borderRight: "1px solid rgba(255,255,255,0.06)", borderRadius: 0 }}
+          style={{ ...glassStyle, borderRight: "1px solid rgba(var(--theme-white),0.06)", borderRadius: 0 }}
           initial={{ x: -280, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -280, opacity: 0 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           <Link to="/dashboard" className="flex items-center gap-3 px-3 mb-10">
             <motion.div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden"
-              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(255,255,255,0.1)" }}
+              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(var(--theme-white),0.1)" }}
               whileHover={{ scale: 1.1 }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(var(--theme-white),0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
@@ -106,7 +107,7 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
                     className={`group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive ? "text-white/90" : "text-white/30 hover:text-white/65"}`}>
                     {isActive && (
                       <motion.div className="absolute inset-0 rounded-xl" layoutId="sidebarActive"
-                        style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 0 25px rgba(139,92,246,0.08), inset 0 1px 0 rgba(255,255,255,0.05)" }}
+                        style={{ background: "rgba(var(--theme-white),0.06)", border: "1px solid rgba(var(--theme-white),0.08)", boxShadow: "0 0 25px rgba(139,92,246,0.08), inset 0 1px 0 rgba(var(--theme-white),0.05)" }}
                         transition={{ type: "spring", stiffness: 200, damping: 25 }} />
                     )}
                     <span className="relative z-10">{item.icon}</span>
@@ -118,7 +119,7 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
                     )}
                     {!isActive && (
                       <motion.div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                        style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }} />
+                        style={{ background: "rgba(var(--theme-white),0.02)", border: "1px solid rgba(var(--theme-white),0.04)" }} />
                     )}
                   </Link>
                 </motion.div>
@@ -230,7 +231,7 @@ const AppointmentCard = ({ appointment, currentUserId, delay }) => {
         {/* Note */}
         {appointment.note && (
           <div className="mt-2 rounded-xl px-3.5 py-2.5"
-            style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+            style={{ background: "rgba(var(--theme-white),0.02)", border: "1px solid rgba(var(--theme-white),0.04)" }}>
             <p className="text-[12px] text-white/35 italic leading-relaxed flex items-start gap-2">
               {icons.note}
               <span>"{appointment.note}"</span>
@@ -330,7 +331,7 @@ export default function AppointmentsPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden" style={{ background: "#030108" }}>
+    <div className="relative min-h-screen overflow-hidden" style={{ background: "var(--theme-bg-main)" }}>
       <Background />
       
       <Sidebar active="appointments" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={user?.username || ""} />
@@ -339,7 +340,7 @@ export default function AppointmentsPage() {
         {/* ══════ TOP NAVBAR ══════ */}
         <motion.header
           className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 sm:px-8"
-          style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", borderBottom: "1px solid rgba(var(--theme-white),0.06)" }}
           initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
         >
           <motion.button className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white/70"
@@ -350,6 +351,7 @@ export default function AppointmentsPage() {
           <h2 className="hidden lg:block text-lg font-semibold text-white/70">Appointments</h2>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <NotificationBell />
             <div className="flex items-center gap-3">
               <div className="hidden sm:block text-right">
@@ -400,8 +402,8 @@ export default function AppointmentsPage() {
                   border: "1px solid rgba(139,92,246,0.25)",
                   boxShadow: "0 0 20px rgba(139,92,246,0.08)"
                 } : {
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.06)"
+                  background: "rgba(var(--theme-white),0.03)",
+                  border: "1px solid rgba(var(--theme-white),0.06)"
                 }}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
@@ -447,8 +449,8 @@ export default function AppointmentsPage() {
         style={{
           ...glassStyle,
           borderRadius: 0, borderBottom: "none", borderLeft: "none", borderRight: "none",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          background: "linear-gradient(165deg, rgba(10,6,24,0.95) 0%, rgba(5,2,8,0.98) 100%)",
+          borderTop: "1px solid rgba(var(--theme-white),0.08)",
+          background: "linear-gradient(165deg, var(--theme-bg-nav) 0%, var(--theme-bg-nav-dark) 100%)",
           backdropFilter: "blur(30px) saturate(150%)",
           WebkitBackdropFilter: "blur(30px) saturate(150%)",
         }}

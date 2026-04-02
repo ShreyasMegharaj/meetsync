@@ -103,8 +103,8 @@ export default function NotificationBell() {
       <motion.button 
         onClick={() => setIsOpen(!isOpen)}
         className="relative flex items-center justify-center h-10 w-10 rounded-xl text-white/30 hover:text-white/60 transition-colors duration-300"
-        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
-        whileHover={{ scale: 1.08, borderColor: "rgba(255,255,255,0.12)" }}
+        style={{ background: "rgba(var(--theme-white),0.03)", border: "1px solid rgba(var(--theme-white),0.06)" }}
+        whileHover={{ scale: 1.08, borderColor: "rgba(var(--theme-white),0.12)" }}
         whileTap={{ scale: 0.95 }}
       >
         {icons.bell}
@@ -123,7 +123,7 @@ export default function NotificationBell() {
             style={{ 
               background: "linear-gradient(165deg, rgba(20,15,35,0.95) 0%, rgba(10,5,25,0.98) 100%)",
               backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid rgba(var(--theme-white),0.1)",
               maxHeight: "80vh"
             }}
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -148,7 +148,7 @@ export default function NotificationBell() {
             </div>
 
             {/* List Body */}
-            <div className="flex-1 overflow-y-auto px-2 py-2" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.1) transparent" }}>
+            <div className="flex-1 overflow-y-auto px-2 py-2" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(var(--theme-white),0.1) transparent" }}>
               {activeTab === 'requests' ? (
                 requests.length === 0 ? (
                   <p className="text-center text-sm text-white/30 py-8">No incoming friend requests.</p>

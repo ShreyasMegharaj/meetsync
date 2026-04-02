@@ -4,6 +4,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import EmojiPicker from "emoji-picker-react";
 import api from "../utils/api";
 import NotificationBell from "../components/NotificationBell";
+import ThemeToggle from "../components/ThemeToggle";
 import socket from "../utils/socket";
 
 const DEFAULT_AVATAR = null; // will fall back to initials
@@ -15,7 +16,7 @@ const rand = (a, b) => Math.random() * (b - a) + a;
    BACKGROUND
    ═══════════════════════════════════════════════════════════════ */
 const Background = () => (
-  <div className="fixed inset-0 overflow-hidden bg-[#030108]" style={{ zIndex: 0 }}>
+  <div className="fixed inset-0 overflow-hidden bg-[var(--theme-bg-main)]" style={{ zIndex: 0 }}>
     <div className="absolute inset-0" style={{ background: "linear-gradient(145deg, #050208 0%, #0a0618 30%, #0d0a1a 50%, #06050f 70%, #020104 100%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 25% 15%, rgba(109,40,217,0.07) 0%, transparent 55%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 75% 85%, rgba(59,130,246,0.05) 0%, transparent 55%)" }} />
@@ -47,11 +48,11 @@ const MagneticCursor = () => {
 
 /* ─── Glass Style ─── */
 const glassStyle = {
-  background: "linear-gradient(165deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.05) 100%)",
+  background: "linear-gradient(165deg, rgba(var(--theme-white),0.07) 0%, rgba(var(--theme-white),0.03) 50%, rgba(var(--theme-white),0.05) 100%)",
   backdropFilter: "blur(40px) saturate(130%)",
   WebkitBackdropFilter: "blur(40px) saturate(130%)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
+  border: "1px solid rgba(var(--theme-white),0.08)",
+  boxShadow: "0 20px 60px rgba(var(--theme-black),0.4), inset 0 1px 0 rgba(var(--theme-white),0.08)",
 };
 
 /* ─── Icons ─── */
@@ -96,14 +97,14 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.aside className="fixed top-0 left-0 h-full z-40 flex flex-col w-[260px] py-6 px-4"
-          style={{ ...glassStyle, borderRight: "1px solid rgba(255,255,255,0.06)", borderRadius: 0 }}
+          style={{ ...glassStyle, borderRight: "1px solid rgba(var(--theme-white),0.06)", borderRadius: 0 }}
           initial={{ x: -280, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -280, opacity: 0 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}>
           <Link to="/dashboard" className="flex items-center gap-3 px-3 mb-10">
             <motion.div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden"
-              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(255,255,255,0.1)" }}
+              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(var(--theme-white),0.1)" }}
               whileHover={{ scale: 1.1 }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(var(--theme-white),0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
@@ -123,7 +124,7 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
                     className={`group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive ? "text-white/90" : "text-white/30 hover:text-white/65"}`}>
                     {isActive && (
                       <motion.div className="absolute inset-0 rounded-xl" layoutId="sidebarActive"
-                        style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 0 25px rgba(139,92,246,0.08)" }}
+                        style={{ background: "rgba(var(--theme-white),0.06)", border: "1px solid rgba(var(--theme-white),0.08)", boxShadow: "0 0 25px rgba(139,92,246,0.08)" }}
                         transition={{ type: "spring", stiffness: 200, damping: 25 }} />
                     )}
                     <span className="relative z-10">{item.icon}</span>
@@ -157,7 +158,7 @@ const ConversationItem = ({ convo, isActive, onClick, index }) => {
   return (
     <motion.div
       className={`group relative flex items-center gap-3 rounded-xl px-3 py-3 cursor-pointer transition-all duration-200 ${isActive ? "bg-white/[0.06]" : "hover:bg-white/[0.03]"}`}
-      style={isActive ? { border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 0 20px rgba(139,92,246,0.06)" } : { border: "1px solid transparent" }}
+      style={isActive ? { border: "1px solid rgba(var(--theme-white),0.08)", boxShadow: "0 0 20px rgba(139,92,246,0.06)" } : { border: "1px solid transparent" }}
       onClick={onClick}
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
@@ -171,7 +172,7 @@ const ConversationItem = ({ convo, isActive, onClick, index }) => {
       )}
       <div className="relative shrink-0">
         <div className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold text-white/80"
-          style={{ background: `linear-gradient(135deg, ${colors[convo.id % colors.length]}, ${colors[(convo.id + 2) % colors.length]})`, border: "1px solid rgba(255,255,255,0.1)" }}>
+          style={{ background: `linear-gradient(135deg, ${colors[convo.id % colors.length]}, ${colors[(convo.id + 2) % colors.length]})`, border: "1px solid rgba(var(--theme-white),0.1)" }}>
           {convo.avatar}
         </div>
         {convo.online && (
@@ -215,9 +216,9 @@ const ChatBubble = ({ message, index }) => {
           border: "1px solid rgba(139,92,246,0.15)",
           boxShadow: "0 4px 20px rgba(139,92,246,0.08)",
         } : {
-          background: "linear-gradient(165deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03))",
-          border: "1px solid rgba(255,255,255,0.06)",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+          background: "linear-gradient(165deg, rgba(var(--theme-white),0.07), rgba(var(--theme-white),0.03))",
+          border: "1px solid rgba(var(--theme-white),0.06)",
+          boxShadow: "0 4px 20px rgba(var(--theme-black),0.2)",
         }}>
         {isImage && message.image_url ? (
           <img
@@ -260,12 +261,12 @@ const AppointmentCard = ({ appointment, index, onAccept, onReject, onCancel, cur
     >
       <motion.div
         className="w-full max-w-[400px] rounded-2xl p-5 relative overflow-hidden group cursor-default"
-        style={{ ...glassStyle, background: "linear-gradient(165deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.05) 100%)" }}
-        whileHover={{ boxShadow: `0 20px 60px rgba(0,0,0,0.45), 0 0 30px ${st.glow}, inset 0 1px 0 rgba(255,255,255,0.1)` }}
+        style={{ ...glassStyle, background: "linear-gradient(165deg, rgba(var(--theme-white),0.08) 0%, rgba(var(--theme-white),0.03) 50%, rgba(var(--theme-white),0.05) 100%)" }}
+        whileHover={{ boxShadow: `0 20px 60px rgba(var(--theme-black),0.45), 0 0 30px ${st.glow}, inset 0 1px 0 rgba(var(--theme-white),0.1)` }}
         transition={{ duration: 0.2 }}
       >
         <motion.div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
-          <motion.div style={{ position: "absolute", top: 0, left: "-100%", width: "40%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent)", transform: "skewX(-12deg)" }}
+          <motion.div style={{ position: "absolute", top: 0, left: "-100%", width: "40%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.04),transparent)", transform: "skewX(-12deg)" }}
             animate={{ left: ["-100%", "300%"] }}
             transition={{ duration: 0.2,  repeatDelay: 5, ease: "easeInOut" }} />
         </motion.div>
@@ -281,7 +282,7 @@ const AppointmentCard = ({ appointment, index, onAccept, onReject, onCancel, cur
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <motion.div className="flex h-8 w-8 items-center justify-center rounded-lg"
-                style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(var(--theme-white),0.08)" }}
                 whileHover={{ scale: 1.1 }} transition={{ type: "spring", stiffness: 300, damping: 15 }}>
                 <svg className="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -326,8 +327,8 @@ const AppointmentCard = ({ appointment, index, onAccept, onReject, onCancel, cur
                 <motion.button
                   onClick={() => onCancel(appointment.id || appointment._id)}
                   className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12px] font-semibold text-white/40 hover:text-white/70 transition-all duration-200"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-                  whileHover={{ scale: 1.03, borderColor: "rgba(255,255,255,0.15)", boxShadow: "0 0 15px rgba(255,255,255,0.04)" }}
+                  style={{ background: "rgba(var(--theme-white),0.04)", border: "1px solid rgba(var(--theme-white),0.08)" }}
+                  whileHover={{ scale: 1.03, borderColor: "rgba(var(--theme-white),0.15)", boxShadow: "0 0 15px rgba(var(--theme-white),0.04)" }}
                   whileTap={{ scale: 0.96 }}>
                   {icons.xMark} Cancel Request
                 </motion.button>
@@ -363,9 +364,9 @@ const AppointmentCard = ({ appointment, index, onAccept, onReject, onCancel, cur
 const DURATION_OPTIONS = ["15 minutes", "30 minutes", "45 minutes", "60 minutes"];
 
 const inputStyle = {
-  background: "rgba(255,255,255,0.04)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  color: "rgba(255,255,255,0.8)",
+  background: "rgba(var(--theme-white),0.04)",
+  border: "1px solid rgba(var(--theme-white),0.08)",
+  color: "rgba(var(--theme-white),0.8)",
 };
 
 const AppointmentModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
@@ -394,7 +395,7 @@ const AppointmentModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <motion.div
               className="w-full max-w-[440px] rounded-2xl p-6 relative overflow-hidden"
-              style={{ ...glassStyle, background: "linear-gradient(165deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.06) 100%)", boxShadow: "0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)" }}
+              style={{ ...glassStyle, background: "linear-gradient(165deg, rgba(var(--theme-white),0.09) 0%, rgba(var(--theme-white),0.04) 50%, rgba(var(--theme-white),0.06) 100%)", boxShadow: "0 30px 80px rgba(var(--theme-black),0.6), inset 0 1px 0 rgba(var(--theme-white),0.1)" }}
               initial={{ scale: 0.9, y: 30, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 30, opacity: 0 }}
@@ -402,7 +403,7 @@ const AppointmentModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
               onClick={(e) => e.stopPropagation()}
             >
               <motion.div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-                <motion.div style={{ position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent)", transform: "skewX(-12deg)" }}
+                <motion.div style={{ position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.04),transparent)", transform: "skewX(-12deg)" }}
                   animate={{ left: ["-100%", "300%"] }}
                   transition={{ duration: 0.2,  repeatDelay: 4, ease: "easeInOut" }} />
               </motion.div>
@@ -410,8 +411,8 @@ const AppointmentModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <motion.div className="flex h-10 w-10 items-center justify-center rounded-xl"
-                      style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(255,255,255,0.1)" }}
-                      animate={{ borderColor: ["rgba(255,255,255,0.1)", "rgba(167,139,250,0.25)", "rgba(255,255,255,0.1)"] }}
+                      style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(var(--theme-white),0.1)" }}
+                      animate={{ borderColor: ["rgba(var(--theme-white),0.1)", "rgba(167,139,250,0.25)", "rgba(var(--theme-white),0.1)"] }}
                       transition={{ duration: 0.2,  ease: "easeInOut" }}>
                       <svg className="w-5 h-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -424,7 +425,7 @@ const AppointmentModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
                   </div>
                   <motion.button onClick={onClose}
                     className="flex h-8 w-8 items-center justify-center rounded-lg text-white/30 hover:text-white/60 transition-colors"
-                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+                    style={{ background: "rgba(var(--theme-white),0.04)", border: "1px solid rgba(var(--theme-white),0.06)" }}
                     whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                     {icons.xMark}
                   </motion.button>
@@ -471,7 +472,7 @@ const AppointmentModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
                 <div className="flex items-center gap-3 mt-6">
                   <motion.button onClick={onClose}
                     className="flex-1 rounded-xl py-2.5 text-[13px] font-semibold text-white/40 hover:text-white/60 transition-all duration-200"
-                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+                    style={{ background: "rgba(var(--theme-white),0.04)", border: "1px solid rgba(var(--theme-white),0.06)" }}
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     Cancel
                   </motion.button>
@@ -1144,7 +1145,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 bottom-0 flex flex-col overflow-hidden" style={{ background: "#030108", height: "100dvh" }}>
+    <div className="fixed top-0 left-0 right-0 bottom-0 flex flex-col overflow-hidden" style={{ background: "var(--theme-bg-main)", height: "100dvh" }}>
       <Background />
       
       <Sidebar active="messages" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={user?.username || ""} />
@@ -1153,14 +1154,14 @@ export default function MessagesPage() {
         {/* ══════ TOP NAVBAR ══════ */}
         <motion.header
           className="shrink-0 flex items-center justify-between px-6 py-3 sm:px-8"
-          style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", borderBottom: "1px solid rgba(var(--theme-white),0.06)" }}
           initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="flex items-center gap-4">
             <motion.button
               className="flex items-center justify-center h-10 w-10 rounded-xl text-white/40 hover:text-white/70 transition-colors duration-200"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+              style={{ background: "rgba(var(--theme-white),0.04)", border: "1px solid rgba(var(--theme-white),0.06)" }}
               onClick={() => setSidebarOpen(!sidebarOpen)}
               whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.95 }}>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -1173,6 +1174,7 @@ export default function MessagesPage() {
             </motion.h2>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <NotificationBell />
             <div className="flex items-center gap-3">
               <div className="hidden sm:block text-right">
@@ -1180,7 +1182,7 @@ export default function MessagesPage() {
               </div>
               <motion.div
                 className="relative flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white/80 overflow-hidden"
-                style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.35), rgba(59,130,246,0.3))", border: "1px solid rgba(255,255,255,0.12)" }}
+                style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.35), rgba(59,130,246,0.3))", border: "1px solid rgba(var(--theme-white),0.12)" }}
                 whileHover={{ scale: 1.1 }}>
                 {user?.profile_picture ? (
                   <img src={user.profile_picture} alt={username} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
@@ -1191,7 +1193,7 @@ export default function MessagesPage() {
             </div>
             <motion.button onClick={logout}
               className="group flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-white/30 hover:text-red-400/70 transition-all duration-200"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+              style={{ background: "rgba(var(--theme-white),0.03)", border: "1px solid rgba(var(--theme-white),0.06)" }}
               whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
               {icons.logout}
               <span className="hidden sm:inline">Logout</span>
@@ -1204,7 +1206,7 @@ export default function MessagesPage() {
           {/* ─── LEFT: Conversation List ─── */}
           <motion.div
             className={`flex flex-col w-full md:w-[320px] lg:w-[340px] shrink-0 overflow-hidden ${activeConvo ? 'hidden md:flex' : 'flex'}`}
-            style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderBottom: "none", borderRight: "1px solid rgba(255,255,255,0.06)" }}
+            style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderBottom: "none", borderRight: "1px solid rgba(var(--theme-white),0.06)" }}
             initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
@@ -1217,11 +1219,11 @@ export default function MessagesPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-white/70 placeholder-white/20 outline-none transition-all duration-200 focus:border-violet-500/30"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+                  style={{ background: "rgba(var(--theme-white),0.04)", border: "1px solid rgba(var(--theme-white),0.06)" }}
                 />
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-1" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.08) transparent" }}>
+            <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-1" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(var(--theme-white),0.08) transparent" }}>
               {conversationsLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <motion.div className="h-8 w-8 rounded-full border-2 border-white/10 border-t-violet-500/60"
@@ -1254,7 +1256,7 @@ export default function MessagesPage() {
             {/* Chat Top Bar */}
             {activeConversation && (
               <motion.div className="shrink-0 flex items-center justify-between px-6 py-3"
-                style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
+                style={{ borderBottom: "1px solid rgba(var(--theme-white),0.06)", background: "rgba(var(--theme-white),0.02)" }}
                 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.2 }}>
                 <div className="flex items-center gap-3">
@@ -1263,7 +1265,7 @@ export default function MessagesPage() {
                   </button>
                   <div className="flex relative shrink-0">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold text-white/80"
-                      style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.35), rgba(59,130,246,0.3))", border: "1px solid rgba(255,255,255,0.1)" }}>
+                      style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.35), rgba(59,130,246,0.3))", border: "1px solid rgba(var(--theme-white),0.1)" }}>
                       {activeConversation.avatar}
                     </div>
                     {activeConversation.online && (
@@ -1302,7 +1304,7 @@ export default function MessagesPage() {
             )}
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-4" style={{ paddingBottom: "80px", scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.08) transparent" }}>
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-4" style={{ paddingBottom: "80px", scrollbarWidth: "thin", scrollbarColor: "rgba(var(--theme-white),0.08) transparent" }}>
               <AnimatePresence mode="wait">
                 <motion.div key={activeConvo} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                   {currentMessages.length === 0 ? (
@@ -1340,7 +1342,7 @@ export default function MessagesPage() {
 
             {/* Input Area */}
             <motion.div className="relative shrink-0 sticky bottom-0 w-full z-10"
-              style={{ padding: "12px", borderTop: "1px solid rgba(255,255,255,0.06)", background: "#030108" }}
+              style={{ padding: "12px", borderTop: "1px solid rgba(var(--theme-white),0.06)", background: "var(--theme-bg-main)" }}
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.2 }}>
               {/* Emoji Picker */}
@@ -1362,7 +1364,7 @@ export default function MessagesPage() {
                       width="100%"
                       height={350}
                       previewConfig={{ showPreview: false }}
-                      style={{ background: "rgba(12,8,28,0.97)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "16px" }}
+                      style={{ background: "rgba(12,8,28,0.97)", border: "1px solid rgba(var(--theme-white),0.1)", borderRadius: "16px" }}
                     />
                   </motion.div>
                 )}
@@ -1383,7 +1385,7 @@ export default function MessagesPage() {
                     onClick={handleSendImage}
                     disabled={imageSending}
                     className="shrink-0 flex items-center justify-center h-9 w-9 rounded-xl"
-                    style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.5), rgba(59,130,246,0.4))', border: '1px solid rgba(139,92,246,0.3)', color: 'rgba(255,255,255,0.9)' }}
+                    style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.5), rgba(59,130,246,0.4))', border: '1px solid rgba(139,92,246,0.3)', color: 'rgba(var(--theme-white),0.9)' }}
                     whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                     title="Send Image"
                   >
@@ -1395,7 +1397,7 @@ export default function MessagesPage() {
               )}
 
               <div className="flex items-center gap-2 rounded-xl px-3 py-2"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                style={{ background: "rgba(var(--theme-white),0.04)", border: "1px solid rgba(var(--theme-white),0.06)" }}>
                 <motion.button
                   onClick={() => setShowEmojiPicker(v => !v)}
                   className={`shrink-0 transition-colors ${showEmojiPicker ? 'text-violet-400' : 'text-white/20 hover:text-white/50'}`}
@@ -1432,9 +1434,9 @@ export default function MessagesPage() {
                   onClick={handleSend}
                   className="shrink-0 flex items-center justify-center h-9 w-9 rounded-xl transition-all duration-200"
                   style={{
-                    background: messageInput.trim() ? "linear-gradient(135deg, rgba(139,92,246,0.5), rgba(59,130,246,0.4))" : "rgba(255,255,255,0.04)",
-                    border: messageInput.trim() ? "1px solid rgba(139,92,246,0.3)" : "1px solid rgba(255,255,255,0.06)",
-                    color: messageInput.trim() ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.2)",
+                    background: messageInput.trim() ? "linear-gradient(135deg, rgba(139,92,246,0.5), rgba(59,130,246,0.4))" : "rgba(var(--theme-white),0.04)",
+                    border: messageInput.trim() ? "1px solid rgba(139,92,246,0.3)" : "1px solid rgba(var(--theme-white),0.06)",
+                    color: messageInput.trim() ? "rgba(var(--theme-white),0.9)" : "rgba(var(--theme-white),0.2)",
                     boxShadow: messageInput.trim() ? "0 0 20px rgba(139,92,246,0.15)" : "none",
                   }}
                   whileHover={{ scale: 1.1 }}
@@ -1463,8 +1465,8 @@ export default function MessagesPage() {
           borderBottom: "none",
           borderLeft: "none",
           borderRight: "none",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          background: "linear-gradient(165deg, rgba(10,6,24,0.95) 0%, rgba(5,2,8,0.98) 100%)",
+          borderTop: "1px solid rgba(var(--theme-white),0.08)",
+          background: "linear-gradient(165deg, var(--theme-bg-nav) 0%, var(--theme-bg-nav-dark) 100%)",
           backdropFilter: "blur(30px) saturate(150%)",
           WebkitBackdropFilter: "blur(30px) saturate(150%)",
         }}

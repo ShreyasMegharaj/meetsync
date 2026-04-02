@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../utils/api";
+import { io } from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
 import NotificationBell from "../components/NotificationBell";
+import ThemeToggle from "../components/ThemeToggle";
 
 /* ─── helpers ─── */
 const rand = (a, b) => Math.random() * (b - a) + a;
@@ -12,7 +14,7 @@ const rand = (a, b) => Math.random() * (b - a) + a;
    BACKGROUND
    ═══════════════════════════════════════════════════════════════ */
 const Background = () => (
-  <div className="fixed inset-0 overflow-hidden bg-[#030108]" style={{ zIndex: 0 }}>
+  <div className="fixed inset-0 overflow-hidden bg-[var(--theme-bg-main)]" style={{ zIndex: 0 }}>
     <div className="absolute inset-0" style={{ background: "linear-gradient(145deg, #050208 0%, #0a0618 30%, #0d0a1a 50%, #06050f 70%, #020104 100%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 25% 15%, rgba(109,40,217,0.07) 0%, transparent 55%)" }} />
     <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 75% 85%, rgba(59,130,246,0.05) 0%, transparent 55%)" }} />
@@ -44,11 +46,11 @@ const MagneticCursor = () => {
    GLASS CARD — reusable style
    ═══════════════════════════════════════════════════════════════ */
 const glassStyle = {
-  background: "linear-gradient(165deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.05) 100%)",
+  background: "linear-gradient(165deg, rgba(var(--theme-white),0.07) 0%, rgba(var(--theme-white),0.03) 50%, rgba(var(--theme-white),0.05) 100%)",
   backdropFilter: "blur(40px) saturate(130%)",
   WebkitBackdropFilter: "blur(40px) saturate(130%)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
+  border: "1px solid rgba(var(--theme-white),0.08)",
+  boxShadow: "0 20px 60px rgba(var(--theme-black),0.4), inset 0 1px 0 rgba(var(--theme-white),0.08)",
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -92,24 +94,24 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
       {isOpen && (
         <motion.aside
           className="fixed top-0 left-0 h-full z-40 flex flex-col w-[260px] py-6 px-4"
-          style={{ ...glassStyle, borderRight: "1px solid rgba(255,255,255,0.06)", borderRadius: 0 }}
+          style={{ ...glassStyle, borderRight: "1px solid rgba(var(--theme-white),0.06)", borderRadius: 0 }}
           initial={{ x: -280, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -280, opacity: 0 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
       {/* Logo */}
       <Link to="/dashboard" className="flex items-center gap-3 px-3 mb-10">
         <motion.div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden"
-          style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(255,255,255,0.1)" }}
+          style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(var(--theme-white),0.1)" }}
           whileHover={{ scale: 1.1, borderColor: "rgba(167,139,250,0.4)" }}
-          animate={{ borderColor: ["rgba(255,255,255,0.1)", "rgba(167,139,250,0.2)", "rgba(96,165,250,0.2)", "rgba(255,255,255,0.1)"] }}
+          animate={{ borderColor: ["rgba(var(--theme-white),0.1)", "rgba(167,139,250,0.2)", "rgba(96,165,250,0.2)", "rgba(var(--theme-white),0.1)"] }}
           transition={{ duration: 0.2,  ease: "easeInOut" }}
         >
           {/* Logo shimmer */}
           <motion.div className="absolute inset-0 pointer-events-none"
-            style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)", transform: "skewX(-20deg)" }}
+            style={{ background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.1),transparent)", transform: "skewX(-20deg)" }}
             animate={{ left: ["-150%", "250%"] }}
             transition={{ duration: 0.2,  repeatDelay: 4, ease: "easeInOut" }} />
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(var(--theme-white),0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
             <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
@@ -137,7 +139,7 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
                 {isActive && (
                   <motion.div className="absolute inset-0 rounded-xl"
                     layoutId="sidebarActive"
-                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 0 25px rgba(139,92,246,0.08), inset 0 1px 0 rgba(255,255,255,0.05)" }}
+                    style={{ background: "rgba(var(--theme-white),0.06)", border: "1px solid rgba(var(--theme-white),0.08)", boxShadow: "0 0 25px rgba(139,92,246,0.08), inset 0 1px 0 rgba(var(--theme-white),0.05)" }}
                     transition={{ type: "spring", stiffness: 200, damping: 25 }} />
                 )}
                 <motion.span className="relative z-10"
@@ -156,7 +158,7 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
                 {/* Hover glow for inactive */}
                 {!isActive && (
                   <motion.div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }} />
+                    style={{ background: "rgba(var(--theme-white),0.02)", border: "1px solid rgba(var(--theme-white),0.04)" }} />
                 )}
               </Link>
             </motion.div>
@@ -206,15 +208,15 @@ const QuickActionCard = ({ icon, title, description, gradient, delay }) => (
     {/* Shimmer sweep */}
     <motion.div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
       <motion.div
-        style={{ position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.05),transparent)", transform: "skewX(-15deg)" }}
+        style={{ position: "absolute", top: 0, left: "-100%", width: "50%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.05),transparent)", transform: "skewX(-15deg)" }}
         animate={{ left: ["-100%", "280%"] }}
         transition={{ duration: 0.2,  repeatDelay: 2.5, ease: "easeInOut" }} />
     </motion.div>
 
     {/* Icon container with pulse */}
     <motion.div className="relative z-10 mb-4 flex h-13 w-13 items-center justify-center rounded-xl"
-      style={{ background: gradient, border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 20px rgba(0,0,0,0.3)", width: 52, height: 52 }}
-      animate={{ boxShadow: ["0 4px 20px rgba(0,0,0,0.3)", `0 4px 30px ${gradient.includes("139,92,246") ? "rgba(139,92,246,0.15)" : gradient.includes("59,130,246") ? "rgba(59,130,246,0.15)" : "rgba(236,72,153,0.15)"}`, "0 4px 20px rgba(0,0,0,0.3)"] }}
+      style={{ background: gradient, border: "1px solid rgba(var(--theme-white),0.1)", boxShadow: "0 4px 20px rgba(var(--theme-black),0.3)", width: 52, height: 52 }}
+      animate={{ boxShadow: ["0 4px 20px rgba(var(--theme-black),0.3)", `0 4px 30px ${gradient.includes("139,92,246") ? "rgba(139,92,246,0.15)" : gradient.includes("59,130,246") ? "rgba(59,130,246,0.15)" : "rgba(236,72,153,0.15)"}`, "0 4px 20px rgba(var(--theme-black),0.3)"] }}
       transition={{ duration: 0.2,  ease: "easeInOut" }}
       whileHover={{ scale: 1.15, rotate: 5 }}>
       <span className="text-white/80 group-hover:text-white transition-colors duration-200">{icon}</span>
@@ -527,7 +529,7 @@ export default function DashboardPage() {
   const initials = username.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 
   return (
-    <div className="relative min-h-screen overflow-hidden" style={{ background: "#030108" }}>
+    <div className="relative min-h-screen overflow-hidden" style={{ background: "var(--theme-bg-main)" }}>
       <Background />
       
       <Sidebar active="dashboard" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={user?.username || ""} />
@@ -536,7 +538,7 @@ export default function DashboardPage() {
         {/* ══════ TOP NAVBAR ══════ */}
         <motion.header
           className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 sm:px-8"
-          style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ ...glassStyle, borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", borderBottom: "1px solid rgba(var(--theme-white),0.06)" }}
           initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
         >
           <motion.button className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white/70"
@@ -547,6 +549,7 @@ export default function DashboardPage() {
           <h2 className="hidden lg:block text-lg font-semibold text-white/70">Dashboard</h2>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <NotificationBell />
             <div className="flex items-center gap-3">
               <div className="hidden sm:block text-right">
@@ -610,8 +613,8 @@ export default function DashboardPage() {
           borderBottom: "none",
           borderLeft: "none",
           borderRight: "none",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          background: "linear-gradient(165deg, rgba(10,6,24,0.95) 0%, rgba(5,2,8,0.98) 100%)",
+          borderTop: "1px solid rgba(var(--theme-white),0.08)",
+          background: "linear-gradient(165deg, var(--theme-bg-nav) 0%, var(--theme-bg-nav-dark) 100%)",
           backdropFilter: "blur(30px) saturate(150%)",
           WebkitBackdropFilter: "blur(30px) saturate(150%)",
         }}

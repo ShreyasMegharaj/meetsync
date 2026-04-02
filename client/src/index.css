@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --theme-white: 255, 255, 255;
+  --theme-black: 0, 0, 0;
+  
+  --theme-bg-main: #030108;
+  --theme-bg-nav: rgba(10, 6, 24, 0.95);
+  --theme-bg-nav-dark: rgba(5, 2, 8, 0.98);
+}
+
+html[data-theme='light'] {
+  --theme-white: 24, 24, 27; /* Tailwind white turns into dark gray text/borders */
+  --theme-black: 255, 255, 255; /* Tailwind black turns into white */
+  
+  --theme-bg-main: #f4f2eb; /* Sanctuary creamy beige */
+  --theme-bg-nav: rgba(244, 242, 235, 0.95);
+  --theme-bg-nav-dark: rgba(235, 232, 224, 0.98);
+}
+
+body {
+  background-color: var(--theme-bg-main);
+  color: rgb(var(--theme-white));
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
