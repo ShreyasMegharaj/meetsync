@@ -16,10 +16,13 @@ api.interceptors.request.use((config) => {
 });
 
 // On 401 responses, clear auth and redirect to login
+// Skip for auth endpoints (login/register) so first-attempt errors aren't swallowed
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const url = error.config?.url || "";
+    const isAuthRoute = url.includes("/auth/login") || url.includes("/auth/register");
+    if (error.response && error.response.status === 401 && !isAuthRoute) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/";

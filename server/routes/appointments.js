@@ -207,33 +207,6 @@ router.put('/:id/reject', authMiddleware, async (req, res) => {
 });
 
 
-// --------------------------------------------------
-// GET /api/appointments
-// Get upcoming accepted appointments
-// --------------------------------------------------
-router.get('/', authMiddleware, async (req, res) => {
-  try {
-    const now = new Date();
-
-    const appointments = await Appointment.find({
-      $or: [
-        { host_id: req.user.id },
-        { client_id: req.user.id }
-      ],
-      status: 'accepted',
-      scheduled_for: { $gte: now }
-    })
-      .populate('host_id', 'name username')
-      .populate('client_id', 'name username')
-      .sort({ scheduled_for: 1 });
-
-    res.status(200).json(appointments);
-
-  } catch (error) {
-    console.error('Get appointments error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
 // --------------------------------------------------
 // DELETE /api/appointments/:id

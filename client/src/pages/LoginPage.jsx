@@ -237,7 +237,7 @@ const GlassInput = ({ id, label, type, value, onChange, placeholder, icon, d, ex
       <input id={id} type={type} value={value} onChange={onChange} placeholder={placeholder}
         autoComplete={id === "email" ? "email" : "current-password"}
         className="w-full rounded-2xl border py-3.5 pl-12 pr-12 text-sm text-white/90 outline-none placeholder:text-white/15 transition-all duration-200"
-        style={{ cursor: "none", background: "rgba(255,255,255,0.04)", backdropFilter: "blur(30px)", WebkitBackdropFilter: "blur(30px)", borderColor: "rgba(255,255,255,0.07)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 12px rgba(0,0,0,0.25)" }}
+        style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(30px)", WebkitBackdropFilter: "blur(30px)", borderColor: "rgba(255,255,255,0.07)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 12px rgba(0,0,0,0.25)" }}
         onFocus={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.18)"; e.target.style.background = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.08), 0 0 30px rgba(139,92,246,0.08), 0 0 60px rgba(99,102,241,0.04)"; }}
         onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.07)"; e.target.style.background = "rgba(255,255,255,0.04)"; e.target.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 12px rgba(0,0,0,0.25)"; }}
       />
@@ -292,7 +292,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10" style={{ background: "#030108", cursor: "none" }}>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10" style={{ background: "#030108" }}>
       <Background />
       
 
@@ -381,7 +381,7 @@ export default function LoginPage() {
               <GlassInput id="password" label="Password" type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" d={0.6}
                 icon={<svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>}
                 extra={
-                  <button type="button" onClick={() => setShowPw(!showPw)} className="absolute inset-y-0 right-0 flex items-center pr-4 text-white/15 hover:text-white/40 transition-colors duration-200" tabIndex={-1} style={{ cursor: "none" }}>
+                  <button type="button" onClick={() => setShowPw(!showPw)} className="absolute inset-y-0 right-0 flex items-center pr-4 text-white/15 hover:text-white/40 transition-colors duration-200" tabIndex={-1}>
                     {showPw ? (
                       <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9.27-3.11-11-7.5a11.7 11.7 0 013.168-4.477M6.343 6.343A9.97 9.97 0 0112 5c5 0 9.27 3.11 11 7.5a11.7 11.7 0 01-4.168 4.477M6.343 6.343L3 3m3.343 3.343l3.364 3.364m5.586 5.586L18.657 18.657M18.657 18.657L21 21m-5.293-2.293a4 4 0 01-5.414-5.414" /></svg>
                     ) : (
@@ -399,7 +399,6 @@ export default function LoginPage() {
                   style={{
                     background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(241,245,249,0.92) 50%, rgba(226,232,240,0.9) 100%)",
                     boxShadow: "0 0 35px rgba(255,255,255,0.08), 0 8px 35px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.9)",
-                    cursor: "none",
                   }}>
                   {/* Button shimmer */}
                   <motion.span className="absolute inset-0 pointer-events-none"
@@ -430,7 +429,6 @@ export default function LoginPage() {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85, duration: 0.2 }}>
               Don&apos;t have an account?{" "}
               <Link to="/register" className="font-semibold text-white/40 transition-all duration-200 hover:text-white/70"
-                style={{ cursor: "none" }}
                 onMouseEnter={(e) => (e.target.style.textShadow = "0 0 25px rgba(255,255,255,0.25)")}
                 onMouseLeave={(e) => (e.target.style.textShadow = "none")}>
                 Register

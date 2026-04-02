@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 import NotificationBell from "../components/NotificationBell";
 
 /* ─── helpers ─── */
@@ -72,7 +73,7 @@ const icons = {
 const getSidebarItems = (currentUsername) => [
   { key: "dashboard", label: "Dashboard", icon: icons.dashboard, to: "/dashboard" },
   { key: "messages", label: "Messages", icon: icons.messages, to: "/messages" },
-
+  { key: "appointments", label: "Appointments", icon: icons.appointments, to: "/appointments" },
   { key: "profile", label: "Profile", icon: icons.profile, to: currentUsername ? `/profile/${currentUsername}` : "/dashboard" },
 ];
 
@@ -436,7 +437,7 @@ const UpcomingMeetings = ({ appointments, currentUsername }) => {
    DASHBOARD PAGE
    ═══════════════════════════════════════════════════════════════ */
 export default function DashboardPage() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -449,13 +450,6 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-
-  useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem("user"));
-      if (stored) setUser(stored);
-    } catch { /* ignore */ }
-  }, []);
 
   // Fetch Dashboard Data
   useEffect(() => {
@@ -628,12 +622,13 @@ export default function DashboardPage() {
         {[
           { key: "dashboard", label: "Home", icon: icons.dashboard, to: "/dashboard" },
           { key: "messages", label: "Chat", icon: icons.messages, to: "/messages" },
+          { key: "appointments", label: "Appts", icon: icons.appointments, to: "/appointments" },
           { key: "profile", label: "Profile", icon: icons.profile, to: user?.username ? `/profile/${user.username}` : "/dashboard" },
         ].map((item) => {
           const isActive = item.key === "dashboard";
           return (
             <Link key={item.key} to={item.to}
-              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all duration-200 ${isActive ? "text-violet-400" : "text-white/30 hover:text-white/60"}`}
+              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-200 ${isActive ? "text-violet-400" : "text-white/30 hover:text-white/60"}`}
             >
               <motion.span whileTap={{ scale: 0.85 }}>
                 {item.icon}

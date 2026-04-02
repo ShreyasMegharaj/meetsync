@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import api from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 import NotificationBell from "../components/NotificationBell";
 
 /* ─── helpers ─── */
@@ -75,6 +76,7 @@ const icons = {
 const getSidebarItems = (currentUsername) => [
   { key: "dashboard", label: "Dashboard", icon: icons.dashboard, to: "/dashboard" },
   { key: "messages", label: "Messages", icon: icons.messages, to: "/messages" },
+  { key: "appointments", label: "Appointments", icon: icons.appointments, to: "/appointments" },
   { key: "profile", label: "Profile", icon: icons.profile, to: currentUsername ? `/profile/${currentUsername}` : "/dashboard" },
 ];
 
@@ -260,6 +262,7 @@ const ErrorCard = ({ message, onGoBack }) => (
 export default function ProfilePage() {
   const { username } = useParams();
   const navigate = useNavigate();
+  const { updateUser } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileData, setProfileData] = useState(null);
@@ -427,13 +430,10 @@ export default function ProfilePage() {
       const res = await api.put('/users/profile', payload);
 
       const updatedUser = res.data?.user || res.data;
-      setProfileData((prev) => ({ ...prev, ...updatedUser, bio: editBio, profilePicture: editProfilePic }));
+      setProfileData((prev) => ({ ...prev, ...updatedUser, bio: editBio, profile_picture: editProfilePic }));
 
-      /* Update localStorage */
-      const currentUser = getCurrentUser();
-      if (currentUser) {
-        localStorage.setItem("user", JSON.stringify({ ...currentUser, bio: editBio, profile_picture: editProfilePic }));
-      }
+      /* Update AuthContext + localStorage so photo/bio propagates everywhere */
+      updateUser({ bio: editBio, profile_picture: editProfilePic });
 
       setEditSuccess(true);
       setTimeout(() => {
@@ -863,6 +863,7 @@ export default function ProfilePage() {
         {[
           { key: "dashboard", label: "Home", icon: icons.dashboard, to: "/dashboard" },
           { key: "messages", label: "Chat", icon: icons.messages, to: "/messages" },
+          { key: "appointments", label: "Appts", icon: icons.appointments, to: "/appointments" },
           { key: "profile", label: "Profile", icon: icons.profile, to: currentUser?.username ? `/profile/${currentUser.username}` : "/dashboard" },
         ].map((item) => {
           const isActive = item.key === "profile";
