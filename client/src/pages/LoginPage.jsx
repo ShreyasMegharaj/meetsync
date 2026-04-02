@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motio
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import ThemeToggle from "../components/ThemeToggle";
 /* ─── helpers ─── */
 const rand = (a, b) => Math.random() * (b - a) + a;
 
@@ -295,6 +296,10 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10" style={{ background: "var(--theme-bg-main)" }}>
       <Background />
       
+      {/* Theme toggle — top right */}
+      <div className="fixed top-5 right-5" style={{ zIndex: 50 }}>
+        <ThemeToggle />
+      </div>
 
       {/* ══════ LIQUID GLASS CARD ══════ */}
       <motion.div className="relative w-full max-w-[440px]" style={{ zIndex: 10 }}

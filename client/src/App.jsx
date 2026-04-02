@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { ThemeProvider } from "./context/ThemeContext";
+import FloatingButterflies from "./components/FloatingButterflies";
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -14,6 +15,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
+        <FloatingButterflies />
         <BrowserRouter>
           <Routes>
 
