@@ -14,7 +14,7 @@
 }
 
 html[data-theme='light'] {
-  --theme-white: 65, 42, 18;
+  --theme-white: 75, 48, 20;
   --theme-black: 255, 250, 242;
   --theme-bg-main: #faf4ec;
   --theme-bg-nav: rgba(250, 244, 236, 0.96);
@@ -27,10 +27,11 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   LIGHT THEME — Warm Orange Nature Palette
+   LIGHT THEME — Warm Nature Palette (Orange / Amber / Brown)
+   Dark mode is 100% untouched.
    ═══════════════════════════════════════════════════════════════ */
 
-/* ---------- Painterly background (30% more vivid) ---------- */
+/* ---------- Background image: MORE COLORFUL ---------- */
 html[data-theme='light'] .fixed.inset-0.overflow-hidden {
   background: #faf4ec !important;
 }
@@ -42,43 +43,65 @@ html[data-theme='light'] .fixed.inset-0.overflow-hidden::after {
   position: absolute;
   inset: 0;
   background: url('/light-bg.png') center center / cover no-repeat;
-  opacity: 0.32;
-  filter: saturate(1.5) brightness(1.05);
+  opacity: 0.42;
+  filter: saturate(1.8) brightness(1.08) contrast(1.05);
   pointer-events: none;
 }
 
-/* ---------- text-white → warm burnt orange/brown ---------- */
-html[data-theme='light'] .text-white     { color: #8b4513 !important; }
-html[data-theme='light'] .text-white\/90 { color: rgba(160,82,30,0.95) !important; }
-html[data-theme='light'] .text-white\/85 { color: rgba(155,78,28,0.90) !important; }
-html[data-theme='light'] .text-white\/80 { color: rgba(150,72,25,0.85) !important; }
-html[data-theme='light'] .text-white\/70 { color: rgba(140,65,20,0.78) !important; }
-html[data-theme='light'] .text-white\/60 { color: rgba(130,60,18,0.68) !important; }
-html[data-theme='light'] .text-white\/50 { color: rgba(120,55,16,0.60) !important; }
-html[data-theme='light'] .text-white\/40 { color: rgba(110,50,14,0.55) !important; }
-html[data-theme='light'] .text-white\/35 { color: rgba(100,46,12,0.50) !important; }
-html[data-theme='light'] .text-white\/30 { color: rgba(90,42,10,0.45) !important; }
-html[data-theme='light'] .text-white\/25 { color: rgba(80,38,8,0.40) !important; }
-html[data-theme='light'] .text-white\/20 { color: rgba(70,34,6,0.35) !important; }
-html[data-theme='light'] .text-white\/15 { color: rgba(60,30,4,0.28) !important; }
+/* Also override any bg-[var(--theme-bg-main)] bracket classes */
+html[data-theme='light'] [class*="bg-\[var(--theme-bg-main)\]"] {
+  background: #faf4ec !important;
+}
 
-/* ---------- bg-white → warm tint ---------- */
-html[data-theme='light'] .bg-white\/5       { background-color: rgba(194,112,44,0.06) !important; }
-html[data-theme='light'] .bg-white\/10      { background-color: rgba(194,112,44,0.08) !important; }
-html[data-theme='light'] .bg-white\/\[0\.03\] { background-color: rgba(194,112,44,0.04) !important; }
-html[data-theme='light'] .bg-white\/\[0\.06\] { background-color: rgba(194,112,44,0.06) !important; }
+/* ---------- FONT: Google Fonts DM Serif Display for titles ---------- */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
 
-/* ---------- bg-black → warm overlay ---------- */
-html[data-theme='light'] .bg-black\/60 { background-color: rgba(85,50,20,0.18) !important; }
-html[data-theme='light'] .bg-black\/40 { background-color: rgba(85,50,20,0.08) !important; }
-html[data-theme='light'] .bg-black\/20 { background-color: rgba(85,50,20,0.04) !important; }
+html[data-theme='light'] {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+html[data-theme='light'] h1,
+html[data-theme='light'] h2,
+html[data-theme='light'] h3,
+html[data-theme='light'] .text-lg,
+html[data-theme='light'] .text-xl,
+html[data-theme='light'] .text-2xl,
+html[data-theme='light'] .text-3xl {
+  font-family: 'DM Serif Display', serif !important;
+  letter-spacing: 0.01em !important;
+}
 
-/* ---------- border-white → warm brown ---------- */
-html[data-theme='light'] .border-white\/5  { border-color: rgba(194,112,44,0.10) !important; }
-html[data-theme='light'] .border-white\/6  { border-color: rgba(194,112,44,0.11) !important; }
-html[data-theme='light'] .border-white\/8  { border-color: rgba(194,112,44,0.12) !important; }
-html[data-theme='light'] .border-white\/10 { border-color: rgba(194,112,44,0.14) !important; }
-html[data-theme='light'] .border-white\/20 { border-color: rgba(194,112,44,0.20) !important; }
+/* ---------- text-white → warm ORANGE (NOT purple) ---------- */
+html[data-theme='light'] .text-white     { color: #9a5c28 !important; }
+html[data-theme='light'] .text-white\/90 { color: rgba(154,92,40,0.95) !important; }
+html[data-theme='light'] .text-white\/85 { color: rgba(154,92,40,0.90) !important; }
+html[data-theme='light'] .text-white\/80 { color: rgba(154,92,40,0.85) !important; }
+html[data-theme='light'] .text-white\/70 { color: rgba(140,80,32,0.78) !important; }
+html[data-theme='light'] .text-white\/60 { color: rgba(130,72,28,0.68) !important; }
+html[data-theme='light'] .text-white\/50 { color: rgba(120,64,24,0.60) !important; }
+html[data-theme='light'] .text-white\/40 { color: rgba(110,58,20,0.55) !important; }
+html[data-theme='light'] .text-white\/35 { color: rgba(100,52,18,0.50) !important; }
+html[data-theme='light'] .text-white\/30 { color: rgba(90,46,16,0.45) !important; }
+html[data-theme='light'] .text-white\/25 { color: rgba(80,40,14,0.40) !important; }
+html[data-theme='light'] .text-white\/20 { color: rgba(70,36,12,0.35) !important; }
+html[data-theme='light'] .text-white\/15 { color: rgba(60,30,10,0.28) !important; }
+
+/* ---------- bg-white variants ---------- */
+html[data-theme='light'] .bg-white\/5       { background-color: rgba(154,92,40,0.05) !important; }
+html[data-theme='light'] .bg-white\/10      { background-color: rgba(154,92,40,0.07) !important; }
+html[data-theme='light'] .bg-white\/\[0\.03\] { background-color: rgba(154,92,40,0.03) !important; }
+html[data-theme='light'] .bg-white\/\[0\.06\] { background-color: rgba(154,92,40,0.05) !important; }
+
+/* ---------- bg-black ---------- */
+html[data-theme='light'] .bg-black\/60 { background-color: rgba(85,50,20,0.15) !important; }
+html[data-theme='light'] .bg-black\/40 { background-color: rgba(85,50,20,0.06) !important; }
+html[data-theme='light'] .bg-black\/20 { background-color: rgba(85,50,20,0.03) !important; }
+
+/* ---------- border-white ---------- */
+html[data-theme='light'] .border-white\/5  { border-color: rgba(154,92,40,0.10) !important; }
+html[data-theme='light'] .border-white\/6  { border-color: rgba(154,92,40,0.11) !important; }
+html[data-theme='light'] .border-white\/8  { border-color: rgba(154,92,40,0.12) !important; }
+html[data-theme='light'] .border-white\/10 { border-color: rgba(154,92,40,0.14) !important; }
+html[data-theme='light'] .border-white\/20 { border-color: rgba(154,92,40,0.20) !important; }
 html[data-theme='light'] .border-white\/80 { border-color: rgba(140,65,20,0.50) !important; }
 
 /* ---------- placeholders ---------- */
@@ -87,73 +110,82 @@ html[data-theme='light'] .placeholder-white\/20::placeholder { color: rgba(140,8
 html[data-theme='light'] .placeholder-white\/30::placeholder { color: rgba(140,80,30,0.55) !important; }
 
 /* ---------- hover states ---------- */
-html[data-theme='light'] .hover\:text-white\/65:hover  { color: rgba(155,70,22,0.70) !important; }
-html[data-theme='light'] .hover\:text-white\/70:hover  { color: rgba(155,70,22,0.75) !important; }
-html[data-theme='light'] .hover\:text-white\/80:hover  { color: rgba(155,70,22,0.85) !important; }
-html[data-theme='light'] .hover\:text-white\/90:hover  { color: rgba(155,70,22,0.92) !important; }
-html[data-theme='light'] .hover\:text-white\/60:hover  { color: rgba(155,70,22,0.65) !important; }
-html[data-theme='light'] .hover\:bg-white\/5:hover     { background-color: rgba(194,112,44,0.08) !important; }
-html[data-theme='light'] .hover\:bg-white\/10:hover    { background-color: rgba(194,112,44,0.10) !important; }
-html[data-theme='light'] .hover\:bg-white\/\[0\.03\]:hover { background-color: rgba(194,112,44,0.05) !important; }
+html[data-theme='light'] .hover\:text-white\/65:hover  { color: rgba(154,92,40,0.70) !important; }
+html[data-theme='light'] .hover\:text-white\/70:hover  { color: rgba(154,92,40,0.75) !important; }
+html[data-theme='light'] .hover\:text-white\/80:hover  { color: rgba(154,92,40,0.85) !important; }
+html[data-theme='light'] .hover\:text-white\/90:hover  { color: rgba(154,92,40,0.92) !important; }
+html[data-theme='light'] .hover\:text-white\/60:hover  { color: rgba(154,92,40,0.65) !important; }
+html[data-theme='light'] .hover\:bg-white\/5:hover     { background-color: rgba(154,92,40,0.07) !important; }
+html[data-theme='light'] .hover\:bg-white\/10:hover    { background-color: rgba(154,92,40,0.09) !important; }
+html[data-theme='light'] .hover\:bg-white\/\[0\.03\]:hover { background-color: rgba(154,92,40,0.05) !important; }
 html[data-theme='light'] .hover\:bg-black\/10:hover    { background-color: rgba(85,50,20,0.06) !important; }
 
-/* ---------- Accent overrides (violet → burnt orange) ---------- */
+/* ---------- Accent overrides (violet → warm amber/orange) ---------- */
 html[data-theme='light'] .text-violet-300 { color: #c2702c !important; }
 html[data-theme='light'] .text-violet-400 { color: #b55e1e !important; }
 html[data-theme='light'] .bg-violet-500\/30 { background-color: rgba(194,112,44,0.22) !important; }
 html[data-theme='light'] .border-violet-500\/20 { border-color: rgba(194,112,44,0.18) !important; }
 html[data-theme='light'] .text-pink-400 { color: #c2702c !important; }
 html[data-theme='light'] .border-t-violet-500\/60 { border-top-color: rgba(194,112,44,0.65) !important; }
+html[data-theme='light'] .text-pink-500\/80 { color: rgba(194,112,44,0.80) !important; }
 
 /* ---------- Scrollbar ---------- */
 html[data-theme='light'] ::-webkit-scrollbar-thumb {
-  background: rgba(194,112,44,0.15) !important;
+  background: rgba(154,92,40,0.12) !important;
 }
 html[data-theme='light'] ::-webkit-scrollbar-track {
   background: transparent !important;
 }
 
-/* ---------- Cursor glow: warm & soft ---------- */
+/* ---------- Cursor glow: warm & dim ---------- */
 html[data-theme='light'] .fixed.rounded-full.pointer-events-none[style*="blur"] {
-  opacity: 0.12 !important;
+  opacity: 0.08 !important;
 }
 
-/* ---------- LIQUID GLASS — frosted warm cream ---------- */
+/* ---------- LIQUID GLASS — frosted warm cream cards ---------- */
 html[data-theme='light'] [style*="backdrop-filter"] {
-  background: rgba(255,252,246,0.55) !important;
-  border-color: rgba(194,112,44,0.12) !important;
+  background: rgba(255,252,246,0.62) !important;
+  border-color: rgba(194,112,44,0.10) !important;
   box-shadow:
-    0 8px 32px rgba(160,90,30,0.08),
-    0 2px 8px rgba(194,112,44,0.04),
-    inset 0 1px 0 rgba(255,255,255,0.9),
-    inset 0 -1px 0 rgba(255,255,255,0.3) !important;
+    0 8px 32px rgba(160,90,30,0.06),
+    0 2px 8px rgba(194,112,44,0.03),
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    inset 0 -1px 0 rgba(255,255,255,0.4) !important;
   backdrop-filter: blur(28px) saturate(130%) !important;
   -webkit-backdrop-filter: blur(28px) saturate(130%) !important;
 }
 
-/* ---------- Inputs in light mode ---------- */
+/* ---------- Fix: ensure CONTENT inside glass is visible ---------- */
+html[data-theme='light'] [style*="backdrop-filter"] * {
+  visibility: visible !important;
+}
+
+/* ---------- Inputs ---------- */
 html[data-theme='light'] input[type="date"],
 html[data-theme='light'] input[type="time"],
 html[data-theme='light'] select {
   color-scheme: light !important;
-  color: #8b4513 !important;
+  color: #9a5c28 !important;
 }
 
-/* ---------- Gradient text → warm orange gradient ---------- */
+/* ---------- Gradient text → ORANGE gradient (kills purple) ---------- */
+html[data-theme='light'] [style*="WebkitBackgroundClip: text"],
+html[data-theme='light'] [style*="-webkit-background-clip: text"],
 html[data-theme='light'] [style*="WebkitTextFillColor: transparent"],
 html[data-theme='light'] [style*="-webkit-text-fill-color: transparent"] {
-  background: linear-gradient(135deg, #8b4513 0%, #c2702c 50%, #d4943a 100%) !important;
+  background: linear-gradient(135deg, #8b4513 0%, #c87f33 45%, #d4943a 100%) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
-/* ---------- Emerald dots stay green ---------- */
+/* ---------- Emerald stays green ---------- */
 html[data-theme='light'] .bg-emerald-400 { background-color: #34d399 !important; }
 
 /* ---------- Emoji picker ---------- */
 html[data-theme='light'] .EmojiPickerReact {
   --epr-bg-color: #fffaf2 !important;
-  --epr-text-color: #8b4513 !important;
+  --epr-text-color: #9a5c28 !important;
 }
 
 /* ---------- Login/Register cursor fix ---------- */
@@ -161,10 +193,37 @@ html[data-theme='light'] [style*="cursor: none"] {
   cursor: auto !important;
 }
 
-/* ---------- Font size boost for light mode ---------- */
+/* ---------- Font-size polish ---------- */
 html[data-theme='light'] .text-sm { font-size: 0.9rem !important; }
 html[data-theme='light'] .text-xs { font-size: 0.8rem !important; }
 html[data-theme='light'] .text-\[11px\] { font-size: 12px !important; }
 html[data-theme='light'] .text-\[12px\] { font-size: 13px !important; }
 html[data-theme='light'] .text-\[13px\] { font-size: 14px !important; }
 html[data-theme='light'] .text-\[15px\] { font-size: 16px !important; }
+
+/* ---------- Chat area special fixes ---------- */
+/* Make conversation items and chat bubbles visible */
+html[data-theme='light'] .text-white\/80.leading-relaxed { color: rgba(75,48,20,0.9) !important; }
+
+/* Fix chat input bar visibility */
+html[data-theme='light'] .bg-transparent { background-color: transparent !important; }
+
+/* ---------- MOBILE: disable heavy animations ---------- */
+@media (max-width: 767px) {
+  html[data-theme='light'] [style*="backdrop-filter"] {
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+  /* Reduce motion for all framer-motion on mobile */
+  html[data-theme='light'] .will-change-transform {
+    will-change: auto !important;
+  }
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='light'] * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
