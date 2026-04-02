@@ -15,125 +15,155 @@
 }
 
 html[data-theme='light'] {
-  --theme-white: 35, 33, 41;
-  --theme-black: 255, 255, 255;
-  --theme-bg-main: #f5f0e8;
-  --theme-bg-nav: rgba(245, 240, 232, 0.97);
-  --theme-bg-nav-dark: rgba(240, 235, 226, 0.98);
+  --theme-white: 55, 40, 22;         /* warm dark brown text */
+  --theme-black: 255, 248, 238;      /* warm white */
+  --theme-bg-main: #faf4ec;          /* warm cream */
+  --theme-bg-nav: rgba(250, 244, 236, 0.96);
+  --theme-bg-nav-dark: rgba(245, 238, 228, 0.98);
 }
 
 body {
   background-color: var(--theme-bg-main);
-  transition: background-color 0.3s ease;
+  transition: background-color 0.35s ease;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   LIGHT THEME — Tailwind class overrides
-   Dark mode is completely untouched. All rules below only fire
-   when data-theme="light" is set on <html>.
+   LIGHT THEME — Warm Orange / Nature Palette
+   Inspired by the Mars & Lumo Studios references.
+   Dark mode is completely untouched.
    ═══════════════════════════════════════════════════════════════ */
 
-/* ---------- Background gradient overlays ---------- */
+/* ---------- Painterly background image ---------- */
 html[data-theme='light'] .fixed.inset-0.overflow-hidden {
-  background: #f5f0e8 !important;
+  background: #faf4ec !important;
 }
 html[data-theme='light'] .fixed.inset-0.overflow-hidden > div {
   display: none !important;
 }
+html[data-theme='light'] .fixed.inset-0.overflow-hidden::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/light-bg.png') center center / cover no-repeat;
+  opacity: 0.18;
+  filter: blur(2px) saturate(1.3);
+  pointer-events: none;
+}
 
-/* ---------- text-white variants → dark text ---------- */
-html[data-theme='light'] .text-white     { color: #23212a !important; }
-html[data-theme='light'] .text-white\/90 { color: rgba(35,33,42,0.92) !important; }
-html[data-theme='light'] .text-white\/85 { color: rgba(35,33,42,0.88) !important; }
-html[data-theme='light'] .text-white\/80 { color: rgba(35,33,42,0.82) !important; }
-html[data-theme='light'] .text-white\/70 { color: rgba(35,33,42,0.72) !important; }
-html[data-theme='light'] .text-white\/60 { color: rgba(35,33,42,0.62) !important; }
-html[data-theme='light'] .text-white\/50 { color: rgba(35,33,42,0.55) !important; }
-html[data-theme='light'] .text-white\/40 { color: rgba(35,33,42,0.48) !important; }
-html[data-theme='light'] .text-white\/35 { color: rgba(35,33,42,0.42) !important; }
-html[data-theme='light'] .text-white\/30 { color: rgba(35,33,42,0.38) !important; }
-html[data-theme='light'] .text-white\/25 { color: rgba(35,33,42,0.32) !important; }
-html[data-theme='light'] .text-white\/20 { color: rgba(35,33,42,0.28) !important; }
-html[data-theme='light'] .text-white\/15 { color: rgba(35,33,42,0.22) !important; }
+/* ---------- text-white variants → warm dark brown ---------- */
+html[data-theme='light'] .text-white     { color: #372816 !important; }
+html[data-theme='light'] .text-white\/90 { color: rgba(55,40,22,0.92) !important; }
+html[data-theme='light'] .text-white\/85 { color: rgba(55,40,22,0.88) !important; }
+html[data-theme='light'] .text-white\/80 { color: rgba(55,40,22,0.82) !important; }
+html[data-theme='light'] .text-white\/70 { color: rgba(55,40,22,0.72) !important; }
+html[data-theme='light'] .text-white\/60 { color: rgba(55,40,22,0.62) !important; }
+html[data-theme='light'] .text-white\/50 { color: rgba(55,40,22,0.55) !important; }
+html[data-theme='light'] .text-white\/40 { color: rgba(55,40,22,0.48) !important; }
+html[data-theme='light'] .text-white\/35 { color: rgba(55,40,22,0.42) !important; }
+html[data-theme='light'] .text-white\/30 { color: rgba(55,40,22,0.38) !important; }
+html[data-theme='light'] .text-white\/25 { color: rgba(55,40,22,0.32) !important; }
+html[data-theme='light'] .text-white\/20 { color: rgba(55,40,22,0.28) !important; }
+html[data-theme='light'] .text-white\/15 { color: rgba(55,40,22,0.22) !important; }
 
-/* ---------- bg-white variants → subtle dark tint ---------- */
-html[data-theme='light'] .bg-white\/5       { background-color: rgba(35,33,42,0.04) !important; }
-html[data-theme='light'] .bg-white\/10      { background-color: rgba(35,33,42,0.07) !important; }
-html[data-theme='light'] .bg-white\/\[0\.03\] { background-color: rgba(35,33,42,0.03) !important; }
-html[data-theme='light'] .bg-white\/\[0\.06\] { background-color: rgba(35,33,42,0.05) !important; }
+/* ---------- bg-white variants → warm tint ---------- */
+html[data-theme='light'] .bg-white\/5       { background-color: rgba(55,40,22,0.04) !important; }
+html[data-theme='light'] .bg-white\/10      { background-color: rgba(55,40,22,0.06) !important; }
+html[data-theme='light'] .bg-white\/\[0\.03\] { background-color: rgba(55,40,22,0.03) !important; }
+html[data-theme='light'] .bg-white\/\[0\.06\] { background-color: rgba(55,40,22,0.05) !important; }
 
-/* ---------- bg-black variants → light overlay ---------- */
-html[data-theme='light'] .bg-black\/60 { background-color: rgba(0,0,0,0.25) !important; }
-html[data-theme='light'] .bg-black\/40 { background-color: rgba(0,0,0,0.08) !important; }
-html[data-theme='light'] .bg-black\/20 { background-color: rgba(0,0,0,0.04) !important; }
+/* ---------- bg-black variants → soft warm overlays ---------- */
+html[data-theme='light'] .bg-black\/60 { background-color: rgba(55,40,22,0.15) !important; }
+html[data-theme='light'] .bg-black\/40 { background-color: rgba(55,40,22,0.06) !important; }
+html[data-theme='light'] .bg-black\/20 { background-color: rgba(55,40,22,0.03) !important; }
 
-/* ---------- border-white variants ---------- */
-html[data-theme='light'] .border-white\/5  { border-color: rgba(35,33,42,0.08) !important; }
-html[data-theme='light'] .border-white\/6  { border-color: rgba(35,33,42,0.09) !important; }
-html[data-theme='light'] .border-white\/8  { border-color: rgba(35,33,42,0.10) !important; }
-html[data-theme='light'] .border-white\/10 { border-color: rgba(35,33,42,0.12) !important; }
-html[data-theme='light'] .border-white\/20 { border-color: rgba(35,33,42,0.18) !important; }
-html[data-theme='light'] .border-white\/80 { border-color: rgba(35,33,42,0.70) !important; }
+/* ---------- border-white variants → warm brown borders ---------- */
+html[data-theme='light'] .border-white\/5  { border-color: rgba(55,40,22,0.08) !important; }
+html[data-theme='light'] .border-white\/6  { border-color: rgba(55,40,22,0.09) !important; }
+html[data-theme='light'] .border-white\/8  { border-color: rgba(55,40,22,0.10) !important; }
+html[data-theme='light'] .border-white\/10 { border-color: rgba(55,40,22,0.12) !important; }
+html[data-theme='light'] .border-white\/20 { border-color: rgba(55,40,22,0.18) !important; }
+html[data-theme='light'] .border-white\/80 { border-color: rgba(55,40,22,0.55) !important; }
 
 /* ---------- placeholder colors ---------- */
-html[data-theme='light'] .placeholder-white\/15::placeholder { color: rgba(35,33,42,0.35) !important; }
-html[data-theme='light'] .placeholder-white\/20::placeholder { color: rgba(35,33,42,0.40) !important; }
-html[data-theme='light'] .placeholder-white\/30::placeholder { color: rgba(35,33,42,0.45) !important; }
+html[data-theme='light'] .placeholder-white\/15::placeholder { color: rgba(55,40,22,0.40) !important; }
+html[data-theme='light'] .placeholder-white\/20::placeholder { color: rgba(55,40,22,0.45) !important; }
+html[data-theme='light'] .placeholder-white\/30::placeholder { color: rgba(55,40,22,0.50) !important; }
 
 /* ---------- hover states ---------- */
-html[data-theme='light'] .hover\:text-white\/65:hover  { color: rgba(35,33,42,0.65) !important; }
-html[data-theme='light'] .hover\:text-white\/70:hover  { color: rgba(35,33,42,0.70) !important; }
-html[data-theme='light'] .hover\:text-white\/80:hover  { color: rgba(35,33,42,0.80) !important; }
-html[data-theme='light'] .hover\:text-white\/90:hover  { color: rgba(35,33,42,0.90) !important; }
-html[data-theme='light'] .hover\:text-white\/60:hover  { color: rgba(35,33,42,0.60) !important; }
-html[data-theme='light'] .hover\:bg-white\/5:hover     { background-color: rgba(35,33,42,0.06) !important; }
-html[data-theme='light'] .hover\:bg-white\/10:hover    { background-color: rgba(35,33,42,0.08) !important; }
-html[data-theme='light'] .hover\:bg-white\/\[0\.03\]:hover { background-color: rgba(35,33,42,0.04) !important; }
-html[data-theme='light'] .hover\:bg-black\/10:hover    { background-color: rgba(0,0,0,0.06) !important; }
+html[data-theme='light'] .hover\:text-white\/65:hover  { color: rgba(55,40,22,0.65) !important; }
+html[data-theme='light'] .hover\:text-white\/70:hover  { color: rgba(55,40,22,0.70) !important; }
+html[data-theme='light'] .hover\:text-white\/80:hover  { color: rgba(55,40,22,0.80) !important; }
+html[data-theme='light'] .hover\:text-white\/90:hover  { color: rgba(55,40,22,0.90) !important; }
+html[data-theme='light'] .hover\:text-white\/60:hover  { color: rgba(55,40,22,0.60) !important; }
+html[data-theme='light'] .hover\:bg-white\/5:hover     { background-color: rgba(55,40,22,0.06) !important; }
+html[data-theme='light'] .hover\:bg-white\/10:hover    { background-color: rgba(55,40,22,0.08) !important; }
+html[data-theme='light'] .hover\:bg-white\/\[0\.03\]:hover { background-color: rgba(55,40,22,0.04) !important; }
+html[data-theme='light'] .hover\:bg-black\/10:hover    { background-color: rgba(55,40,22,0.06) !important; }
 
-/* ---------- scrollbar ---------- */
+/* ---------- Accent color overrides (violet → burnt orange) ---------- */
+html[data-theme='light'] .text-violet-300 { color: #c2702c !important; }
+html[data-theme='light'] .text-violet-400 { color: #b55e1e !important; }
+html[data-theme='light'] .bg-violet-500\/30 { background-color: rgba(194,112,44,0.25) !important; }
+html[data-theme='light'] .border-violet-500\/20 { border-color: rgba(194,112,44,0.20) !important; }
+html[data-theme='light'] .text-pink-400 { color: #c2702c !important; }
+
+/* ---------- Scrollbar ---------- */
 html[data-theme='light'] ::-webkit-scrollbar-thumb {
-  background: rgba(35,33,42,0.15) !important;
+  background: rgba(55,40,22,0.12) !important;
 }
 html[data-theme='light'] ::-webkit-scrollbar-track {
   background: transparent !important;
 }
 
-/* ---------- Magnetic cursor glow: hide in light mode ---------- */
+/* ---------- Magnetic cursor glow: soften in light mode ---------- */
 html[data-theme='light'] .fixed.rounded-full.pointer-events-none[style*="blur"] {
-  opacity: 0 !important;
+  opacity: 0.15 !important;
 }
 
-/* ---------- Glass morphism cards in light mode ---------- */
+/* ---------- Glass morphism → warm frosted cream cards ---------- */
 html[data-theme='light'] [style*="backdrop-filter"] {
-  background: rgba(255,255,255,0.65) !important;
-  border-color: rgba(35,33,42,0.08) !important;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.05), 0 1px 0 rgba(255,255,255,0.8) inset !important;
-  backdrop-filter: blur(20px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(120%) !important;
+  background: rgba(255,250,242,0.72) !important;
+  border-color: rgba(55,40,22,0.08) !important;
+  box-shadow:
+    0 8px 32px rgba(194,112,44,0.06),
+    0 1px 0 rgba(255,255,255,0.85) inset !important;
+  backdrop-filter: blur(24px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(120%) !important;
 }
 
 /* ---------- Date/time input color-scheme ---------- */
-html[data-theme='light'] [class*="color-scheme"] {
-  color-scheme: light !important;
-}
 html[data-theme='light'] input[type="date"],
 html[data-theme='light'] input[type="time"],
 html[data-theme='light'] select {
   color-scheme: light !important;
-  color: #23212a !important;
+  color: #372816 !important;
 }
 
-/* ---------- Gradient text (MeetSync logo etc.) ---------- */
+/* ---------- Gradient text (MeetSync logo) → warm gradient ---------- */
 html[data-theme='light'] [style*="WebkitTextFillColor: transparent"],
 html[data-theme='light'] [style*="-webkit-text-fill-color: transparent"] {
-  background: linear-gradient(135deg, #23212a 0%, #6d28d9 70%, #4f46e5 100%) !important;
+  background: linear-gradient(135deg, #372816 0%, #c2702c 60%, #d4943a 100%) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
 }
 
-/* ---------- Emoji picker dark theme override ---------- */
+/* ---------- Active sidebar indicator → burnt orange ---------- */
+html[data-theme='light'] [style*="rgba(139,92,246"] {
+  --tw-shadow-color: rgba(194,112,44,0.15);
+}
+
+/* ---------- Status badge colors stay the same (green, amber, red) ---------- */
+
+/* ---------- Emoji picker ---------- */
 html[data-theme='light'] .EmojiPickerReact {
-  --epr-bg-color: #fff !important;
-  --epr-text-color: #23212a !important;
+  --epr-bg-color: #fffaf2 !important;
+  --epr-text-color: #372816 !important;
+}
+
+/* ---------- Emerald online dot → keep green ---------- */
+html[data-theme='light'] .bg-emerald-400 { background-color: #34d399 !important; }
+
+/* ---------- Spinner overrides ---------- */
+html[data-theme='light'] .border-t-violet-500\/60 {
+  border-top-color: rgba(194,112,44,0.65) !important;
 }
