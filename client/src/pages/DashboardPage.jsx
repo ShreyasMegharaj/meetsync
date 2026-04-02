@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../utils/api";
-import { io } from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
 import NotificationBell from "../components/NotificationBell";
 import ThemeToggle from "../components/ThemeToggle";

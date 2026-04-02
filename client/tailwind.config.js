@@ -5,13 +5,7 @@ export default {
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {
-      colors: {
-        white: "rgba(var(--theme-white), <alpha-value>)",
-        black: "rgba(var(--theme-black), <alpha-value>)",
-      }
-    },
+    extend: {},
   },
   plugins: [],
 }
-

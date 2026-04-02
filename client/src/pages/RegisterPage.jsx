@@ -6,9 +6,7 @@ import API from "../utils/api";
 /* ─── helpers ─── */
 const rand = (a, b) => Math.random() * (b - a) + a;
 
-/* ═══════════════════════════════════════════════════════════════
-   BACKGROUND — rich mixed dark gradient with living depth
-   ═══════════════════════════════════════════════════════════════ */
+
 
 /* Large ambient blobs that drift continuously */
 const AmbientBlob = ({ gradient, size, blur, dur, path, opacity }) => (
