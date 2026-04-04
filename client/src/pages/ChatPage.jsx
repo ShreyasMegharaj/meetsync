@@ -1348,7 +1348,13 @@ export default function MessagesPage() {
 
             {/* Input Area */}
             <motion.div className="relative shrink-0 sticky bottom-0 w-full z-10"
-              style={{ padding: "12px", borderTop: "1px solid rgba(var(--theme-white),0.06)", background: "var(--theme-bg-main)" }}
+              style={{
+                padding: "12px", 
+                borderTop: "1px solid rgba(255,255,255,0.2)",
+                background: "linear-gradient(180deg, rgba(var(--theme-white), 0.1), rgba(var(--theme-white), 0.05))",
+                backdropFilter: "blur(24px) saturate(180%)",
+                WebkitBackdropFilter: "blur(24px) saturate(180%)"
+              }}
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.2 }}>
               {/* Emoji Picker */}

@@ -53,6 +53,7 @@ export default function VideoBackground() {
       <video
         ref={videoRef}
         autoPlay
+        loop
         muted
         playsInline
         style={{
