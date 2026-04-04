@@ -1,14 +1,23 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useLocation } from "react-router-dom";
 
 /**
- * VideoBackground — renders a fullscreen looping video behind everything
- * when the light theme is active. Falls back to nothing in dark mode.
+ * VideoBackground — renders a fullscreen video behind everything
+ * when the light theme is active. Plays once per route change.
  */
 export default function VideoBackground() {
   const [isLight, setIsLight] = useState(
     () => document.documentElement.getAttribute("data-theme") === "light"
   );
   const videoRef = useRef(null);
+  
+  // Try to use useLocation gracefully in case it's not wrapped yet
+  let location;
+  try {
+    location = useLocation();
+  } catch (e) {
+    location = { pathname: window.location.pathname };
+  }
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -23,13 +32,16 @@ export default function VideoBackground() {
     return () => observer.disconnect();
   }, []);
 
+  // Play video on mount or route change
   useEffect(() => {
     if (isLight && videoRef.current) {
+      // Reset video to start
+      videoRef.current.currentTime = 0;
       videoRef.current.play().catch(err => {
         console.error("Auto-play was prevented:", err);
       });
     }
-  }, [isLight]);
+  }, [isLight, location.pathname]);
 
   if (!isLight) return null;
 
@@ -41,7 +53,6 @@ export default function VideoBackground() {
       <video
         ref={videoRef}
         autoPlay
-        loop
         muted
         playsInline
         style={{
@@ -54,7 +65,7 @@ export default function VideoBackground() {
           height: "auto",
           transform: "translate(-50%, -50%)",
           objectFit: "cover",
-          opacity: 1, /* Full opacity to be the primary background */
+          opacity: 1, /* Full opacity */
           filter: "brightness(1.05)",
         }}
       >
