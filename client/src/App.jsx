@@ -3,6 +3,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { ThemeProvider } from "./context/ThemeContext";
 import FloatingButterflies from "./components/FloatingButterflies";
+import VideoBackground from "./components/VideoBackground";
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -15,6 +16,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
+        <VideoBackground />
         <FloatingButterflies />
         <BrowserRouter>
           <Routes>

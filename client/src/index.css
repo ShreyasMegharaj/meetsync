@@ -31,26 +31,25 @@ body {
    Dark mode is 100% untouched.
    ═══════════════════════════════════════════════════════════════ */
 
-/* ---------- Background image: MORE COLORFUL ---------- */
+/* ---------- Background: video (replaces static painting) ---------- */
 html[data-theme='light'] .fixed.inset-0.overflow-hidden {
-  background: #faf4ec !important;
+  background: transparent !important;
 }
 html[data-theme='light'] .fixed.inset-0.overflow-hidden > div {
   display: none !important;
 }
-html[data-theme='light'] .fixed.inset-0.overflow-hidden::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: url('/light-bg.png') center center / cover no-repeat;
-  opacity: 0.42;
-  filter: saturate(1.8) brightness(1.08) contrast(1.05);
-  pointer-events: none;
-}
 
 /* Also override any bg-[var(--theme-bg-main)] bracket classes */
 html[data-theme='light'] [class*="bg-\[var(--theme-bg-main)\]"] {
-  background: #faf4ec !important;
+  background: transparent !important;
+}
+
+/* Ensure body and any inline style using theme-bg-main is transparent to show video */
+html[data-theme='light'] body {
+  background-color: transparent !important;
+}
+html[data-theme='light'] [style*="var(--theme-bg-main)"] {
+  background: transparent !important;
 }
 
 /* ---------- FONT: Google Fonts DM Serif Display for titles ---------- */
