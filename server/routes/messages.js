@@ -41,10 +41,9 @@ router.get('/:conversationId', authMiddleware, async (req, res) => {
           { path: 'client_id', select: 'name username profile_picture' }
         ]
       })
-      .sort({ createdAt: -1 })
-      .limit(100);
+      .sort({ createdAt: 1 });
 
-    res.status(200).json(messages.reverse());
+    res.status(200).json(messages);
 
   } catch (error) {
     console.error('Get messages error:', error);

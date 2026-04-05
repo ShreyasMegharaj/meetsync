@@ -10,7 +10,14 @@ export default function VideoBackground() {
     () => document.documentElement.getAttribute("data-theme") === "light"
   );
   const videoRef = useRef(null);
-  const location = useLocation();
+  
+  // Try to use useLocation gracefully in case it's not wrapped yet
+  let location;
+  try {
+    location = useLocation();
+  } catch (e) {
+    location = { pathname: window.location.pathname };
+  }
 
   useEffect(() => {
     const observer = new MutationObserver(() => {

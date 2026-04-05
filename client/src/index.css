@@ -35,6 +35,9 @@ body {
 html[data-theme='light'] .fixed.inset-0.overflow-hidden {
   background: transparent !important;
 }
+html[data-theme='light'] .fixed.inset-0.overflow-hidden > div {
+  display: none !important;
+}
 
 /* Also override any bg-[var(--theme-bg-main)] bracket classes */
 html[data-theme='light'] [class*="bg-\[var(--theme-bg-main)\]"] {
@@ -147,8 +150,8 @@ html[data-theme='light'] [style*="backdrop-filter"] {
     0 2px 8px rgba(194,112,44,0.03),
     inset 0 1px 0 rgba(255,255,255,0.95),
     inset 0 -1px 0 rgba(255,255,255,0.4) !important;
-  backdrop-filter: blur(12px) saturate(130%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
+  backdrop-filter: blur(28px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(130%) !important;
 }
 
 /* ---------- Fix: ensure CONTENT inside glass is visible ---------- */
@@ -207,8 +210,8 @@ html[data-theme='light'] .bg-transparent { background-color: transparent !import
 /* ---------- MOBILE: disable heavy animations ---------- */
 @media (max-width: 767px) {
   html[data-theme='light'] [style*="backdrop-filter"] {
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
   }
   /* Reduce motion for all framer-motion on mobile */
   html[data-theme='light'] .will-change-transform {

@@ -26,14 +26,31 @@ const Background = () => (
 
 /* ─── Magnetic Cursor (glow only — default OS cursor is always visible) ─── */
 const MagneticCursor = () => {
-  return null;
+  const mx = useMotionValue(-400);
+  const my = useMotionValue(-400);
+  const slowX = useSpring(mx, { stiffness: 20, damping: 25, mass: 1.8 });
+  const slowY = useSpring(my, { stiffness: 20, damping: 25, mass: 1.8 });
+  const [isPointer, setIsPointer] = useState(false);
+  useEffect(() => {
+    // Only render on fine-pointer (mouse/trackpad) devices
+    const mq = window.matchMedia("(pointer: fine)");
+    setIsPointer(mq.matches);
+    const move = (e) => { mx.set(e.clientX); my.set(e.clientY); };
+    window.addEventListener("mousemove", move);
+    return () => window.removeEventListener("mousemove", move);
+  }, [mx, my]);
+  if (!isPointer) return null;
+  return (
+    <motion.div className="fixed rounded-full pointer-events-none"
+      style={{ x: slowX, y: slowY, width: 350, height: 350, marginLeft: -175, marginTop: -175, background: "radial-gradient(circle,rgba(139,92,246,0.06),rgba(59,130,246,0.04),rgba(236,72,153,0.02),transparent 70%)", filter: "blur(50px)", zIndex: 9997 }} />
+  );
 };
 
 /* ─── Glass Style ─── */
 const glassStyle = {
   background: "linear-gradient(165deg, rgba(var(--theme-white),0.07) 0%, rgba(var(--theme-white),0.03) 50%, rgba(var(--theme-white),0.05) 100%)",
-  backdropFilter: "blur(8px) saturate(130%)",
-  WebkitBackdropFilter: "blur(8px) saturate(130%)",
+  backdropFilter: "blur(40px) saturate(130%)",
+  WebkitBackdropFilter: "blur(40px) saturate(130%)",
   border: "1px solid rgba(var(--theme-white),0.08)",
   boxShadow: "0 20px 60px rgba(var(--theme-black),0.4), inset 0 1px 0 rgba(var(--theme-white),0.08)",
 };
@@ -189,19 +206,23 @@ const ChatBubble = ({ message, index }) => {
   return (
     <motion.div
       className={`flex ${isMe ? "justify-end" : "justify-start"} mb-3`}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.15 }}
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: index * 0.05, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className={`relative max-w-[70%] ${isImage ? 'p-1.5' : 'px-4 py-2.5'} rounded-2xl ${isMe ? "rounded-br-md" : "rounded-bl-md"}`}
+      <div className={`relative max-w-[70%] ${isImage ? 'p-1.5' : 'px-4 py-2.5'} rounded-3xl ${isMe ? "rounded-br-sm" : "rounded-bl-sm"}`}
         style={isMe ? {
-          background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))",
-          border: "1px solid rgba(139,92,246,0.15)",
-          boxShadow: "0 4px 20px rgba(139,92,246,0.08)",
+          background: "linear-gradient(135deg, rgba(139,92,246,0.55), rgba(59,130,246,0.45))",
+          backdropFilter: "blur(24px) saturate(180%)",
+          WebkitBackdropFilter: "blur(24px) saturate(180%)",
+          border: "1px solid rgba(255,255,255,0.25)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)",
         } : {
-          background: "linear-gradient(165deg, rgba(var(--theme-white),0.07), rgba(var(--theme-white),0.03))",
-          border: "1px solid rgba(var(--theme-white),0.06)",
-          boxShadow: "0 4px 20px rgba(var(--theme-black),0.2)",
+          background: "linear-gradient(165deg, rgba(255,255,255,0.65), rgba(255,255,255,0.45))",
+          backdropFilter: "blur(24px) saturate(180%)",
+          WebkitBackdropFilter: "blur(24px) saturate(180%)",
+          border: "1px solid rgba(255,255,255,0.4)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6)",
         }}>
         {isImage && message.image_url ? (
           <img
@@ -213,9 +234,11 @@ const ChatBubble = ({ message, index }) => {
             loading="lazy"
           />
         ) : (
-          <p className="text-[13px] text-white/80 leading-relaxed">{message.text}</p>
+          <p className="text-[13px] text-gray-900 leading-relaxed font-semibold" style={{ textShadow: isMe ? "0 1px 2px rgba(255,255,255,0.3)" : "0 1px 3px rgba(255,255,255,0.9)" }}>
+            {message.text}
+          </p>
         )}
-        <p className={`text-[10px] mt-1 ${isImage ? 'px-2 pb-1' : ''} ${isMe ? "text-white/25 text-right" : "text-white/20"}`}>{message.time}</p>
+        <p className={`text-[10px] mt-1 font-medium ${isImage ? 'px-2 pb-1' : ''} ${isMe ? "text-gray-800 text-right opacity-80" : "text-gray-600 opacity-80"}`}>{message.time}</p>
       </div>
     </motion.div>
   );
@@ -1325,7 +1348,13 @@ export default function MessagesPage() {
 
             {/* Input Area */}
             <motion.div className="relative shrink-0 sticky bottom-0 w-full z-10"
-              style={{ padding: "12px", borderTop: "1px solid rgba(var(--theme-white),0.06)", background: "var(--theme-bg-main)" }}
+              style={{
+                padding: "12px", 
+                borderTop: "1px solid rgba(255,255,255,0.2)",
+                background: "linear-gradient(180deg, rgba(var(--theme-white), 0.1), rgba(var(--theme-white), 0.05))",
+                backdropFilter: "blur(24px) saturate(180%)",
+                WebkitBackdropFilter: "blur(24px) saturate(180%)"
+              }}
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.2 }}>
               {/* Emoji Picker */}
