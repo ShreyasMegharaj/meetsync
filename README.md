@@ -1,23 +1,43 @@
-# MeetSync
+# ⚡ MeetSync
 
-MeetSync is a modern, real-time messaging and appointment scheduling platform. Built with a sleek, premium "liquid glass" UI using React, it features real-time chat powered by WebSockets, user profiles, dynamic cinematic backgrounds, and a built-in meeting scheduler - bridging the gap between casual messaging and professional coordination.
+**🚀 Live Demo: [https://meetsync-sand.vercel.app](https://meetsync-sand.vercel.app)**
 
-## Features
+> *Built to explore full-stack real-time systems combining chat and scheduling in one platform.*
 
-- **Real-Time Messaging:** Instant chat powered by Socket.io, including live online statuses, emoji support, and image sharing.
+MeetSync is a modern, real-time messaging and appointment scheduling platform. Built with a sleek, premium "liquid glass" UI using React, it features real-time chat powered by WebSockets, user profiles, dynamic cinematic backgrounds, and a built-in meeting scheduler—bridging the gap between casual messaging and professional coordination.
+
+---
+
+## 📸 Screenshots
+
+*(Replace these placeholders with actual images of your application once you take them!)*
+
+| Dashboard | Real-Time Chat |
+| :---: | :---: |
+| ![Dashboard Screenshot](https://via.placeholder.com/600x350?text=Dashboard+UI) | ![Chat UI Screenshot](https://via.placeholder.com/600x350?text=Chat+Interface) |
+| **Complete overview with Quick Actions** | **Real-time messaging with meeting scheduling** |
+
+| Dark Theme | Light Theme (Liquid Glass) |
+| :---: | :---: |
+| ![Dark Theme](https://via.placeholder.com/600x350?text=Dark+Mode) | ![Light Theme](https://via.placeholder.com/600x350?text=Light+Mode) |
+
+---
+
+## ✨ Features
+
+- **Real-Time Messaging:** Instant chat powered by Socket.io, including live online statuses and image sharing.
 - **Appointment Scheduling:** Send, accept, reject, or cancel meeting requests directly inside your conversations.
-- **Cinematic Themes:** Beautiful Light and Dark modes featuring a frosted glassmorphism interface with custom CSS logic and responsive video backgrounds.
+- **Cinematic Themes:** Beautiful Light and Dark modes featuring a frosted glassmorphism interface with custom CSS logic and responsive backgrounds.
 - **Responsive Navigation:** Interactive sidebar for desktop browsers and bottom navigation for mobile clients.
 - **User Discovery:** Search and discover other professionals on the platform to rapidly build your network.
 
-## Tech Stack
+## 🛠 Tech Stack
 
 ### Frontend (Client)
 - **Core:** React 18, Vite
 - **Styling:** Tailwind CSS, Custom UI/CSS overrides
 - **Animations:** Framer Motion
 - **Real-time:** Socket.io-client
-- **Network calls:** Axios
 - **Routing:** React Router v6
 
 ### Backend (Server)
@@ -26,56 +46,77 @@ MeetSync is a modern, real-time messaging and appointment scheduling platform. B
 - **WebSockets:** Socket.io
 - **Security & Auth:** JSON Web Tokens (JWT), bcrypt
 
-## Getting Started
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (v18+ recommended)
 - MongoDB running locally or a MongoDB Atlas connection string
 
-### 1. Backend Server Setup
+### 1. Environment Variables
 
-Navigate to the `server` directory and install the necessary dependencies:
-
-```bash
-cd server
-npm install
-```
-
-Create a `.env` file in the `server` directory with the following variables:
+Create a `.env` file in the **`server`** directory:
 ```env
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
 CLIENT_URL=http://localhost:5173
+
+# Email reminders (Brevo)
+EMAIL_USER=your_verified_sender_email@gmail.com
+BREVO_API_KEY=your_brevo_api_key
 ```
 
-Start the backend server:
-```bash
-npm run dev
-```
-
-### 2. Frontend Client Setup
-
-In a new terminal window, navigate to the `client` directory and install dependencies:
-
-```bash
-cd client
-npm install
-```
-
-Create a `.env` file in the `client` directory:
+Create a `.env` file in the **`client`** directory:
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
 
-Launch the frontend development server:
+### 2. Backend Server Setup
+
+Navigate into the server folder:
 ```bash
+cd server
+npm install
+npm run dev
+```
+
+### 3. Frontend Client Setup
+
+Open a new terminal window:
+```bash
+cd client
+npm install
 npm run dev
 ```
 
 The application will now be running on `http://localhost:5173`.
 
-## Folder Structure
+---
+
+## 🌍 Deployment
+
+MeetSync is designed to be easily deployed using modern PaaS providers:
+
+### Frontend (Vercel)
+1. Push your code to GitHub.
+2. Import the project in Vercel.
+3. Set the Framework Preset to **Vite**.
+4. Set the Root Directory to `client`.
+5. Add the Environment Variable: `VITE_API_URL=https://your-backend-url.onrender.com/api`
+6. Deploy!
+
+### Backend (Render / Heroku)
+1. Create a new Web Service on Render.
+2. Set the Root Directory to `server`.
+3. Set the Build Command: `npm install`
+4. Set the Start Command: `node index.js` (or `npm start` if defined).
+5. Add all Server Environment Variables (`MONGO_URI`, `JWT_SECRET`, `CLIENT_URL`, `BREVO_API_KEY`, etc.) in the Render dashboard.
+
+---
+
+## 📁 Folder Structure
 
 ```
 meetsync/
@@ -85,12 +126,9 @@ meetsync/
 │   │   ├── context/     # Auth and Theme Providers
 │   │   ├── pages/       # Dashboard, Chat, Profile screens
 │   │   └── utils/       # API interceptors & Socket configs
-│   ├── index.html
-│   └── package.json
 └── server/          # Backend API (Express)
     ├── middleware/  # JWT Auth protection
-    ├── models/      # Mongoose Schemas (User, Message, Appointment, Conversation)
+    ├── models/      # Mongoose Schemas
     ├── routes/      # Application API endpoints
-    ├── index.js     # Entry point & Socket.io initialization
-    └── package.json
+    └── index.js     # Entry point & Socket.io initialization
 ```
