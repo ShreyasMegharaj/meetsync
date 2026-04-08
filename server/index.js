@@ -44,31 +44,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on("sendMessage", async (data) => {
-    try {
-      const Message = require('./models/messages');
-      const Conversation = require('./models/conversation');
-
-      const message = await Message.create({
-        conversation_id: data.conversationId,
-        sender_id: data.senderId,
-        message_text: data.text,
-        message_type: "text"
-      });
-
-      await Conversation.findByIdAndUpdate(data.conversationId, {
-        last_message_at: new Date()
-      });
-
-      await message.populate('sender_id', 'name username profile_picture');
-
-      socket.to(data.conversationId).emit("receiveMessage", message);
-
-    } catch (err) {
-      console.error("Socket sendMessage Error:", err);
-    }
-  });
-
   socket.on('disconnect', () => {
   });
 });

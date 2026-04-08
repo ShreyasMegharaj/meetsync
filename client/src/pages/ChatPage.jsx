@@ -5,6 +5,7 @@ import EmojiPicker from "emoji-picker-react";
 import api from "../utils/api";
 import NotificationBell from "../components/NotificationBell";
 import ThemeToggle from "../components/ThemeToggle";
+import { useTheme } from "../context/ThemeContext";
 import socket from "../utils/socket";
 
 const DEFAULT_AVATAR = null; // will fall back to initials
@@ -81,6 +82,7 @@ const icons = {
 const getSidebarItems = (currentUsername) => [
   { key: "dashboard", label: "Dashboard", icon: icons.dashboard, to: "/dashboard" },
   { key: "messages", label: "Messages", icon: icons.messages, to: "/messages" },
+  { key: "appointments", label: "Appointments", icon: icons.appointments, to: "/appointments" },
   { key: "profile", label: "Profile", icon: icons.profile, to: currentUsername ? `/profile/${currentUsername}` : "/dashboard" },
 ];
 
@@ -200,30 +202,60 @@ const ConversationItem = ({ convo, isActive, onClick, index }) => {
 };
 
 /* ─── Chat Bubble ─── */
-const ChatBubble = ({ message, index }) => {
+const ChatBubble = ({ message, index, isLightTheme }) => {
   const isMe = message.sender === "me";
   const isImage = message.message_type === "image";
+
+  const getBubbleStyle = () => {
+    if (isLightTheme) {
+      return isMe ? {
+        background: "linear-gradient(135deg, rgba(194,112,44,0.75), rgba(180,90,30,0.60))",
+        border: "1px solid rgba(194,112,44,0.30)",
+        boxShadow: "0 8px 32px rgba(160,90,30,0.10), inset 0 1px 0 rgba(255,255,255,0.4)",
+      } : {
+        background: "linear-gradient(165deg, rgba(255,252,246,0.85), rgba(255,248,235,0.75))",
+        border: "1px solid rgba(194,112,44,0.18)",
+        boxShadow: "0 8px 32px rgba(160,90,30,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+      };
+    }
+    return isMe ? {
+      background: "linear-gradient(135deg, rgba(139,92,246,0.55), rgba(59,130,246,0.45))",
+      backdropFilter: "blur(24px) saturate(180%)",
+      WebkitBackdropFilter: "blur(24px) saturate(180%)",
+      border: "1px solid rgba(255,255,255,0.25)",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)",
+    } : {
+      background: "linear-gradient(165deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))",
+      backdropFilter: "blur(24px) saturate(180%)",
+      WebkitBackdropFilter: "blur(24px) saturate(180%)",
+      border: "1px solid rgba(255,255,255,0.15)",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1)",
+    };
+  };
+
+  const getTextColor = () => {
+    if (isLightTheme) {
+      return isMe ? "#fff" : "#4b3014";
+    }
+    return isMe ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.85)";
+  };
+
+  const getTimeColor = () => {
+    if (isLightTheme) {
+      return isMe ? "rgba(255,255,255,0.7)" : "rgba(75,48,20,0.55)";
+    }
+    return isMe ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)";
+  };
+
   return (
     <motion.div
       className={`flex ${isMe ? "justify-end" : "justify-start"} mb-3`}
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: index * 0.05, duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ delay: Math.min(index * 0.03, 0.5), duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className={`relative max-w-[70%] ${isImage ? 'p-1.5' : 'px-4 py-2.5'} rounded-3xl ${isMe ? "rounded-br-sm" : "rounded-bl-sm"}`}
-        style={isMe ? {
-          background: "linear-gradient(135deg, rgba(139,92,246,0.55), rgba(59,130,246,0.45))",
-          backdropFilter: "blur(24px) saturate(180%)",
-          WebkitBackdropFilter: "blur(24px) saturate(180%)",
-          border: "1px solid rgba(255,255,255,0.25)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)",
-        } : {
-          background: "linear-gradient(165deg, rgba(255,255,255,0.65), rgba(255,255,255,0.45))",
-          backdropFilter: "blur(24px) saturate(180%)",
-          WebkitBackdropFilter: "blur(24px) saturate(180%)",
-          border: "1px solid rgba(255,255,255,0.4)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6)",
-        }}>
+      <div className={`chat-bubble relative max-w-[70%] ${isImage ? 'p-1.5' : 'px-4 py-2.5'} rounded-3xl ${isMe ? "rounded-br-sm" : "rounded-bl-sm"}`}
+        style={getBubbleStyle()}>
         {isImage && message.image_url ? (
           <img
             src={message.image_url}
@@ -234,11 +266,11 @@ const ChatBubble = ({ message, index }) => {
             loading="lazy"
           />
         ) : (
-          <p className="text-[13px] text-gray-900 leading-relaxed font-semibold" style={{ textShadow: isMe ? "0 1px 2px rgba(255,255,255,0.3)" : "0 1px 3px rgba(255,255,255,0.9)" }}>
+          <p className="text-[13px] leading-relaxed font-semibold" style={{ color: getTextColor() }}>
             {message.text}
           </p>
         )}
-        <p className={`text-[10px] mt-1 font-medium ${isImage ? 'px-2 pb-1' : ''} ${isMe ? "text-gray-800 text-right opacity-80" : "text-gray-600 opacity-80"}`}>{message.time}</p>
+        <p className={`text-[10px] mt-1 font-medium ${isImage ? 'px-2 pb-1' : ''} ${isMe ? "text-right" : ""}`} style={{ color: getTimeColor() }}>{message.time}</p>
       </div>
     </motion.div>
   );
@@ -508,9 +540,12 @@ const AppointmentModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
 export default function MessagesPage() {
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
+  const { theme } = useTheme();
+  const isLightTheme = theme === 'light';
 
   // Derived display values
   const username = user?.name || user?.username || "User";
+  const profileUsername = user?.username || user?.name || "";
   const initials = username.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
   const currentUserId = user?._id || user?.id || "me";
 
@@ -745,15 +780,18 @@ export default function MessagesPage() {
   // Handle incoming live socket messages (from OTHER users only — server excludes sender)
   useEffect(() => {
     const handleReceive = (msg) => {
-      // Normalize sender ID
-      const senderIdStr = msg.sender_id
-        ? ((msg.sender_id._id ?? msg.sender_id).toString())
+      // Normalize sender ID — handle both populated objects and raw strings
+      const senderIdRaw = msg.sender_id;
+      const senderIdStr = senderIdRaw
+        ? (typeof senderIdRaw === 'object' ? (senderIdRaw._id || senderIdRaw.id || senderIdRaw).toString() : senderIdRaw.toString())
         : null;
 
-      // Skip own messages — we already have them from the HTTP response
-      if (senderIdStr === String(currentUserId)) return;
+      // Skip own messages — we already have them from the HTTP response / optimistic UI
+      if (senderIdStr && String(senderIdStr) === String(currentUserId)) return;
 
-      const msgId = msg._id ? msg._id.toString() : String(Math.random());
+      const msgId = msg._id ? msg._id.toString() : null;
+      // If we can't identify the message, skip to avoid duplicates
+      if (!msgId) return;
 
       // Handle appointment message type from socket
       let appointmentData = undefined;
@@ -791,8 +829,11 @@ export default function MessagesPage() {
 
         const currentMsgs = prev[convoId] || [];
 
-        // Prevent duplicates
-        if (currentMsgs.some(m => m.id.toString() === msgId)) return prev;
+        // Prevent duplicates — check both _id and id
+        if (currentMsgs.some(m => {
+          const existingId = (m._id || m.id || '').toString();
+          return existingId === msgId;
+        })) return prev;
 
         return {
           ...prev,
@@ -1154,7 +1195,7 @@ export default function MessagesPage() {
     <div className="fixed top-0 left-0 right-0 bottom-0 flex flex-col overflow-hidden" style={{ background: "var(--theme-bg-main)", height: "100dvh" }}>
       <Background />
       
-      <Sidebar active="messages" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={user?.username || ""} />
+      <Sidebar active="messages" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={profileUsername} />
 
       <div className="relative z-10 flex flex-col flex-1 overflow-hidden">
         {/* ══════ TOP NAVBAR ══════ */}
@@ -1337,7 +1378,7 @@ export default function MessagesPage() {
                           onCancel={(id) => handleCancelAppointment(id)}
                         />
                       ) : (
-                        <ChatBubble key={msg.id} message={msg} index={i} />
+                        <ChatBubble key={msg.id} message={msg} index={i} isLightTheme={isLightTheme} />
                       )
                     )
                   ) : null}
@@ -1489,7 +1530,7 @@ export default function MessagesPage() {
         {[
           { key: "dashboard", label: "Home", icon: icons.dashboard, to: "/dashboard" },
           { key: "messages", label: "Chat", icon: icons.messages, to: "/messages" },
-          { key: "profile", label: "Profile", icon: icons.profile, to: user?.username ? `/profile/${user.username}` : "/dashboard" },
+          { key: "profile", label: "Profile", icon: icons.profile, to: profileUsername ? `/profile/${profileUsername}` : "/dashboard" },
         ].map((item) => {
           const isActive = item.key === "messages";
           return (

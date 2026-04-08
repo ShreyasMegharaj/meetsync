@@ -142,7 +142,11 @@ html[data-theme='light'] .fixed.rounded-full.pointer-events-none[style*="blur"] 
 }
 
 /* ---------- LIQUID GLASS — frosted warm cream cards ---------- */
-html[data-theme='light'] [style*="backdrop-filter"] {
+/* IMPORTANT: scope this carefully so it doesn't break chat bubbles and buttons */
+html[data-theme='light'] header[style*="backdrop-filter"],
+html[data-theme='light'] aside[style*="backdrop-filter"],
+html[data-theme='light'] nav[style*="backdrop-filter"],
+html[data-theme='light'] .fixed.inset-0 + div [style*="backdrop-filter"]:not(.chat-bubble) {
   background: rgba(255,252,246,0.62) !important;
   border-color: rgba(194,112,44,0.10) !important;
   box-shadow:
@@ -154,9 +158,34 @@ html[data-theme='light'] [style*="backdrop-filter"] {
   -webkit-backdrop-filter: blur(28px) saturate(130%) !important;
 }
 
+/* Glass panels (conversation list, chat window containers with glassStyle) */
+html[data-theme='light'] div[style*="blur(40px)"] {
+  background: rgba(255,252,246,0.55) !important;
+  border-color: rgba(194,112,44,0.10) !important;
+  box-shadow:
+    0 8px 32px rgba(160,90,30,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.90) !important;
+  backdrop-filter: blur(28px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(130%) !important;
+}
+
+/* Chat top bar (inside chat area) */
+html[data-theme='light'] div[style*="rgba(var(--theme-white),0.02)"] {
+  background: rgba(255,252,246,0.45) !important;
+}
+
 /* ---------- Fix: ensure CONTENT inside glass is visible ---------- */
-html[data-theme='light'] [style*="backdrop-filter"] * {
+html[data-theme='light'] header[style*="backdrop-filter"] *,
+html[data-theme='light'] aside[style*="backdrop-filter"] *,
+html[data-theme='light'] nav[style*="backdrop-filter"] * {
   visibility: visible !important;
+}
+
+/* ---------- Chat bubbles in light mode — DON'T override, let JS handle ---------- */
+html[data-theme='light'] .chat-bubble {
+  /* Bubble styles are handled in JS via isLightTheme prop — no CSS override needed */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* ---------- Inputs ---------- */
@@ -207,9 +236,77 @@ html[data-theme='light'] .text-white\/80.leading-relaxed { color: rgba(75,48,20,
 /* Fix chat input bar visibility */
 html[data-theme='light'] .bg-transparent { background-color: transparent !important; }
 
+/* ---------- Input & Button fixes for light theme ---------- */
+/* Search input, message input, and other text inputs */
+html[data-theme='light'] input[style*="rgba(var(--theme-white)"],
+html[data-theme='light'] textarea[style*="rgba(var(--theme-white)"],
+html[data-theme='light'] select[style*="rgba(var(--theme-white)"] {
+  background: rgba(194,112,44,0.06) !important;
+  border-color: rgba(194,112,44,0.15) !important;
+  color: #4b3014 !important;
+}
+
+/* Fix message text input inside the bar */
+html[data-theme='light'] input.bg-transparent {
+  color: #4b3014 !important;
+}
+html[data-theme='light'] input.bg-transparent::placeholder {
+  color: rgba(75,48,20,0.4) !important;
+}
+
+/* ---------- Button gradient overrides for light theme ---------- */
+/* Send button and action buttons with violet gradients */
+html[data-theme='light'] button[style*="rgba(139,92,246"] {
+  background: linear-gradient(135deg, rgba(194,112,44,0.65), rgba(180,90,30,0.50)) !important;
+  border-color: rgba(194,112,44,0.3) !important;
+  box-shadow: 0 0 20px rgba(194,112,44,0.12) !important;
+}
+
+/* Schedule button */
+html[data-theme='light'] button[style*="rgba(139,92,246,0.08)"] {
+  background: rgba(194,112,44,0.08) !important;
+  border-color: rgba(194,112,44,0.15) !important;
+}
+
+/* Logout hover */
+html[data-theme='light'] .hover\:text-red-400\/70:hover {
+  color: rgba(220,60,40,0.75) !important;
+}
+
+/* ---------- Conversation list active indicator ---------- */
+html[data-theme='light'] div[style*="rgba(139,92,246,0.9)"] {
+  background: linear-gradient(180deg, rgba(194,112,44,0.9), rgba(180,90,30,0.7)) !important;
+  box-shadow: 0 0 12px rgba(194,112,44,0.5) !important;
+}
+
+/* ---------- Online status dot ---------- */
+html[data-theme='light'] div[style*="rgba(52,211,153,0.9)"] {
+  border-color: rgba(255,252,246,0.9) !important;
+}
+
+/* ---------- Emerald online text ---------- */
+html[data-theme='light'] .text-emerald-400\/50 {
+  color: rgba(16,150,100,0.65) !important;
+}
+
+/* ---------- Modal overlay in light mode ---------- */
+html[data-theme='light'] .fixed.inset-0.bg-black\/60.backdrop-blur-sm {
+  background-color: rgba(85,50,20,0.20) !important;
+}
+html[data-theme='light'] .fixed.inset-0.bg-black\/60.backdrop-blur-md {
+  background-color: rgba(85,50,20,0.20) !important;
+}
+
+/* ---------- Glass card widgets (dashboard) ---------- */
+html[data-theme='light'] div[style*="blur(40px) saturate(130%)"] {
+  background: rgba(255,252,246,0.55) !important;
+}
+
 /* ---------- MOBILE: disable heavy animations ---------- */
 @media (max-width: 767px) {
-  html[data-theme='light'] [style*="backdrop-filter"] {
+  html[data-theme='light'] header[style*="backdrop-filter"],
+  html[data-theme='light'] aside[style*="backdrop-filter"],
+  html[data-theme='light'] nav[style*="backdrop-filter"] {
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
   }

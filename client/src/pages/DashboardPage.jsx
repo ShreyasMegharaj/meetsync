@@ -75,7 +75,7 @@ const getSidebarItems = (currentUsername) => [
   { key: "dashboard", label: "Dashboard", icon: icons.dashboard, to: "/dashboard" },
   { key: "messages", label: "Messages", icon: icons.messages, to: "/messages" },
   { key: "appointments", label: "Appointments", icon: icons.appointments, to: "/appointments" },
-  { key: "profile", label: "Profile", icon: icons.profile, to: currentUsername ? `/profile/${currentUsername}` : "/dashboard" },
+  { key: "profile", label: "Profile", icon: icons.profile, to: currentUsername ? `/profile/${currentUsername}` : "/profile" },
 ];
 
 const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
@@ -531,7 +531,7 @@ export default function DashboardPage() {
     <div className="relative min-h-screen overflow-hidden" style={{ background: "var(--theme-bg-main)" }}>
       <Background />
       
-      <Sidebar active="dashboard" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={user?.username || ""} />
+      <Sidebar active="dashboard" isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} currentUsername={user?.username || user?.name || ""} />
 
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* ══════ TOP NAVBAR ══════ */}
@@ -625,7 +625,7 @@ export default function DashboardPage() {
           { key: "dashboard", label: "Home", icon: icons.dashboard, to: "/dashboard" },
           { key: "messages", label: "Chat", icon: icons.messages, to: "/messages" },
           { key: "appointments", label: "Appts", icon: icons.appointments, to: "/appointments" },
-          { key: "profile", label: "Profile", icon: icons.profile, to: user?.username ? `/profile/${user.username}` : "/dashboard" },
+          { key: "profile", label: "Profile", icon: icons.profile, to: (user?.username || user?.name) ? `/profile/${user?.username || user?.name}` : "/profile" },
         ].map((item) => {
           const isActive = item.key === "dashboard";
           return (
