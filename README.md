@@ -8,21 +8,6 @@ MeetSync is a modern, real-time messaging and appointment scheduling platform. B
 
 ---
 
-## 📸 Screenshots
-
-*(Replace these placeholders with actual images of your application once you take them!)*
-
-| Dashboard | Real-Time Chat |
-| :---: | :---: |
-| ![Dashboard Screenshot](https://via.placeholder.com/600x350?text=Dashboard+UI) | ![Chat UI Screenshot](https://via.placeholder.com/600x350?text=Chat+Interface) |
-| **Complete overview with Quick Actions** | **Real-time messaging with meeting scheduling** |
-
-| Dark Theme | Light Theme (Liquid Glass) |
-| :---: | :---: |
-| ![Dark Theme](https://via.placeholder.com/600x350?text=Dark+Mode) | ![Light Theme](https://via.placeholder.com/600x350?text=Light+Mode) |
-
----
-
 ## ✨ Features
 
 - **Real-Time Messaging:** Instant chat powered by Socket.io, including live online statuses and image sharing.

@@ -10,6 +10,13 @@ import socket from "../utils/socket";
 
 const DEFAULT_AVATAR = null; // will fall back to initials
 
+/* ─────────────────────────────────────────────────────────────
+   MODULE-LEVEL CACHE — survives React unmount/remount so
+   navigating away and back is instant, no extra API calls.
+   ───────────────────────────────────────────────────────────── */
+const _cachedConversations = { list: null };   // null = never fetched
+const _cachedMessages = {};                     // { [convoId]: Message[] }
+
 /* ─── helpers ─── */
 const rand = (a, b) => Math.random() * (b - a) + a;
 
@@ -632,9 +639,22 @@ export default function MessagesPage() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Load Conversations on Mount (run ONCE — no activeConvo in deps)
+  // Load Conversations on Mount — use module cache so remounting is instant
   useEffect(() => {
     const loadConversations = async () => {
+      // If we have a cached list, restore it immediately — no spinner
+      if (_cachedConversations.list) {
+        setConversations(_cachedConversations.list);
+        setConversationsLoading(false);
+
+        // Still auto-select first if none in URL
+        if (!conversationId && _cachedConversations.list.length > 0 && window.innerWidth >= 768) {
+          setActiveConvo(_cachedConversations.list[0].id);
+          navigate(`/chat/${_cachedConversations.list[0].id}`, { replace: true });
+        }
+        return; // Skip API call — already fresh
+      }
+
       setConversationsLoading(true);
       try {
         const res = await api.get('/conversations');
@@ -658,13 +678,15 @@ export default function MessagesPage() {
           };
         });
 
-        setConversations(Array.isArray(mapped) ? mapped : []);
+        const safeList = Array.isArray(mapped) ? mapped : [];
+        _cachedConversations.list = safeList; // save to module cache
+        setConversations(safeList);
         
         // Auto select first if none passed in URL
-        if (!conversationId && Array.isArray(mapped) && mapped.length > 0) {
+        if (!conversationId && safeList.length > 0) {
           if (window.innerWidth >= 768) {
-            setActiveConvo(mapped[0].id);
-            navigate(`/chat/${mapped[0].id}`, { replace: true });
+            setActiveConvo(safeList[0].id);
+            navigate(`/chat/${safeList[0].id}`, { replace: true });
           }
         }
       } catch (_err) {
@@ -677,7 +699,37 @@ export default function MessagesPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load Messages & Join Socket Room
+  // Utility — maps a raw API message object to the local display shape
+  const mapMessage = useCallback((msg) => {
+    const senderIdStr = msg.sender_id ? (msg.sender_id._id || msg.sender_id).toString() : null;
+    const isMe = senderIdStr === String(currentUserId);
+    let appointmentData = undefined;
+    if (msg.appointment_id) {
+      const apt = msg.appointment_id;
+      const scheduledDate = apt.scheduled_for ? new Date(apt.scheduled_for) : null;
+      appointmentData = {
+        ...apt,
+        id: apt._id,
+        title: apt.note || 'Meeting Request',
+        date: scheduledDate ? scheduledDate.toLocaleDateString() : 'TBD',
+        time: scheduledDate ? scheduledDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD',
+        duration: '30 minutes',
+        host_id: apt.host_id?._id || apt.host_id,
+      };
+    }
+    return {
+      ...msg,
+      id: msg._id || String(Math.random()),
+      sender: isMe ? "me" : "other",
+      text: msg.message_text,
+      message_type: msg.message_type || 'text',
+      image_url: msg.image_url || null,
+      time: new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      appointment: appointmentData,
+    };
+  }, [currentUserId]);
+
+  // Load Messages & Join Socket Room — skip API if already cached
   useEffect(() => {
     if (!activeConvo) return;
     socket.emit("joinConversation", activeConvo);
@@ -687,95 +739,47 @@ export default function MessagesPage() {
       navigate(`/chat/${activeConvo}`, { replace: true });
     }
 
+    // If this conversation's messages are already in the module cache,
+    // restore them to state immediately — zero loading time.
+    if (_cachedMessages[activeConvo]) {
+      setLocalMessages(prev => ({
+        ...prev,
+        [activeConvo]: _cachedMessages[activeConvo],
+      }));
+      return; // Don't re-fetch from API
+    }
+
     const loadMessages = async () => {
       try {
         const res = await api.get(`/messages/${activeConvo}`);
-        
-        const mappedMsgs = res.data.map(msg => {
-          const senderIdStr = msg.sender_id ? (msg.sender_id._id || msg.sender_id).toString() : null;
-          const isMe = senderIdStr === String(currentUserId);
-          
-          // Map appointment fields from backend model to frontend display fields
-          let appointmentData = undefined;
-          if (msg.appointment_id) {
-            const apt = msg.appointment_id;
-            const scheduledDate = apt.scheduled_for ? new Date(apt.scheduled_for) : null;
-            appointmentData = {
-              ...apt,
-              id: apt._id,
-              title: apt.note || 'Meeting Request',
-              date: scheduledDate ? scheduledDate.toLocaleDateString() : 'TBD',
-              time: scheduledDate ? scheduledDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD',
-              duration: '30 minutes',
-              host_id: apt.host_id?._id || apt.host_id,
-            };
-          }
-          
-          return {
-            ...msg,
-            id: msg._id || String(Math.random()),
-            sender: isMe ? "me" : "other",
-            text: msg.message_text,
-            message_type: msg.message_type || 'text',
-            image_url: msg.image_url || null,
-            time: new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            appointment: appointmentData
-          };
-        });
-        
-        setLocalMessages(prev => ({
-          ...prev,
-          [activeConvo]: Array.isArray(mappedMsgs) ? mappedMsgs : []
-        }));
+        const mappedMsgs = (res.data || []).map(mapMessage);
+        const safeList = Array.isArray(mappedMsgs) ? mappedMsgs : [];
+        _cachedMessages[activeConvo] = safeList; // save to module cache
+        setLocalMessages(prev => ({ ...prev, [activeConvo]: safeList }));
       } catch (_err) {
         // handled by api interceptor
       }
     };
     loadMessages();
-  }, [activeConvo, conversationId, currentUserId, navigate]);
+  }, [activeConvo, conversationId, currentUserId, navigate, mapMessage]);
 
-  // ── Re-fetch messages on socket reconnect (replaces aggressive polling) ──
+  // ── Re-fetch messages on socket reconnect (miss-proof: only re-fetches what's stale) ──
   useEffect(() => {
     const handleReconnectRefetch = async () => {
       const convoId = activeConvoRef.current;
       if (!convoId) return;
       try {
         const res = await api.get(`/messages/${convoId}`);
-        const rawMsgs = res.data || [];
-        const mappedMsgs = rawMsgs.map(msg => {
-          const senderIdStr = msg.sender_id ? (msg.sender_id._id || msg.sender_id).toString() : null;
-          const isMe = senderIdStr === String(currentUserId);
-          let appointmentData = undefined;
-          if (msg.appointment_id) {
-            const apt = msg.appointment_id;
-            const scheduledDate = apt.scheduled_for ? new Date(apt.scheduled_for) : null;
-            appointmentData = {
-              ...apt, id: apt._id,
-              title: apt.note || 'Meeting Request',
-              date: scheduledDate ? scheduledDate.toLocaleDateString() : 'TBD',
-              time: scheduledDate ? scheduledDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD',
-              duration: '30 minutes',
-              host_id: apt.host_id?._id || apt.host_id,
-            };
-          }
-          return {
-            ...msg,
-            id: msg._id || String(Math.random()),
-            sender: isMe ? "me" : "other",
-            text: msg.message_text,
-            message_type: msg.message_type || 'text',
-            image_url: msg.image_url || null,
-            time: new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            appointment: appointmentData
-          };
-        });
-        setLocalMessages(prev => ({ ...prev, [convoId]: mappedMsgs }));
+        const mappedMsgs = (res.data || []).map(mapMessage);
+        const safeList = Array.isArray(mappedMsgs) ? mappedMsgs : [];
+        _cachedMessages[convoId] = safeList; // update cache too
+        setLocalMessages(prev => ({ ...prev, [convoId]: safeList }));
       } catch (_) {}
     };
 
     socket.on('connect', handleReconnectRefetch);
     return () => socket.off('connect', handleReconnectRefetch);
-  }, [currentUserId]);
+  }, [mapMessage]);
 
   // Handle incoming live socket messages (from OTHER users only — server excludes sender)
   useEffect(() => {
@@ -835,10 +839,9 @@ export default function MessagesPage() {
           return existingId === msgId;
         })) return prev;
 
-        return {
-          ...prev,
-          [convoId]: [...currentMsgs, mappedMsg]
-        };
+        const updated = [...currentMsgs, mappedMsg];
+        _cachedMessages[convoId] = updated; // keep module cache in sync
+        return { ...prev, [convoId]: updated };
       });
     };
     
