@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import QRCode from "react-qr-code";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import NotificationBell from "../components/NotificationBell";
 import ThemeToggle from "../components/ThemeToggle";
 
@@ -264,6 +266,8 @@ export default function ProfilePage() {
   const { username } = useParams();
   const navigate = useNavigate();
   const { updateUser } = useAuth();
+  const { theme } = useTheme();
+  const isLightTheme = theme === 'light';
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileData, setProfileData] = useState(null);
@@ -287,6 +291,7 @@ export default function ProfilePage() {
   /* Incoming friend requests (own profile only) */
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [requestActionLoading, setRequestActionLoading] = useState(null);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -793,6 +798,104 @@ export default function ProfilePage() {
                     </div>
                   )}
                 </motion.div>
+
+                {/* ─── QR Code ID (own profile) ─── */}
+                {isOwnProfile && (
+                  <motion.div className="w-full mt-7"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.25 }}
+                  >
+                    <div
+                      className={`rounded-2xl p-5 ${isLightTheme ? 'qr-card-light' : ''}`}
+                      style={isLightTheme ? {} : {
+                        background: 'linear-gradient(165deg, rgba(var(--theme-white),0.06) 0%, rgba(var(--theme-white),0.02) 50%, rgba(var(--theme-white),0.04) 100%)',
+                        border: '1px solid rgba(var(--theme-white),0.08)',
+                        boxShadow: '0 10px 40px rgba(var(--theme-black),0.3), inset 0 1px 0 rgba(var(--theme-white),0.06)',
+                        backdropFilter: 'blur(30px) saturate(130%)',
+                        WebkitBackdropFilter: 'blur(30px) saturate(130%)',
+                      }}
+                    >
+                      {/* Header */}
+                      <div className="flex items-center gap-2.5 mb-4">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg"
+                          style={isLightTheme
+                            ? { background: 'rgba(180,100,30,0.12)', border: '1px solid rgba(180,100,30,0.18)' }
+                            : { background: 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(59,130,246,0.15))', border: '1px solid rgba(var(--theme-white),0.08)' }
+                          }>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke={isLightTheme ? '#8b4513' : 'rgba(255,255,255,0.65)'} strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75H16.5v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75H16.5v-.75z" />
+                          </svg>
+                        </div>
+                        <h3 className="text-sm font-semibold text-white/60">Your QR ID</h3>
+                      </div>
+
+                      {/* QR Code */}
+                      <div className="flex justify-center mb-4">
+                        <div
+                          className="p-3 rounded-xl"
+                          style={isLightTheme
+                            ? { background: '#ffffff', boxShadow: '0 4px 20px rgba(140,80,20,0.08), inset 0 0 0 1px rgba(180,120,60,0.08)' }
+                            : { background: 'rgba(255,255,255,0.95)', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }
+                          }
+                        >
+                          <QRCode
+                            value={`${window.location.origin}/profile/${displayUsername}`}
+                            size={140}
+                            level="M"
+                            fgColor={isLightTheme ? '#5c3310' : '#1a1a2e'}
+                            bgColor="transparent"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-xs text-white/35 text-center mb-4 leading-relaxed">
+                        Scan this QR code to visit your profile.
+                        <br />New users will register first, then can chat with you.
+                      </p>
+
+                      {/* Copy Link Button */}
+                      <motion.button
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/profile/${displayUsername}`);
+                          setLinkCopied(true);
+                          setTimeout(() => setLinkCopied(false), 2000);
+                        }}
+                        className="w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold transition-all duration-200"
+                        style={isLightTheme
+                          ? {
+                              background: 'rgba(180,100,30,0.08)',
+                              border: '1px solid rgba(180,100,30,0.15)',
+                              color: '#8b4513',
+                            }
+                          : {
+                              background: 'rgba(var(--theme-white),0.04)',
+                              border: '1px solid rgba(var(--theme-white),0.08)',
+                              color: 'rgba(255,255,255,0.6)',
+                            }
+                        }
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        {linkCopied ? (
+                          <>
+                            {icons.check}
+                            <span>Link Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-3.061a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364l-1.757 1.757" />
+                            </svg>
+                            <span>Copy Profile Link</span>
+                          </>
+                        )}
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )}
 
                 {/* ─── Incoming Friend Requests (own profile) ─── */}
                 {isOwnProfile && incomingRequests.length > 0 && (
