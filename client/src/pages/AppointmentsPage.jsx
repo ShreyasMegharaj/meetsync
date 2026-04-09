@@ -286,7 +286,13 @@ export default function AppointmentsPage() {
     const fetchAppointments = async () => {
       try {
         const res = await api.get("/appointments");
-        setAppointments(Array.isArray(res.data) ? res.data : []);
+        console.log("[Appointments] raw API response:", res.data);
+        const data = Array.isArray(res.data) ? res.data : (res.data?.appointments || []);
+        console.log("[Appointments] parsed array length:", data.length);
+        if (data.length > 0) {
+          console.log("[Appointments] first item:", JSON.stringify(data[0], null, 2));
+        }
+        setAppointments(data);
       } catch (err) {
         console.error("Fetch appointments error:", err);
       } finally {
@@ -296,19 +302,28 @@ export default function AppointmentsPage() {
     fetchAppointments();
   }, []);
 
+  /* Helper: safely get the scheduled date from an appointment */
+  const getScheduledDate = (a) => {
+    const raw = a.scheduled_for || a.scheduledFor;
+    if (!raw) return null;
+    const d = new Date(raw);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
   const now = new Date();
 
-  const upcoming = appointments.filter(a =>
-    (a.status === "accepted" || a.status === "pending") &&
-    a.scheduled_for && new Date(a.scheduled_for) >= now
-  );
+  const upcoming = appointments.filter(a => {
+    const d = getScheduledDate(a);
+    return (a.status === "accepted" || a.status === "pending") && d && d >= now;
+  });
 
   const pending = appointments.filter(a => a.status === "pending");
 
-  const past = appointments.filter(a =>
-    a.status === "rejected" || a.status === "cancelled" ||
-    (a.scheduled_for && new Date(a.scheduled_for) < now)
-  );
+  const past = appointments.filter(a => {
+    const d = getScheduledDate(a);
+    return a.status === "rejected" || a.status === "cancelled" ||
+      (d && d < now);
+  });
 
   const tabs = [
     { key: "upcoming", label: "Upcoming", count: upcoming.length },
