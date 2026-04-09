@@ -201,18 +201,14 @@ const AnimatedLogo = () => (
           transition={{ duration: 0.2,  repeatDelay: 2, ease: "easeInOut" }} />
       </motion.div>
 
-      {/* Register icon — user-plus */}
-      <motion.svg
-        width="30" height="30" viewBox="0 0 24 24" fill="none"
-        stroke="rgba(var(--theme-white),0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-        animate={{ strokeOpacity: [0.9, 1, 0.9], scale: [1, 1.05, 1] }}
+      {/* MeetSync Logo Image */}
+      <motion.img
+        src="/logo.png"
+        alt="MeetSync Logo"
+        className="w-[48px] h-[48px] object-contain"
+        animate={{ scale: [1, 1.05, 1] }}
         transition={{ duration: 0.2,  ease: "easeInOut" }}
-      >
-        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-        <circle cx="8.5" cy="7" r="4" />
-        <line x1="20" y1="8" x2="20" y2="14" />
-        <line x1="23" y1="11" x2="17" y2="11" />
-      </motion.svg>
+      />
     </motion.div>
   </motion.div>
 );

@@ -203,18 +203,14 @@ const AnimatedLogo = () => (
           transition={{ duration: 0.2,  repeatDelay: 2, ease: "easeInOut" }} />
       </motion.div>
 
-      {/* Icon with continuous subtle animation */}
-      <motion.svg
-        width="30" height="30" viewBox="0 0 24 24" fill="none"
-        stroke="rgba(var(--theme-white),0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-        animate={{ strokeOpacity: [0.9, 1, 0.9], scale: [1, 1.05, 1] }}
+      {/* MeetSync Logo Image */}
+      <motion.img
+        src="/logo.png"
+        alt="MeetSync Logo"
+        className="w-[48px] h-[48px] object-contain"
+        animate={{ scale: [1, 1.05, 1] }}
         transition={{ duration: 0.2,  ease: "easeInOut" }}
-      >
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </motion.svg>
+      />
     </motion.div>
   </motion.div>
 );
