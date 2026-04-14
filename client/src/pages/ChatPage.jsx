@@ -729,7 +729,7 @@ export default function MessagesPage() {
     };
   }, [currentUserId]);
 
-  // Load Messages & Join Socket Room — skip API if already cached
+  // Load Messages & Join Socket Room
   useEffect(() => {
     if (!activeConvo) return;
     socket.emit("joinConversation", activeConvo);
@@ -739,16 +739,16 @@ export default function MessagesPage() {
       navigate(`/chat/${activeConvo}`, { replace: true });
     }
 
-    // If this conversation's messages are already in the module cache,
-    // restore them to state immediately — zero loading time.
+    // If cached, show instantly for zero loading time
     if (_cachedMessages[activeConvo]) {
       setLocalMessages(prev => ({
         ...prev,
         [activeConvo]: _cachedMessages[activeConvo],
       }));
-      return; // Don't re-fetch from API
     }
 
+    // Always fetch from API (background refresh if cached, primary fetch if not)
+    // This ensures new messages from the other user are always loaded
     const loadMessages = async () => {
       try {
         const res = await api.get(`/messages/${activeConvo}`);
@@ -781,7 +781,8 @@ export default function MessagesPage() {
     return () => socket.off('connect', handleReconnectRefetch);
   }, [mapMessage]);
 
-  // Handle incoming live socket messages (from OTHER users only — server excludes sender)
+  // Handle incoming live socket messages
+  // Server broadcasts to ALL sockets in the room, so we MUST filter our own messages
   useEffect(() => {
     const handleReceive = (msg) => {
       // Normalize sender ID — handle both populated objects and raw strings
@@ -790,8 +791,10 @@ export default function MessagesPage() {
         ? (typeof senderIdRaw === 'object' ? (senderIdRaw._id || senderIdRaw.id || senderIdRaw).toString() : senderIdRaw.toString())
         : null;
 
-      // Skip own messages — we already have them from the HTTP response / optimistic UI
-      if (senderIdStr && String(senderIdStr) === String(currentUserId)) return;
+      // Skip own messages — we already have them from optimistic UI + HTTP response.
+      // Compare against all known user ID fields to be safe.
+      const myId = String(currentUserId);
+      if (myId !== 'me' && senderIdStr && senderIdStr === myId) return;
 
       const msgId = msg._id ? msg._id.toString() : null;
       // If we can't identify the message, skip to avoid duplicates
@@ -833,11 +836,14 @@ export default function MessagesPage() {
 
         const currentMsgs = prev[convoId] || [];
 
-        // Prevent duplicates — check both _id and id
-        if (currentMsgs.some(m => {
+        // Prevent duplicates — check _id, id, and also optimistic messages
+        // (optimistic msgs have timestamp IDs; real msgs have MongoDB ObjectIds)
+        const isDuplicate = currentMsgs.some(m => {
           const existingId = (m._id || m.id || '').toString();
-          return existingId === msgId;
-        })) return prev;
+          if (existingId === msgId) return true;
+          return false;
+        });
+        if (isDuplicate) return prev;
 
         const updated = [...currentMsgs, mappedMsg];
         _cachedMessages[convoId] = updated; // keep module cache in sync
@@ -943,10 +949,15 @@ export default function MessagesPage() {
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
-    setLocalMessages(prev => ({
-      ...prev,
-      [activeConvo]: [...(prev[activeConvo] || []), optimisticMsg]
-    }));
+    setLocalMessages(prev => {
+      const updated = {
+        ...prev,
+        [activeConvo]: [...(prev[activeConvo] || []), optimisticMsg]
+      };
+      // Sync module cache so it stays consistent
+      _cachedMessages[activeConvo] = updated[activeConvo];
+      return updated;
+    });
 
     // Update convo list preview immediately
     setConversations(prev => prev.map(c =>
@@ -954,7 +965,7 @@ export default function MessagesPage() {
     ));
 
     // Send via HTTP POST (reliable — works even if socket is disconnected)
-    // The server route broadcasts to the OTHER user via socket automatically.
+    // The server route broadcasts to the other user via socket automatically.
     try {
       const res = await api.post('/messages', {
         conversation_id: activeConvo,
@@ -965,13 +976,16 @@ export default function MessagesPage() {
       const realId = serverMsg._id ? serverMsg._id.toString() : optimisticId;
       setLocalMessages(prev => {
         const msgs = prev[activeConvo] || [];
+        const updatedMsgs = msgs.map(m =>
+          m.id === optimisticId
+            ? { ...m, id: realId, _id: serverMsg._id }
+            : m
+        );
+        // Sync module cache with real ID
+        _cachedMessages[activeConvo] = updatedMsgs;
         return {
           ...prev,
-          [activeConvo]: msgs.map(m =>
-            m.id === optimisticId
-              ? { ...m, id: realId, _id: serverMsg._id }
-              : m
-          ),
+          [activeConvo]: updatedMsgs,
         };
       });
     } catch (err) {
@@ -1039,10 +1053,14 @@ export default function MessagesPage() {
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
-    setLocalMessages(prev => ({
-      ...prev,
-      [activeConvo]: [...(prev[activeConvo] || []), optimisticMsg]
-    }));
+    setLocalMessages(prev => {
+      const updated = {
+        ...prev,
+        [activeConvo]: [...(prev[activeConvo] || []), optimisticMsg]
+      };
+      _cachedMessages[activeConvo] = updated[activeConvo];
+      return updated;
+    });
 
     setConversations(prev => prev.map(c =>
       c.id === activeConvo ? { ...c, lastMessage: "📷 Image", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) } : c
@@ -1060,13 +1078,15 @@ export default function MessagesPage() {
       const realId = serverMsg._id ? serverMsg._id.toString() : optimisticId;
       setLocalMessages(prev => {
         const msgs = prev[activeConvo] || [];
+        const updatedMsgs = msgs.map(m =>
+          m.id === optimisticId
+            ? { ...m, id: realId, _id: serverMsg._id }
+            : m
+        );
+        _cachedMessages[activeConvo] = updatedMsgs;
         return {
           ...prev,
-          [activeConvo]: msgs.map(m =>
-            m.id === optimisticId
-              ? { ...m, id: realId, _id: serverMsg._id }
-              : m
-          ),
+          [activeConvo]: updatedMsgs,
         };
       });
     } catch (err) {

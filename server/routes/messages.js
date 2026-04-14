@@ -125,18 +125,12 @@ router.post('/', authMiddleware, async (req, res) => {
       'name username profile_picture'
     );
 
-    // Broadcast to conversation room but EXCLUDE the sender's sockets
-    // so the sender doesn't get an echo of their own message
+    // Broadcast to ALL sockets in the conversation room.
+    // The client filters out the sender's own messages to avoid duplicates.
     const io = req.app.get('io');
     if (io) {
-      const senderId = req.user.id.toString();
       const room = conversation_id.toString();
-      const socketsInRoom = await io.in(room).fetchSockets();
-      for (const s of socketsInRoom) {
-        // Skip sockets that belong to the sender (they joined a room with their userId)
-        if (s.rooms.has(senderId)) continue;
-        s.emit('receiveMessage', message);
-      }
+      io.to(room).emit('receiveMessage', message);
     }
 
     res.status(201).json(message);
