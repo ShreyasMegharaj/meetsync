@@ -162,7 +162,11 @@ const StatusBadge = ({ status }) => {
    APPOINTMENT CARD
    ═══════════════════════════════════════════════════════════════ */
 const AppointmentCard = ({ appointment, currentUserId, delay }) => {
-  const isHost = appointment.host_id?._id === currentUserId || appointment.host_id?.id === currentUserId;
+  const isHost =
+    appointment.host_id?._id === currentUserId ||
+    appointment.host_id?.id === currentUserId ||
+    (appointment.host_id?._id && String(appointment.host_id._id) === String(currentUserId)) ||
+    String(appointment.host_id) === String(currentUserId);
   const partner = isHost ? appointment.client_id : appointment.host_id;
   const partnerName = partner?.name || partner?.username || "Unknown";
   const partnerInitials = partnerName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
@@ -286,12 +290,7 @@ export default function AppointmentsPage() {
     const fetchAppointments = async () => {
       try {
         const res = await api.get("/appointments");
-        console.log("[Appointments] raw API response:", res.data);
         const data = Array.isArray(res.data) ? res.data : (res.data?.appointments || []);
-        console.log("[Appointments] parsed array length:", data.length);
-        if (data.length > 0) {
-          console.log("[Appointments] first item:", JSON.stringify(data[0], null, 2));
-        }
         setAppointments(data);
       } catch (err) {
         console.error("Fetch appointments error:", err);
@@ -314,15 +313,18 @@ export default function AppointmentsPage() {
 
   const upcoming = appointments.filter(a => {
     const d = getScheduledDate(a);
-    return (a.status === "accepted" || a.status === "pending") && d && d >= now;
+    // Pending appointments always show as upcoming (not yet confirmed)
+    if (a.status === "pending") return true;
+    // Accepted appointments show as upcoming only if date is in the future
+    return a.status === "accepted" && d && d >= now;
   });
 
   const pending = appointments.filter(a => a.status === "pending");
 
   const past = appointments.filter(a => {
     const d = getScheduledDate(a);
-    return a.status === "rejected" || a.status === "cancelled" ||
-      (d && d < now);
+    if (a.status === "rejected" || a.status === "cancelled") return true;
+    return a.status === "accepted" && d && d < now;
   });
 
   const tabs = [
@@ -451,7 +453,7 @@ export default function AppointmentsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {filteredAppointments.map((apt, i) => (
-                <AppointmentCard key={apt._id} appointment={apt} currentUserId={user?.id} delay={0.3 + i * 0.08} />
+                <AppointmentCard key={apt._id} appointment={apt} currentUserId={user?._id || user?.id} delay={0.3 + i * 0.08} />
               ))}
             </div>
           )}

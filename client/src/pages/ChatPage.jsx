@@ -565,6 +565,7 @@ export default function MessagesPage() {
   const [activeConvo, setActiveConvo] = useState(conversationId || null);
   const activeConvoRef = useRef(activeConvo);
   const [localMessages, setLocalMessages] = useState({});
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [messageInput, setMessageInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -639,51 +640,51 @@ export default function MessagesPage() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Load Conversations on Mount — use module cache so remounting is instant
+  // Load Conversations on Mount — use module cache so remounting is instant,
+  // but ALWAYS do a background refresh so new conversations appear.
   useEffect(() => {
+    const mapConvo = (convo) => {
+      const name = convo.otherUser?.name || convo.otherUser?.username || "Unknown";
+      const init = name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+      return {
+        id: convo._id,
+        name: name,
+        avatar: convo.otherUser?.profile_picture ? (
+          <img src={convo.otherUser.profile_picture} alt={name} className="w-full h-full object-cover rounded-full" onError={(e) => { e.target.style.display = 'none'; }} />
+        ) : init,
+        time: new Date(convo.last_message_at).toLocaleDateString() === new Date().toLocaleDateString()
+          ? new Date(convo.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : new Date(convo.last_message_at).toLocaleDateString(),
+        lastMessage: "Tap to view conversation",
+        online: true,
+        unread: 0
+      };
+    };
+
     const loadConversations = async () => {
       // If we have a cached list, restore it immediately — no spinner
       if (_cachedConversations.list) {
         setConversations(_cachedConversations.list);
         setConversationsLoading(false);
-
-        // Still auto-select first if none in URL
+        // Still auto-select first if none in URL (desktop only)
         if (!conversationId && _cachedConversations.list.length > 0 && window.innerWidth >= 768) {
-          setActiveConvo(_cachedConversations.list[0].id);
-          navigate(`/chat/${_cachedConversations.list[0].id}`, { replace: true });
+          const first = _cachedConversations.list[0];
+          setActiveConvo(first.id);
+          navigate(`/chat/${first.id}`, { replace: true });
         }
-        return; // Skip API call — already fresh
+        // Fall through to always do a background refresh
+      } else {
+        setConversationsLoading(true);
       }
 
-      setConversationsLoading(true);
       try {
         const res = await api.get('/conversations');
-        
-        const mapped = res.data.map(convo => {
-          const name = convo.otherUser?.name || convo.otherUser?.username || "Unknown";
-          const init = name.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
-          
-          return {
-            id: convo._id,
-            name: name,
-            avatar: convo.otherUser?.profile_picture ? (
-              <img src={convo.otherUser.profile_picture} alt={name} className="w-full h-full object-cover rounded-full" onError={(e) => { e.target.style.display = 'none'; }} />
-            ) : init,
-            time: new Date(convo.last_message_at).toLocaleDateString() === new Date().toLocaleDateString() 
-                ? new Date(convo.last_message_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                : new Date(convo.last_message_at).toLocaleDateString(),
-            lastMessage: "Tap to view conversation",
-            online: true, 
-            unread: 0 
-          };
-        });
-
-        const safeList = Array.isArray(mapped) ? mapped : [];
-        _cachedConversations.list = safeList; // save to module cache
+        const safeList = Array.isArray(res.data) ? res.data.map(mapConvo) : [];
+        _cachedConversations.list = safeList;
         setConversations(safeList);
-        
-        // Auto select first if none passed in URL
-        if (!conversationId && safeList.length > 0) {
+
+        // Auto select first if no conversation selected yet
+        if (!conversationId && !activeConvoRef.current && safeList.length > 0) {
           if (window.innerWidth >= 768) {
             setActiveConvo(safeList[0].id);
             navigate(`/chat/${safeList[0].id}`, { replace: true });
@@ -733,8 +734,8 @@ export default function MessagesPage() {
   useEffect(() => {
     if (!activeConvo) return;
     socket.emit("joinConversation", activeConvo);
-    
-    // Switch URL silently 
+
+    // Switch URL silently
     if (conversationId !== activeConvo) {
       navigate(`/chat/${activeConvo}`, { replace: true });
     }
@@ -745,19 +746,33 @@ export default function MessagesPage() {
         ...prev,
         [activeConvo]: _cachedMessages[activeConvo],
       }));
+      // Still do a background refresh to pick up any new messages
+      const bgRefresh = async () => {
+        try {
+          const res = await api.get(`/messages/${activeConvo}`);
+          const mappedMsgs = (res.data || []).map(mapMessage);
+          const safeList = Array.isArray(mappedMsgs) ? mappedMsgs : [];
+          _cachedMessages[activeConvo] = safeList;
+          setLocalMessages(prev => ({ ...prev, [activeConvo]: safeList }));
+        } catch (_err) { /* silent */ }
+      };
+      bgRefresh();
+      return;
     }
 
-    // Always fetch from API (background refresh if cached, primary fetch if not)
-    // This ensures new messages from the other user are always loaded
+    // No cache — show loading spinner and fetch
+    setMessagesLoading(true);
     const loadMessages = async () => {
       try {
         const res = await api.get(`/messages/${activeConvo}`);
         const mappedMsgs = (res.data || []).map(mapMessage);
         const safeList = Array.isArray(mappedMsgs) ? mappedMsgs : [];
-        _cachedMessages[activeConvo] = safeList; // save to module cache
+        _cachedMessages[activeConvo] = safeList;
         setLocalMessages(prev => ({ ...prev, [activeConvo]: safeList }));
       } catch (_err) {
         // handled by api interceptor
+      } finally {
+        setMessagesLoading(false);
       }
     };
     loadMessages();
@@ -1304,7 +1319,10 @@ export default function MessagesPage() {
               ) : Array.isArray(filteredConversations) && filteredConversations.length > 0 ? (
                 filteredConversations.map((convo, i) => (
                   <ConversationItem key={convo.id} convo={convo} isActive={activeConvo === convo.id}
-                    onClick={() => setActiveConvo(convo.id)} index={i} />
+                    onClick={() => {
+                      setActiveConvo(convo.id);
+                      navigate(`/chat/${convo.id}`);
+                    }} index={i} />
                 ))
               ) : (
                 <div className="flex flex-col items-center justify-center py-12">
@@ -1377,7 +1395,28 @@ export default function MessagesPage() {
             <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-4" style={{ paddingBottom: "80px", scrollbarWidth: "thin", scrollbarColor: "rgba(var(--theme-white),0.08) transparent" }}>
               <AnimatePresence mode="wait">
                 <motion.div key={activeConvo} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                  {currentMessages.length === 0 ? (
+                  {messagesLoading ? (
+                    <div className="flex flex-col gap-4 py-6">
+                      {[...Array(5)].map((_, i) => (
+                        <motion.div key={i}
+                          className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}
+                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.06 }}>
+                          <motion.div
+                            className="h-10 rounded-3xl"
+                            style={{
+                              width: `${[55, 40, 65, 35, 50][i]}%`,
+                              background: i % 2 === 0
+                                ? "linear-gradient(135deg, rgba(139,92,246,0.2), rgba(59,130,246,0.15))"
+                                : "rgba(255,255,255,0.05)",
+                              border: "1px solid rgba(255,255,255,0.05)",
+                            }}
+                            animate={{ opacity: [0.4, 0.7, 0.4] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
+                          />
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : currentMessages.length === 0 ? (
                     <motion.div className="flex flex-col items-center justify-center h-full text-center py-20"
                       initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
                       <div className="flex h-16 w-16 items-center justify-center rounded-2xl mb-4"
