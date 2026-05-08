@@ -14,9 +14,26 @@ import ChatPage from "./pages/ChatPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
 
 // Smart redirect: /profile -> /profile/:username
+// Waits for auth to load, falls back to localStorage if needed
 function ProfileRedirect() {
-  const { user } = useAuth();
-  const username = user?.username || user?.name;
+  const { user, loading } = useAuth();
+
+  // Wait until AuthContext finishes reading from localStorage
+  if (loading) return null;
+
+  // Try auth context first, then localStorage directly as fallback
+  const username =
+    user?.username ||
+    user?.name ||
+    (() => {
+      try {
+        const stored = JSON.parse(localStorage.getItem("user") || "{}");
+        return stored.username || stored.name || null;
+      } catch {
+        return null;
+      }
+    })();
+
   if (username) return <Navigate to={`/profile/${username}`} replace />;
   return <Navigate to="/dashboard" replace />;
 }
