@@ -468,9 +468,9 @@ export default function DashboardPage() {
         
         // Ensure appointments API has been returning properly
         if (Array.isArray(apptRes.data)) {
-          const accepted = apptRes.data.filter(a => a.status === 'accepted');
-          // Sort nearest date first
-          accepted.sort((a,b) => new Date(a.date) - new Date(b.date));
+          const accepted = apptRes.data.filter(a => a.status === 'accepted' || a.status === 'pending');
+          // Sort nearest date first using correct field name
+          accepted.sort((a, b) => new Date(a.scheduled_for || a.date) - new Date(b.scheduled_for || b.date));
           setAppointments(accepted);
         } else {
           setAppointments([]);
