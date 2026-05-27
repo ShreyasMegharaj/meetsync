@@ -104,18 +104,16 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
           <Link to="/dashboard" className="flex items-center gap-3 px-3 mb-10">
             <motion.div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden"
               style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(var(--theme-white),0.1)" }}
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: 1.1, borderColor: "rgba(167,139,250,0.4)" }}
               animate={{ borderColor: ["rgba(var(--theme-white),0.1)", "rgba(167,139,250,0.2)", "rgba(96,165,250,0.2)", "rgba(var(--theme-white),0.1)"] }}
-              transition={{ duration: 0.2,  ease: "easeInOut" }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
             >
+              {/* Logo shimmer */}
               <motion.div className="absolute inset-0 pointer-events-none"
                 style={{ background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.1),transparent)", transform: "skewX(-20deg)" }}
                 animate={{ left: ["-150%", "250%"] }}
-                transition={{ duration: 0.2,  repeatDelay: 4, ease: "easeInOut" }} />
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(var(--theme-white),0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
+                transition={{ duration: 0.2, repeatDelay: 4, ease: "easeInOut" }} />
+              <img src="/logo.png" alt="MeetSync" className="w-7 h-7 object-contain" />
             </motion.div>
             <motion.span className="text-xl font-bold"
               style={{ background: "linear-gradient(135deg, #ffffff 0%, #c4b5fd 70%, #818cf8 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
