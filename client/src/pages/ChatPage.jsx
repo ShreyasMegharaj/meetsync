@@ -110,17 +110,21 @@ const Sidebar = ({ active, isOpen, onClose, currentUsername }) => {
           initial={{ x: -280, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -280, opacity: 0 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}>
           <Link to="/dashboard" className="flex items-center gap-3 px-3 mb-10">
-            <motion.div className="relative flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden"
-              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(59,130,246,0.2))", border: "1px solid rgba(var(--theme-white),0.1)" }}
-              whileHover={{ scale: 1.1, borderColor: "rgba(167,139,250,0.4)" }}
-              animate={{ borderColor: ["rgba(var(--theme-white),0.1)", "rgba(167,139,250,0.2)", "rgba(96,165,250,0.2)", "rgba(var(--theme-white),0.1)"] }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}>
-              {/* Logo shimmer */}
-              <motion.div className="absolute inset-0 pointer-events-none"
-                style={{ background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.1),transparent)", transform: "skewX(-20deg)" }}
-                animate={{ left: ["-150%", "250%"] }}
-                transition={{ duration: 0.2, repeatDelay: 4, ease: "easeInOut" }} />
-              <img src="/logo.png" alt="MeetSync" className="w-7 h-7 object-contain" />
+            <motion.div className="relative flex h-10 w-10 items-center justify-center"
+              whileHover={{ scale: 1.1 }}>
+              <motion.img
+                src="/logo.png"
+                alt="MeetSync"
+                className="w-9 h-9 object-contain"
+                animate={{
+                  filter: [
+                    "drop-shadow(0 0 6px rgba(139,92,246,0.6))",
+                    "drop-shadow(0 0 12px rgba(167,139,250,0.85))",
+                    "drop-shadow(0 0 6px rgba(139,92,246,0.6))",
+                  ]
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              />
             </motion.div>
             <motion.span className="text-xl font-bold"
               style={{ background: "linear-gradient(135deg, #ffffff 0%, #c4b5fd 70%, #818cf8 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
@@ -185,7 +189,7 @@ const ConversationItem = ({ convo, isActive, onClick, index }) => {
       )}
       <div className="relative shrink-0">
         <div className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold text-white/80"
-          style={{ background: `linear-gradient(135deg, ${colors[convo.id % colors.length]}, ${colors[(convo.id + 2) % colors.length]})`, border: "1px solid rgba(var(--theme-white),0.1)" }}>
+          style={{ background: `linear-gradient(135deg, ${colors[index % colors.length]}, ${colors[(index + 2) % colors.length]})`, border: "1px solid rgba(var(--theme-white),0.1)" }}>
           {convo.avatar}
         </div>
         {convo.online && (

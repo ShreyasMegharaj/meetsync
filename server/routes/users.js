@@ -32,27 +32,6 @@ router.get('/search', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/:username', async (req, res) => {
-  try {
-    const username = req.params.username.toLowerCase();
-
-    const user = await User.findOne({ username }).select(
-      'name username bio profile_picture createdAt'
-    );
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    res.status(200).json(user);
-
-  } catch (error) {
-    console.error('Get profile error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-
 router.put('/profile', authMiddleware, async (req, res) => {
   try {
     const { bio, profile_picture } = req.body;
@@ -90,6 +69,27 @@ router.put('/profile', authMiddleware, async (req, res) => {
 
   } catch (error) {
     console.error('Update profile error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+router.get('/:username', async (req, res) => {
+  try {
+    const username = req.params.username.toLowerCase();
+
+    const user = await User.findOne({ username }).select(
+      'name username bio profile_picture createdAt'
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json(user);
+
+  } catch (error) {
+    console.error('Get profile error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

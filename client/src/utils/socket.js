@@ -10,7 +10,7 @@ const socketUrl = API_BASE.endsWith("/api")
 const socket = io(socketUrl, {
   withCredentials: true,
   transports: ["websocket", "polling"],
-  autoConnect: true,
+  autoConnect: false,
   reconnection: true,
   reconnectionAttempts: Infinity,
   reconnectionDelay: 500,

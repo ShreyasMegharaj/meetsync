@@ -106,7 +106,7 @@ const MagneticCursor = () => {
   const midX = useSpring(mx, { stiffness: 50, damping: 28, mass: 1 });
   const midY = useSpring(my, { stiffness: 50, damping: 28, mass: 1 });
   const slowX = useSpring(mx, { stiffness: 18, damping: 22, mass: 2 });
-  const slowY = useSpring(mx, { stiffness: 18, damping: 22, mass: 2 });
+  const slowY = useSpring(my, { stiffness: 18, damping: 22, mass: 2 });
 
   const [sparks, setSparks] = useState([]);
   const last = useRef(0);
@@ -155,63 +155,38 @@ const MagneticCursor = () => {
    ═══════════════════════════════════════════════════════════════ */
 const AnimatedLogo = () => (
   <motion.div
-    className="relative mx-auto mb-4 flex h-[72px] w-[72px] items-center justify-center"
+    className="relative mx-auto mb-5 flex h-[96px] w-[96px] items-center justify-center"
     initial={{ scale: 0, opacity: 0 }}
     animate={{ scale: 1, opacity: 1 }}
     transition={{ type: "spring", stiffness: 160, damping: 12, delay: 0.15 }}
   >
-    {/* Outer pulsing glow rings */}
-    <motion.div className="absolute inset-0 rounded-[22px]"
-      style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.2), rgba(59,130,246,0.15))", filter: "blur(20px)" }}
-      animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0.1, 0.4] }}
-      transition={{ duration: 0.2,  ease: "easeInOut" }} />
-    <motion.div className="absolute inset-0 rounded-[22px]"
-      style={{ background: "linear-gradient(135deg, rgba(236,72,153,0.15), rgba(139,92,246,0.1))", filter: "blur(15px)" }}
-      animate={{ scale: [1.2, 0.9, 1.2], opacity: [0.2, 0.5, 0.2] }}
-      transition={{ duration: 0.2,  ease: "easeInOut", delay: 0.5 }} />
+    {/* Outer pulsing glow — violet */}
+    <motion.div className="absolute inset-[-8px] rounded-full pointer-events-none"
+      style={{ background: "radial-gradient(circle, rgba(139,92,246,0.5), rgba(59,130,246,0.25), transparent 70%)", filter: "blur(22px)" }}
+      animate={{ scale: [1, 1.45, 1], opacity: [0.55, 0.12, 0.55] }}
+      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
+    {/* Inner pulsing glow — pink */}
+    <motion.div className="absolute inset-[-4px] rounded-full pointer-events-none"
+      style={{ background: "radial-gradient(circle, rgba(236,72,153,0.3), transparent 70%)", filter: "blur(14px)" }}
+      animate={{ scale: [1.2, 0.85, 1.2], opacity: [0.2, 0.55, 0.2] }}
+      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.6 }} />
 
-    {/* Rotating border gradient */}
-    <motion.div className="absolute -inset-px rounded-[22px] overflow-hidden">
-      <motion.div className="absolute inset-0"
-        style={{ background: "conic-gradient(from 0deg, transparent 30%, rgba(167,139,250,0.5), rgba(96,165,250,0.4), transparent 70%, rgba(244,114,182,0.3), transparent 100%)" }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 0.2,  ease: "linear" }} />
-    </motion.div>
-
-    {/* Glass body */}
-    <motion.div
-      className="relative flex h-full w-full items-center justify-center rounded-[20px]"
-      style={{
-        background: "rgba(var(--theme-white),0.08)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-        border: "1px solid rgba(var(--theme-white),0.12)",
-        boxShadow: "inset 0 1px 0 rgba(var(--theme-white),0.15), 0 8px 32px rgba(var(--theme-black),0.4)",
-      }}
+    {/* Logo — floating freely with drop-shadow glow */}
+    <motion.img
+      src="/logo.png"
+      alt="MeetSync Logo"
+      className="relative w-[90px] h-[90px] object-contain"
       animate={{
-        scale: [1, 1.04, 1],
-        borderColor: ["rgba(var(--theme-white),0.12)", "rgba(167,139,250,0.25)", "rgba(var(--theme-white),0.12)"],
+        scale: [1, 1.06, 1],
+        filter: [
+          "drop-shadow(0 0 14px rgba(139,92,246,0.75)) drop-shadow(0 0 28px rgba(59,130,246,0.45))",
+          "drop-shadow(0 0 22px rgba(167,139,250,0.95)) drop-shadow(0 0 44px rgba(99,102,241,0.55))",
+          "drop-shadow(0 0 14px rgba(139,92,246,0.75)) drop-shadow(0 0 28px rgba(59,130,246,0.45))",
+        ],
       }}
-      transition={{ duration: 0.2,  ease: "easeInOut" }}
-      whileHover={{ scale: 1.1, borderColor: "rgba(167,139,250,0.4)" }}
-    >
-      {/* Liquid refraction inside logo */}
-      <motion.div className="absolute inset-0 rounded-[20px] overflow-hidden pointer-events-none">
-        <motion.div
-          style={{ position: "absolute", top: 0, left: "-120%", width: "80%", height: "100%", background: "linear-gradient(90deg,transparent,rgba(var(--theme-white),0.08),transparent)", transform: "skewX(-20deg)" }}
-          animate={{ left: ["-120%", "220%"] }}
-          transition={{ duration: 0.2,  repeatDelay: 2, ease: "easeInOut" }} />
-      </motion.div>
-
-      {/* MeetSync Logo Image */}
-      <motion.img
-        src="/logo.png"
-        alt="MeetSync Logo"
-        className="w-[48px] h-[48px] object-contain"
-        animate={{ scale: [1, 1.05, 1] }}
-        transition={{ duration: 0.2,  ease: "easeInOut" }}
-      />
-    </motion.div>
+      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      whileHover={{ scale: 1.12 }}
+    />
   </motion.div>
 );
 

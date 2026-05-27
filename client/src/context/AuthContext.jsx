@@ -14,9 +14,15 @@ export const AuthProvider = ({ children }) => {
     const storedUser = localStorage.getItem("user");
 
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-      socket.connect();
+      try {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+        socket.connect();
+      } catch (e) {
+        // Corrupted storage — clear it and force re-login
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
     }
     setLoading(false);
   }, []);

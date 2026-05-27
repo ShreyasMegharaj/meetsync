@@ -148,7 +148,6 @@ router.put('/:id/accept', authMiddleware, async (req, res) => {
 
     const io = req.app.get('io');
     if (io) {
-      console.log("Appointment updated:", appointment);
       io.to(appointment.conversation_id.toString()).emit('appointmentUpdated', appointment.toObject());
     }
 
@@ -191,7 +190,6 @@ router.put('/:id/reject', authMiddleware, async (req, res) => {
 
     const io = req.app.get('io');
     if (io) {
-      console.log("Appointment updated:", appointment);
       io.to(appointment.conversation_id.toString()).emit('appointmentUpdated', appointment.toObject());
     }
 
@@ -232,7 +230,6 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 
     const io = req.app.get('io');
     if (io) {
-      console.log("Appointment cancelled:", appointment);
       io.to(appointment.conversation_id.toString()).emit('appointmentUpdated', appointment.toObject());
     }
 
