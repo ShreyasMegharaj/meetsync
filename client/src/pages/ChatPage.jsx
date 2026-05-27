@@ -16,6 +16,8 @@ const DEFAULT_AVATAR = null; // will fall back to initials
    ───────────────────────────────────────────────────────────── */
 const _cachedConversations = { list: null };   // null = never fetched
 const _cachedMessages = {};                     // { [convoId]: Message[] }
+const _cacheTimestamp = {};                     // { [convoId]: timestamp ms }
+const CACHE_TTL_MS = 30_000;                    // 30 seconds — only refetch if stale
 
 /* ─── helpers ─── */
 const rand = (a, b) => Math.random() * (b - a) + a;
@@ -754,17 +756,21 @@ export default function MessagesPage() {
         ...prev,
         [activeConvo]: _cachedMessages[activeConvo],
       }));
-      // Still do a background refresh to pick up any new messages
-      const bgRefresh = async () => {
-        try {
-          const res = await api.get(`/messages/${activeConvo}`);
-          const mappedMsgs = (res.data || []).map(mapMessage);
-          const safeList = Array.isArray(mappedMsgs) ? mappedMsgs : [];
-          _cachedMessages[activeConvo] = safeList;
-          setLocalMessages(prev => ({ ...prev, [activeConvo]: safeList }));
-        } catch (_err) { /* silent */ }
-      };
-      bgRefresh();
+      // Only do a background refresh if cache is stale (older than 30s)
+      const cacheAge = Date.now() - (_cacheTimestamp[activeConvo] || 0);
+      if (cacheAge > CACHE_TTL_MS) {
+        const bgRefresh = async () => {
+          try {
+            const res = await api.get(`/messages/${activeConvo}`);
+            const mappedMsgs = (res.data || []).map(mapMessage);
+            const safeList = Array.isArray(mappedMsgs) ? mappedMsgs : [];
+            _cachedMessages[activeConvo] = safeList;
+            _cacheTimestamp[activeConvo] = Date.now();
+            setLocalMessages(prev => ({ ...prev, [activeConvo]: safeList }));
+          } catch (_err) { /* silent */ }
+        };
+        bgRefresh();
+      }
       return;
     }
 
@@ -776,6 +782,7 @@ export default function MessagesPage() {
         const mappedMsgs = (res.data || []).map(mapMessage);
         const safeList = Array.isArray(mappedMsgs) ? mappedMsgs : [];
         _cachedMessages[activeConvo] = safeList;
+        _cacheTimestamp[activeConvo] = Date.now();
         setLocalMessages(prev => ({ ...prev, [activeConvo]: safeList }));
       } catch (_err) {
         // handled by api interceptor
