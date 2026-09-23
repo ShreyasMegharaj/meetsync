@@ -1,7 +1,7 @@
-const Brevo = require('@getbrevo/brevo');
+const { BrevoClient } = require('@getbrevo/brevo');
 
 /**
- * Send an email via Brevo (Sendinblue) Transactional Email API.
+ * Send an email via Brevo Transactional Email API (SDK v5).
  *
  * Accepts either positional args:  sendEmail(to, subject, html)
  * or a single options object:      sendEmail({ to, subject, html })
@@ -16,11 +16,9 @@ const sendEmail = async (toOrOptions, subject, html) => {
     to = toOrOptions;
   }
 
-  const client = Brevo.ApiClient.instance;
-  client.authentications['api-key'].apiKey = process.env.BREVO_API_KEY;
+  const client = new BrevoClient({ apiKey: process.env.BREVO_API_KEY });
 
-  const api = new Brevo.TransactionalEmailsApi();
-  await api.sendTransacEmail({
+  await client.transactionalEmails.sendTransacEmail({
     sender: { email: process.env.EMAIL_USER, name: 'MeetSync' },
     to: [{ email: to }],
     subject,

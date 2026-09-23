@@ -20,7 +20,7 @@ const useIsMobile = () => {
 const Bird = ({ x, y, size, delay, duration, color }) => (
   <motion.svg
     width={size} height={size * 0.4} viewBox="0 0 50 20"
-    className="absolute"
+    className="absolute pointer-events-none"
     style={{ left: `${x}%`, top: `${y}%` }}
     animate={{
       x: [0, rand(200, 600), rand(400, 900)],
@@ -32,15 +32,17 @@ const Bird = ({ x, y, size, delay, duration, color }) => (
     <motion.path
       d="M25 12 Q18 2, 5 6"
       stroke={color} strokeWidth="1.8" fill="none" strokeLinecap="round"
-      animate={{ d: ['M25 12 Q18 2, 5 6', 'M25 12 Q18 14, 5 10', 'M25 12 Q18 2, 5 6'] }}
-      transition={{ duration: rand(0.4, 0.7), repeat: Infinity, ease: 'easeInOut' }}
+      style={{ transformOrigin: '25px 12px' }}
+      animate={{ scaleY: [1, 0.2, 1, -0.4, 1] }}
+      transition={{ duration: rand(0.35, 0.6), repeat: Infinity, ease: 'easeInOut' }}
     />
     {/* Right wing */}
     <motion.path
       d="M25 12 Q32 2, 45 6"
       stroke={color} strokeWidth="1.8" fill="none" strokeLinecap="round"
-      animate={{ d: ['M25 12 Q32 2, 45 6', 'M25 12 Q32 14, 45 10', 'M25 12 Q32 2, 45 6'] }}
-      transition={{ duration: rand(0.4, 0.7), repeat: Infinity, ease: 'easeInOut' }}
+      style={{ transformOrigin: '25px 12px' }}
+      animate={{ scaleY: [1, 0.2, 1, -0.4, 1] }}
+      transition={{ duration: rand(0.35, 0.6), repeat: Infinity, ease: 'easeInOut' }}
     />
   </motion.svg>
 );
@@ -48,7 +50,7 @@ const Bird = ({ x, y, size, delay, duration, color }) => (
 /* ═══ LOTUS SVG ═══ */
 const Lotus = ({ x, delay, size }) => (
   <motion.div
-    className="absolute"
+    className="absolute pointer-events-none"
     style={{ bottom: '3%', left: `${x}%` }}
     animate={{ y: [0, -4, 0, 3, 0], rotate: [0, 2, 0, -2, 0] }}
     transition={{ duration: rand(4, 7), delay, repeat: Infinity, ease: 'easeInOut' }}
@@ -71,20 +73,18 @@ const Lotus = ({ x, delay, size }) => (
 /* ═══ WATER WAVE ═══ */
 const WaterWave = ({ yOffset, opacity, delay, duration }) => (
   <motion.div
-    className="absolute left-0 right-0"
+    className="absolute left-0 right-0 pointer-events-none"
     style={{ bottom: `${yOffset}%`, height: '60px', opacity }}
+    animate={{
+      y: [0, -5, 0, 4, 0],
+      x: [0, -20, 0, 20, 0],
+    }}
+    transition={{ duration, delay, repeat: Infinity, ease: 'easeInOut' }}
   >
     <svg width="100%" height="60" viewBox="0 0 1440 60" preserveAspectRatio="none">
-      <motion.path
+      <path
         fill="rgba(100,160,210,0.25)"
-        animate={{
-          d: [
-            'M0,30 C240,10 480,50 720,30 C960,10 1200,50 1440,30 L1440,60 L0,60Z',
-            'M0,30 C240,50 480,10 720,30 C960,50 1200,10 1440,30 L1440,60 L0,60Z',
-            'M0,30 C240,10 480,50 720,30 C960,10 1200,50 1440,30 L1440,60 L0,60Z',
-          ]
-        }}
-        transition={{ duration, delay, repeat: Infinity, ease: 'easeInOut' }}
+        d="M0,30 C240,10 480,50 720,30 C960,10 1200,50 1440,30 L1440,60 L0,60Z"
       />
     </svg>
   </motion.div>

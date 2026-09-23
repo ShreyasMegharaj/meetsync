@@ -4,3 +4,6 @@ dist/
 build/
 .vscode/
 .DS_Store
+__pycache__/
+*.pyc
+server/test_email.js
